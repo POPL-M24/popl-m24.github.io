@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-16 Fri 00:03 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lecture notes on the =ADDITION= Language: Operational Semantics</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'left',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    output: {
+      font: 'mathjax-euler',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Lecture notes on the <code>ADDITION</code> Language: Operational Semantics</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org56c1f1b">1. Introduction</a>
+<ul>
+<li><a href="#org2e3fa00">1.1. Motivating example</a></li>
+</ul>
+</li>
+<li><a href="#org5d1e817">2. Semantic Engineering</a></li>
+<li><a href="#org1b1c683">3. <code>ADDITION</code> Syntax</a></li>
+<li><a href="#org9039adc">4. <code>ADDITION</code> Rewrite (redex) rules</a></li>
+<li><a href="#org033b045">5. Reduction (small step semantics)</a></li>
+<li><a href="#orgf2b167e">6. Simplification (reflexive-transitive closure of  reduction)</a></li>
+<li><a href="#orgeeb8c1c">7. Theorem (Simplification compatible closure)</a>
+<ul>
+<li><a href="#orge42322d">7.1. Proof</a>
+<ul>
+<li><a href="#orgc0153a3">7.1.1. Part 1</a></li>
+<li><a href="#org7890e9e">7.1.2. Part 2</a></li>
+</ul>
+</li>
+<li><a href="#orgbc94c8a">7.2. Derived Rules</a></li>
+</ul>
+</li>
+<li><a href="#orgc5bdc7b">8. Values</a>
+<ul>
+<li><a href="#org510bc83">8.1. Values represented by literals</a></li>
+</ul>
+</li>
+<li><a href="#orga1f657a">9. Semantic Properties of the  ADDITION language</a>
+<ul>
+<li><a href="#org462c1a9">9.1. Theorem (Normal forms under \(\reducesto\) are literals)</a>
+<ul>
+<li><a href="#org34856d9">9.1.1. Statement</a></li>
+<li><a href="#org7dd2e41">9.1.2. Proof</a></li>
+</ul>
+</li>
+<li><a href="#org179faea">9.2. Theorem (Termination)</a>
+<ul>
+<li><a href="#orgadf0000">9.2.1. Statement</a></li>
+<li><a href="#orgaeb2e88">9.2.2. Proof</a></li>
+</ul>
+</li>
+<li><a href="#orgbff11f6">9.3. Theorem (Normalizing)</a>
+<ul>
+<li><a href="#org0ec2541">9.3.1. Statement</a></li>
+<li><a href="#orga397182">9.3.2. Proof</a></li>
+</ul>
+</li>
+<li><a href="#org592a059">9.4. Theorem (Local Confluence)</a>
+<ul>
+<li><a href="#org3abedd9">9.4.1. Statement</a></li>
+<li><a href="#orgb1938b3">9.4.2. Proof</a></li>
+</ul>
+</li>
+<li><a href="#orgffe18ba">9.5. Theorem (Confluence)</a>
+<ul>
+<li><a href="#orgdeeb2cf">9.5.1. Statement</a></li>
+<li><a href="#org6ee2cb0">9.5.2. Proof</a></li>
+</ul>
+</li>
+<li><a href="#org329d8c5">9.6. Theorem (Convergence to a value)</a>
+<ul>
+<li><a href="#org5f50631">9.6.1. Statement</a></li>
+<li><a href="#org6f69ae2">9.6.2. Proof</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgdd80fc2">10. Valuation (Big step) Semantics</a>
+<ul>
+<li><a href="#org3f95e75">10.1. Evaluation Rules</a></li>
+</ul>
+</li>
+<li><a href="#orgaab2658">11. Theorem (Consistency between small-step and valuation semantics)</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org267e687">11.0.1. Statement</a></li>
+<li><a href="#org319efd4">11.0.2. Proof</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org958670f">12. Implementations (Reduction Strategies)</a>
+<ul>
+<li><a href="#org231f283">12.1. Implementation via left-order reduction</a></li>
+</ul>
+</li>
+<li><a href="#orgdd3aee8">13. Theorem (Relating reduction, evaluation and implementation)</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orgbeafbf1">13.0.1. Statement</a></li>
+<li><a href="#org4d3fab5">13.0.2. Proof</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org56c1f1b" class="outline-2">
+<h2 id="org56c1f1b"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+We define a small language called <code>ADDITION</code>, the language of
+arithmetic expressions over numbers and the addition operator.
+While the language itself is perhaps trivial, it is still a
+useful test bed to introduce the two essential elements of the
+design and analysis of programming languages: syntax and
+semantics.  Syntax defines what constitute expressions in a
+language.  Semantics is concerned with their meaning.  Meaning
+is arrived as the culmination of the execution of abstract
+machine(s) that manipulate expressions.  This process, called
+evaluation, is the process by which meaning is invested into
+expressions of a language.  The semantic approach we employ is
+called <i>operational semantics</i>, to distinguish from other types
+of semantic approaches (denotational, axiomatic).  It consists
+of essentially six key components, each of which is defined as a
+relation involving syntax:
+</p>
+
+
+<ul class="org-ul">
+<li>1. Equational identities</li>
+<li>2. Rewriting  (reading the equations left to write)</li>
+<li>3. Reduction (applying a rewrite rule to a subexpression)</li>
+<li>4. Simplification (a sequence of reductions)</li>
+<li>5. Evaluation (simplification to a value)</li>
+<li>6. Implementation (reduction strategies)</li>
+</ul>
+</div>
+
+
+<div id="outline-container-org2e3fa00" class="outline-3">
+<h3 id="org2e3fa00"><span class="section-number-3">1.1.</span> Motivating example</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Intuitively, the approach of operational semantics is not very
+different from how we do algebra in high school.  We evaluate
+algebraic expressions by the process of simplification.  Each
+simplification step consists of a reduction that transforms an
+expression to another expression.  Each reduction is driven by
+the instantiation of a rewrite rule, an equation driven in a
+particular direction.  For example the equation \(x/x = 1\)
+(provided \(x\neq 0\)) could be used to drive the rewrite rule
+\(x/x \rewritesto 1\) (read `rewrites to').
+</p>
+
+<dl class="org-dl">
+<dt>Algebraic identities</dt><dd>These come from our knowledge of the
+underlying domain.  E.g., variables in the identities
+represent real numbers, and the operations * and /
+represent division and multiplication in a field.</dd>
+</dl>
+
+\begin{align*}
+x/x &= 1 & \quad x\neq 0\\
+1*x &= x\\
+x*1 &= x
+\end{align*}
+
+<dl class="org-dl">
+<dt>Rewrite Rules</dt><dd>These are obtained by orienting the
+algebraic identities in a particular
+direction (from left to right):</dd>
+</dl>
+
+\begin{align*}
+x/x &\rewritesto 1 & \quad \mbox{$x\neq 0$} \quad \mbox{INV}\\
+1*x &\rewritesto x & \quad \qquad \id{ID}_\id{LEFT}\\
+x*1 &\rewritesto x & \quad \qquad \id{ID}_\id{RIGHT}\\
+\end{align*}
+
+
+<p>
+Consider the expression \((3/3)*(y/y)\), where \(y\neq 0\).  This
+expression <i>reduces to</i> 1*y/y by the application of a rewrite
+rule.  The subexpression that matches the left side of the
+rewrite rule is called a <i>redex</i>.  A sequence of reductions
+constitute a <i>simplification</i>.  Answers are numbers; numbers are
+already in the simplest possible form: they can not be reduced
+further.  A simplification that results in an answer is called
+an <i>evaluation</i>.
+</p>
+
+<dl class="org-dl">
+<dt>Reduction, Simplification to an answer</dt><dd>Here is an example
+of an evaluation.</dd>
+</dl>
+
+\begin{align*}
+(3/3)*(y/y) &\reducesto  & \quad \mbox{using INV with $x\mapsto 3$ in the redex $3/3$}\\
+1*(y/y)   &\reducesto   & \quad \mbox{using INV with $x\mapsto y$ in the redex $y/y$}\\
+1*1     &\reducesto  & \quad \mbox{using ID_RIGHT with $x\mapsto 1$ in the redex $1*1$}\\
+1
+\end{align*}
+
+<p>
+We might say that the meaning of \((3/3)*(y/y)\) when \(y\neq 0\)
+<i>is</i> \(1\) because this expression <i>evaluates</i> to 1.   
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5d1e817" class="outline-2">
+<h2 id="org5d1e817"><span class="section-number-2">2.</span> Semantic Engineering</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Numerous questions arise: Does every expression simplify to an
+answer?  Could the simplification yield multiple answers?  What
+if the simplification process never finishes?  What if multiple
+rewrite rules are applicable for reduction?  Which one do we
+choose?  Does it matter which one we choose first? In terms of
+efficiency?  In terms of correctness?  What does `correctness'
+mean anyway?  What other machinery is needed to carry out
+simplification besides the expressions themselves,  et cetera.
+</p>
+
+<p>
+A semantic engineer tasked with designing a programming language
+is concerned with such questions, many of which have subtleties
+that miss the casual eye.  The answer involves comparing
+multiple choices in the design space, with competing
+requirements inevitably yielding to some compromises, not
+uncommon in engineering design.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org1b1c683" class="outline-2">
+<h2 id="org1b1c683"><span class="section-number-2">3.</span> <code>ADDITION</code> Syntax</h2>
+<div class="outline-text-2" id="text-3">
+\begin{align*}
+e ::= &                  &   \scriptstyle{EXP}       &    \qquad \mbox{Addition Expression}\\
+      &   \overline{n}   &   \scriptstyle{NUMCONST}  &    \qquad \mbox{Number Literal}\\
+      &   e + e          &   \scriptstyle{PLUSEXP}   &    \qquad \mbox{Plus Expression}\\ \\
+n ::= &                  &   \scriptstyle{NUM}       &    \qquad \mbox{Number}
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-org9039adc" class="outline-2">
+<h2 id="org9039adc"><span class="section-number-2">4.</span> <code>ADDITION</code> Rewrite (redex) rules</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+\[\rewritesto  \subseteq \id{EXP}\times \id{EXP}\]
+</p>
+
+\begin{align*}
+\overline{n_1}+\overline{n_2} \rewritesto
+  \overline{n_1+n_2}\quad \scriptstyle{PLUS} \\ \\ \\
+\end{align*}
+
+<p>
+The understanding is that the above rule defines an (infinite)
+<i>family</i> of rules, one for each pair of numbers.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org033b045" class="outline-2">
+<h2 id="org033b045"><span class="section-number-2">5.</span> Reduction (small step semantics)</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+\[\reducesto  \subseteq \id{EXP}\times \id{EXP}\]
+</p>
+
+\begin{align*}
+\frac{e \hookrightarrow e'}{e\reducesto e'}\quad \scriptstyle{REWRITE} \\ \\ \\
+ 
+  \frac{e_1\rightarrow e_1'}{e_1+e_2 \reducesto e_1'+e_2}\quad \scriptstyle{LEFT} \\ \\ \\
+
+  \frac{e_2\reducesto e_2'}{e_1+e_2 \reducesto e_1+e'_2}\quad \scriptstyle{RIGHT} \\
+\end{align*}
+
+<p>
+\(e\) is <i>reducible</i>, written \(e\reducesto\), if there exists an
+\(e'\) such that \(e\reducesto e'\).  \(e\) is <i>irreducible</i> if \(e\)
+is <i>not</i> reducible.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf2b167e" class="outline-2">
+<h2 id="orgf2b167e"><span class="section-number-2">6.</span> Simplification (reflexive-transitive closure of  reduction)</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+\[\simplifiesto  \subseteq \id{EXP}\times \id{EXP}\]
+</p>
+
+\begin{align*}
+\frac{}{e \simplifiesto e}\quad \scriptstyle{REFLEX} \\ \\ \\
+\frac{e \reducesto e'}{e\simplifiesto e'}\quad \scriptstyle{REDUCE} \\ \\ \\
+\frac{e_1\reducesto e_2\quad e_2\simplifiesto e_3}{e_1\simplifiesto e_3}\quad \scriptstyle{TRANS} \\ \\ \\
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-orgeeb8c1c" class="outline-2">
+<h2 id="orgeeb8c1c"><span class="section-number-2">7.</span> Theorem (Simplification compatible closure)</h2>
+<div class="outline-text-2" id="text-7">
+<div class="lemma" id="org55e0e18">
+<p>
+[L1]
+</p>
+<ul class="org-ul">
+<li>1. If \(p \simplifiesto r\) then \(p+q\simplifiesto r+q\).</li>
+
+<li>2. If \(q \simplifiesto s\) then \(p+r\simplifiesto p+s\).</li>
+</ul>
+
+</div>
+</div>
+
+<div id="outline-container-orge42322d" class="outline-3">
+<h3 id="orge42322d"><span class="section-number-3">7.1.</span> Proof</h3>
+<div class="outline-text-3" id="text-7-1">
+</div>
+<div id="outline-container-orgc0153a3" class="outline-4">
+<h4 id="orgc0153a3"><span class="section-number-4">7.1.1.</span> Part 1</h4>
+<div class="outline-text-4" id="text-7-1-1">
+<p>
+By induction on the derivation of  \(p\simplifiesto r\).
+</p>
+
+<ul class="org-ul">
+<li>1. \(\cfrac{}{p\simplifiesto r}\quad\scriptstyle{REFLEX}\): In
+this case \(p=r\).  Therefore, we have
+\[\frac{}{p+q\simplifiesto r+q}\quad{\scriptstyle{REFLEX}}\]</li>
+</ul>
+
+
+<ul class="org-ul">
+<li>2. \(\cfrac{p\reducesto r}{p\simplifiesto
+    r}\quad{REDUCE}\): The desired derivation of the
+simplification is obtained as</li>
+</ul>
+<p>
+\[\cfrac{\cfrac{p\reducesto r}{p+q\reducesto
+  r+q}\quad{LEFT}}{p+q\simplifiesto r+q}\quad{\scriptstyle{REDUCE}}\]
+</p>
+
+
+<ul class="org-ul">
+<li><p>
+3. \(\cfrac{{p\reducesto s}\quad {s\simplifiesto
+    r}}{p\simplifiesto r}\quad{TRANS}\): 
+</p>
+
+<p>
+Since \(s\simplifiesto r\), by the induction hypothesis
+\(s+q\simplifiesto r+q\).
+</p>
+
+<p>
+Thus we have the following derivation of simplification:
+</p></li>
+</ul>
+
+<p>
+\[
+\cfrac{\cfrac{\cfrac{p\reducesto s}
+                    {p+q\reducesto s+q}\quad LEFT}
+             {p+q\simplifiesto s+q}\quad{REDUCE}
+       \qquad{s+q\simplifiesto r+q \quad (IH)}}
+      {p+q\simplifiesto r+q}\quad{TRANS}
+\]
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org7890e9e" class="outline-4">
+<h4 id="org7890e9e"><span class="section-number-4">7.1.2.</span> Part 2</h4>
+<div class="outline-text-4" id="text-7-1-2">
+<p>
+The proof is very similar to that of Part1 and is omitted. 
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbc94c8a" class="outline-3">
+<h3 id="orgbc94c8a"><span class="section-number-3">7.2.</span> Derived Rules</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+From the above, we have
+</p>
+\begin{align*}
+\frac{p\simplifiesto r}{p+q\simplifiesto r+q}\quad {LEFT*}\\ \\
+\frac{q\simplifiesto s}{p+q\simplifiesto p+s}\quad {RIGHT*}
+\end{align*}
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc5bdc7b" class="outline-2">
+<h2 id="orgc5bdc7b"><span class="section-number-2">8.</span> Values</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+We identify a set of <i>values</i> and a subset of expressions that
+represent those <i>values</i>.  In the ADDITION language, values are
+numbers.  
+</p>
+
+\begin{align*}
+v ::=  &               & \scriptstyle{VAL} & \qquad \mbox{Value}\\
+       & n  & \scriptstyle{NUM} & \qquad \mbox{Number}\\
+\end{align*}
+</div>
+
+<div id="outline-container-org510bc83" class="outline-3">
+<h3 id="org510bc83"><span class="section-number-3">8.1.</span> Values represented by literals</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+Certain expressions, the <i>literals</i> of the form \(\overline{n}\)
+represent values.  More precisely, a literal \(\overline{n}\)
+represents  the value \(n\).   
+</p>
+
+<p>
+Note that literals are irreducible.  
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga1f657a" class="outline-2">
+<h2 id="orga1f657a"><span class="section-number-2">9.</span> Semantic Properties of the  ADDITION language</h2>
+<div class="outline-text-2" id="text-9">
+</div>
+<div id="outline-container-org462c1a9" class="outline-3">
+<h3 id="org462c1a9"><span class="section-number-3">9.1.</span> Theorem (Normal forms under \(\reducesto\) are literals)</h3>
+<div class="outline-text-3" id="text-9-1">
+</div>
+<div id="outline-container-org34856d9" class="outline-4">
+<h4 id="org34856d9"><span class="section-number-4">9.1.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-9-1-1">
+<p>
+\(e\) is irreducible iff \(e\) is a literal \(\overline{n}\) for some
+number \(n\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7dd2e41" class="outline-4">
+<h4 id="org7dd2e41"><span class="section-number-4">9.1.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-9-1-2">
+<p>
+The 'if' part follows immediately since there is no reduction
+for a number literal.  
+</p>
+
+<p>
+For the `only if' we show that \(e\) is not a literal implies \(e\)
+is reducible.  The proof is by induction on the structure of
+\(e\).  
+</p>
+
+<p>
+If \(e\) is not a literal, then it is an addition expression, say
+\(e_1+e_2\).  Either both \(e_1\) and \(e_2\) are literals
+\(\overline{n_1}\) and \(\overline{n_2}\) respectively, or one or
+more of \(e_1\) and \(e_2\) are not.  In the first case, \(e\) reduces
+to \(\overline{n_1+n_2}\).  In the second case, assume \(e_1\) is
+not a literal.  By the induction hypothesis, \(e_1\) is reducible.
+By the LEFT rule \(e\) is reducible.  The case assuming \(e_2\) is
+not a literal is similar and omitted.
+</p>
+
+<p>
+The only if condition, viz, ``if \(e\) is not a literal implies
+\(e\) is reducible'' is called the <i>progress condition</i>.  It's
+possible in other languages, and we will see several later, that
+the progress condition may be violated.  
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org179faea" class="outline-3">
+<h3 id="org179faea"><span class="section-number-3">9.2.</span> Theorem (Termination)</h3>
+<div class="outline-text-3" id="text-9-2">
+</div>
+<div id="outline-container-orgadf0000" class="outline-4">
+<h4 id="orgadf0000"><span class="section-number-4">9.2.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-9-2-1">
+<p>
+For every \(e\), there is no infinite chain of reductions
+\[e\reducesto e_1 \reducesto e_2 \ldots\]
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaeb2e88" class="outline-4">
+<h4 id="orgaeb2e88"><span class="section-number-4">9.2.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-9-2-2">
+<p>
+The proof is by structural induction on \(e\).  Note that the
+size of the expression reduces in each reduction.  If
+\(e\reducesto e'\), then \(|e'| < |e|\).
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbff11f6" class="outline-3">
+<h3 id="orgbff11f6"><span class="section-number-3">9.3.</span> Theorem (Normalizing)</h3>
+<div class="outline-text-3" id="text-9-3">
+</div>
+<div id="outline-container-org0ec2541" class="outline-4">
+<h4 id="org0ec2541"><span class="section-number-4">9.3.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-9-3-1">
+<p>
+\(\reducesto\) is normalizing.  Every expression \(e\) has a
+normal form.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga397182" class="outline-4">
+<h4 id="orga397182"><span class="section-number-4">9.3.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-9-3-2">
+<p>
+Follows from Termination.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org592a059" class="outline-3">
+<h3 id="org592a059"><span class="section-number-3">9.4.</span> Theorem (Local Confluence)</h3>
+<div class="outline-text-3" id="text-9-4">
+</div>
+<div id="outline-container-org3abedd9" class="outline-4">
+<h4 id="org3abedd9"><span class="section-number-4">9.4.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-9-4-1">
+<p>
+If an expression reduces to two different expressions,
+then those two expressions simplify to a common third
+expression.  If \(e\reducesto e_1\) and \(e\reducesto
+ e_2\), there there exists \(e_3\) such that \(e_1\simplifiesto
+ e_3\) and \(e_2 \simplifiesto e_3\). 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb1938b3" class="outline-4">
+<h4 id="orgb1938b3"><span class="section-number-4">9.4.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-9-4-2">
+<p>
+The proof is based on well-founded induction on the
+\(\reducesto\) relation over expressions.  Notice that our
+induction scheme is based on the inductive structure of the
+<i>derivations</i> of the reduction relation \(\reducesto\), not the
+structure of expressions (syntax).
+</p>
+
+<p>
+Assume \(e\reducesto e_1\) and \(e\reducesto e_2\).  Then
+we have the following cases:
+</p>
+
+<ul class="org-ul">
+<li>1. \(e \reducesto e_1\) using REWRITE: Then
+\(e=\overline{n_1}+\overline{n_2}\).  It follows that \(e_1\)
+and \(e_2\) are each \(\overline{n_1+n_2}\) and then \(e_1 =
+	e_2 = e_3\), and hence \(e_1\simplifiesto e_3\) and
+\(e_2\simplifiesto e_3\).</li>
+</ul>
+
+
+<ul class="org-ul">
+<li>2. \(e \reducesto e_1\) using LEFT: Then we have \(e = p+q\)
+and \(e_1=p'+q\) such that \(p\reducesto p'\).  Then there
+are two possibilities for \(e\reducesto e_2\):
+
+<ul class="org-ul">
+<li><p>
+2.1.  \(e\reducesto e_2\) using LEFT: We have \(e=p+q\)
+(from the parent assumption) and \(e_2=p''+ q\) such
+that \(p\reducesto p''\).   
+</p>
+
+<p>
+From the induction hypothesis, since \(p\reducesto p'\)
+and \(p\reducesto p''\), both \(p'\) and \(p''\) reduce to a
+common expression \(r\).  Using LEFT*,
+\(p'+q\simplifiesto r+q\) and \(p''+q\simplifiesto r+q\).
+Thus both \(e_1\) and \(e_2\) simplify to a common
+expression.
+</p></li>
+
+<li>2.2. \(e\reducesto e_2\) using RIGHT: We have \(e=p+q\)
+(from the parent assumption) and \(e_2=p+q'\) such that
+\(q\reducesto q'\).  Then \(p'+q\) and \(p+q'\) simplify to
+the common expression \(p'+q'\) with the application of
+a LEFT and RIGHT rule, respectively.</li>
+</ul></li>
+</ul>
+
+<p>
+The other cases are similar and left as an exercise. 
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgffe18ba" class="outline-3">
+<h3 id="orgffe18ba"><span class="section-number-3">9.5.</span> Theorem (Confluence)</h3>
+<div class="outline-text-3" id="text-9-5">
+</div>
+<div id="outline-container-orgdeeb2cf" class="outline-4">
+<h4 id="orgdeeb2cf"><span class="section-number-4">9.5.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-9-5-1">
+<p>
+\(\reducesto\) is confluent.  
+</p>
+</div>
+</div>
+<div id="outline-container-org6ee2cb0" class="outline-4">
+<h4 id="org6ee2cb0"><span class="section-number-4">9.5.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-9-5-2">
+<p>
+Follows from termination and local confluence (see notes on
+<a href="../abstract-reductions/index.html">Abstract Reduction systems</a>). 
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org329d8c5" class="outline-3">
+<h3 id="org329d8c5"><span class="section-number-3">9.6.</span> Theorem (Convergence to a value)</h3>
+<div class="outline-text-3" id="text-9-6">
+</div>
+<div id="outline-container-org5f50631" class="outline-4">
+<h4 id="org5f50631"><span class="section-number-4">9.6.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-9-6-1">
+<p>
+Every expression simplifies to a unique literal. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6f69ae2" class="outline-4">
+<h4 id="org6f69ae2"><span class="section-number-4">9.6.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-9-6-2">
+<p>
+Confluence and termination means convergence.  Termination
+implies at least every expression simplifies to at least one
+normal form.  Confluence implies at most one.  From this it
+follows that every ADDITION expression reduces to a unique
+normal form.  Since all normal forms in the ADDITION are
+literals, the result follows.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdd80fc2" class="outline-2">
+<h2 id="orgdd80fc2"><span class="section-number-2">10.</span> Valuation (Big step) Semantics</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+We define the <i>value</i> of an expression to be the number of the
+number literal to which the expression simplifies.
+</p>
+
+<p>
+We write this as \(e\evaluatesto v\).  The EOPL text also writes
+this as \(v = \id{valueof}(e)\).  Notice that for ADDITION, it
+makes sense to say ``the'' value because the number literal to
+which an expression simplifies to is unique (from the above
+theorem).
+</p>
+</div>
+
+
+<div id="outline-container-org3f95e75" class="outline-3">
+<h3 id="org3f95e75"><span class="section-number-3">10.1.</span> Evaluation Rules</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+\[\evaluatesto  \subseteq \id{EXP}\times \id{NUM}\]
+</p>
+
+\begin{align*}
+
+\frac{}{\overline{n}\evaluatesto n}\quad \scriptstyle{NUM} \\ \\ \\
+
+\frac{{e_1\evaluatesto n_1}\qquad {e_2\evaluatesto n_2}}{e_1+e_2 \evaluatesto n_1+n_2}\quad \scriptstyle{PLUS} \\ \\ \\
+\end{align*}
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgaab2658" class="outline-2">
+<h2 id="orgaab2658"><span class="section-number-2">11.</span> Theorem (Consistency between small-step and valuation semantics)</h2>
+<div class="outline-text-2" id="text-11">
+</div>
+<div id="outline-container-org267e687" class="outline-4">
+<h4 id="org267e687"><span class="section-number-4">11.0.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-11-0-1">
+<p>
+\[e\simplifiesto \overline{n}\] iff \[e\evaluatesto n\]
+</p>
+</div>
+</div>
+
+<div id="outline-container-org319efd4" class="outline-4">
+<h4 id="org319efd4"><span class="section-number-4">11.0.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-11-0-2">
+<p>
+Left as an exercise.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org958670f" class="outline-2">
+<h2 id="org958670f"><span class="section-number-2">12.</span> Implementations (Reduction Strategies)</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+Notice the non-determinism inherent in the reduction relation
+\(\reducesto\).  Either the left or the right side of a compound
+expression may be reduced first.  The deduction system doesn't
+specify which one.  Implementations sometimes stipulate a
+specific order for the evaluation of the subexpressions.  This
+may be necessary in the presence of side effects, for example. 
+</p>
+
+<p>
+The strategy we employ reduces the left subexpression first to a
+value.  Only then does it reduce the right subexpression.
+(using the same strategy).  We call this reduction strategy
+<i>left-order</i>.
+</p>
+</div>
+
+<div id="outline-container-org231f283" class="outline-3">
+<h3 id="org231f283"><span class="section-number-3">12.1.</span> Implementation via left-order reduction</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+\[\xto{}{L}  \subseteq \id{EXP}\times \id{EXP}\]
+</p>
+
+\begin{align*}
+\frac{}{\overline{n}+\overline{n_2}\xto{}{L}\ \overline{n_1+n_2}}\quad \scriptstyle{REWRITE} \\ \\ \\
+\frac{e_1\ \xto{}{L}\ {e'_1}}{e_1+e_2\ \xto{}{L}\ {e'_1}+e_2}\quad \scriptstyle{LEFT} \\ \\ \\
+\frac{e_2\ \xto{}{L}\ {e'_2}}{\overline{n_1}+e_2\ \xto{}{L}\ \overline{n_1}+{e'_2}}\quad \scriptstyle{RIGHT} \\ \\ \\
+\end{align*}
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdd3aee8" class="outline-2">
+<h2 id="orgdd3aee8"><span class="section-number-2">13.</span> Theorem (Relating reduction, evaluation and implementation)</h2>
+<div class="outline-text-2" id="text-13">
+</div>
+<div id="outline-container-orgbeafbf1" class="outline-4">
+<h4 id="orgbeafbf1"><span class="section-number-4">13.0.1.</span> Statement</h4>
+<div class="outline-text-4" id="text-13-0-1">
+<p>
+\(e\simplifiesto \overline{n}\) \(\qquad\) iff \(\qquad\) \(e\xto{*}{L}
+\overline{n}\) \(\qquad\) iff \(\qquad\) \(e\evaluatesto n\). 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4d3fab5" class="outline-4">
+<h4 id="org4d3fab5"><span class="section-number-4">13.0.2.</span> Proof</h4>
+<div class="outline-text-4" id="text-13-0-2">
+<p>
+Exercise.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-16 Fri 00:03</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

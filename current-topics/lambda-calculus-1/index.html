@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-16 Fri 00:03 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lecture notes on Lambda Calculus &#x2013;  Part 1: Syntax and Operational Semantics</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="./themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'left',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    output: {
+      font: 'mathjax-euler',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Lecture notes on Lambda Calculus &#x2013;  Part 1: Syntax and Operational Semantics</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org824030c">1. Introduction</a></li>
+<li><a href="#org86be22b">2. Abstract Syntax</a>
+<ul>
+<li><a href="#orgf286ea4">2.1. Syntactic extension</a></li>
+<li><a href="#org8aca182">2.2. Size</a></li>
+<li><a href="#orgd50ef13">2.3. Free and bound identifiers</a></li>
+<li><a href="#orgad2201d">2.4. Open and closed expressions</a></li>
+<li><a href="#orgfef6ced">2.5. Combinators</a></li>
+</ul>
+</li>
+<li><a href="#orgafd8459">3. Alpha Equivalence</a>
+<ul>
+<li><a href="#orgc864ae2">3.1. Renaming</a></li>
+<li><a href="#org40d468a">3.2. Defining &alpha;-equivalence</a>
+<ul>
+<li><a href="#org21e5071">3.2.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#org7ff7b5a">3.3. Examples</a>
+<ul>
+<li><a href="#alpha1">3.3.1. \(\lambda x.\ x \alphaequiv \lambda y.\ y\)</a></li>
+<li><a href="#alpha2">3.3.2. \(\lambda x.\lambda x.\ x \alphaequiv \lambda y.\ \lambda y.\ y\)</a></li>
+<li><a href="#org3130e08">3.3.3. \(\lambda x.\lambda y.\ y \alphaequiv \lambda y.\ \lambda x.\ x\)</a></li>
+<li><a href="#orgf111569">3.3.4. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#orgf54e1e3">3.4. Barendregt identifier convention</a></li>
+</ul>
+</li>
+<li><a href="#org7fc6d07">4. Application of a substitution to an expression</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org5d4b7f3">4.0.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#orgf72593d">4.1. Discussion</a>
+<ul>
+<li><a href="#orgf589de7">4.1.1. Accidental elimination of a binding</a></li>
+<li><a href="#orga52c00f">4.1.2. Accidental capture of a free identifier</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org6710fd6">5. &beta; and &eta; rewrite rules</a>
+<ul>
+<li><a href="#orgcf7e974">5.1. &beta; rewrite rule</a></li>
+<li><a href="#org4e442c4">5.2. &eta; rewrite rule</a></li>
+</ul>
+</li>
+<li><a href="#org0d1f666">6. &beta;&eta; reduction</a></li>
+<li><a href="#org7de1786">7. Normal forms for (full) \(\beta \eta\) reduction</a></li>
+<li><a href="#org7abdcce">8. Confluence (Church-Rosser Property) of the &lambda;-calculus: Proof Sketch</a>
+<ul>
+<li><a href="#org9c84d80">8.1. Confluence and the Diamond Property</a></li>
+<li><a href="#org877a37f">8.2. Strategy to prove Confluence of &lambda;-calculus</a></li>
+<li><a href="#orgbf6caa5">8.3. Definition of Parallel reduction</a>
+<ul>
+<li><a href="#org5677c19">8.3.1. Example 1</a></li>
+<li><a href="#e-preducesto-e">8.3.2. Lemma: Prove that for each \(e\), \(e\preducesto e\)</a></li>
+<li><a href="#orgb0a0f58">8.3.3. Example 2</a>
+<ul>
+<li><a href="#org0120b91">8.3.3.1. \(S1\)</a>
+<ul>
+<li><a href="#orgd427bf0">8.3.3.1.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#org9936c95">8.3.3.2. \(S2\)</a>
+<ul>
+<li><a href="#org67e8ebc">8.3.3.2.1. Exercise</a></li>
+<li><a href="#org322b260">8.3.3.2.2. Exercise</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgcf0a298">8.4. Relating \(\psimplifiesto\) with \(\simplifiesto\)</a></li>
+<li><a href="#orgb62fa91">8.5. Definition of Maximally Parallel Reduct</a>
+<ul>
+<li><a href="#org2205cff">8.5.1. Exercise.  Computing maximally parallel reduct</a></li>
+</ul>
+</li>
+<li><a href="#org9b7a86f">8.6. Proof of Property B: \(\preducesto\) satisfies the Diamond property</a></li>
+</ul>
+</li>
+<li><a href="#orgec678df">9. Significance of the Confluence (Church-Rosser) property of &lambda; calculus</a></li>
+<li><a href="#orgf27fd78">10. Reduction Strategies</a>
+<ul>
+<li><a href="#org119cbe6">10.1. Full Reduction</a></li>
+<li><a href="#org2b4f21f">10.2. Normal order reduction</a></li>
+<li><a href="#orgba6627a">10.3. Proof that Normal Order reduction guarantees a normal form if one exists</a></li>
+<li><a href="#org53321a8">10.4. Applicative Order</a></li>
+<li><a href="#orge17b2a5">10.5. Call by name reduction</a></li>
+<li><a href="#org10e129f">10.6. Call by value</a></li>
+<li><a href="#org427b673">10.7. Comparison</a></li>
+</ul>
+</li>
+<li><a href="#org194ae4e">11. References</a>
+<ul>
+<li><a href="#org37392a7">11.1. Online notes/papers</a></li>
+<li><a href="#org8bca847">11.2. Other resources</a></li>
+<li><a href="#org82e513f">11.3. Video Resources</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org824030c" class="outline-2">
+<h2 id="org824030c"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The &lambda;-calculus, introduced by Alonzo Church in the
+late 1920's and the 1930's, is a reduction system designed
+to model <i>functions</i>, their construction and application.
+It was invented by Church to study the logical foundations
+of mathematics and computability theory.  Later, people
+discovered its utility as a foundation for the design of
+programming languages.
+</p>
+
+<p>
+At its core, the (pure) &lambda;-calculus is a startlingly simple
+language of expressions: only three kinds of syntactic
+expressions and two rules govern the reduction of its
+expressions.  However, these rules capture the essence of how
+programs in <i>any</i> sequential programming language behave.
+&lambda;-calculus is Turing complete.
+</p>
+
+<p>
+These lecture notes are an introduction to &lambda;-calculus, its
+syntax, operational semantics and a theorem about its confluence
+property, and reduction strategies that relate &lambda;-calculus
+to modern programming languages.
+</p>
+
+<p>
+The material presented here is based on some of the textbooks and
+online resources listed in the References Section (Sec.
+<a href="#org194ae4e">11</a>) , particularly the Chapter on Untyped Lambda
+calculus from Types and Programming Languages by Pierce and
+<a href="https://arxiv.org/pdf/0804.3434.pdf">Selinger's lecture notes on Lambda calculus</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org86be22b" class="outline-2">
+<h2 id="org86be22b"><span class="section-number-2">2.</span> Abstract Syntax</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The (abstract) syntax of &lambda;-calculus expressions, or
+expressions for short is given below:
+</p>
+
+\begin{align*}
+e ::= &                                        &  \scriptstyle{EXP}       &    \qquad \mbox{Expression}\\
+      &   x                                    &  \scriptstyle{IDENT}     &    \qquad \mbox{Identifier}\\
+      &   \lambda\ x.\ e            &  \scriptstyle{ABS}        &    \qquad \mbox{Abstraction}\\
+      &   e\ e     &  \scriptstyle{APP}        &    \qquad \mbox{Application}
+\end{align*}
+
+<p>
+Informally, an abstraction expression denotes the
+construction of a function of one argument.  An application
+\(e\ e'\) denotes the application of the function denoted by
+\(e\) to the argument denoted by \(e'\).  
+</p>
+</div>
+
+<div id="outline-container-orgf286ea4" class="outline-3">
+<h3 id="orgf286ea4"><span class="section-number-3">2.1.</span> Syntactic extension</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Abstraction expressions take a single formal parameter and,
+correspondingly applications involve a single argument applied
+to an expression denoting a function.  To avoid clutter, we rely
+on the following syntactic extension: an expression \(e_0\ e_1\
+e_2\) is shorthand for \(((e_0 e_1) e_2)\).  The shorthand
+\(\lambda\ x\ y.\ e\) abbreviates \(\lambda\ x.\ (\lambda\ y.\ e)\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8aca182" class="outline-3">
+<h3 id="org8aca182"><span class="section-number-3">2.2.</span> Size</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+The size of an expression \(e\), denoted \(|e|\) is
+recursively defined as follows:
+</p>
+
+\begin{align*}
+|x| &= 1\\
+|\lambda\ x.\  e| &= |e| + 2 \\
+|e\ e'| &= |e|+|e'|
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-orgd50ef13" class="outline-3">
+<h3 id="orgd50ef13"><span class="section-number-3">2.3.</span> Free and bound identifiers</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+In earlier classes, we learned how to connect identifier
+references to their binding occurrences (if they exist).  A
+identifier <code>x</code> in an expression <code>e</code> that has a reference
+occurrence without a corresponding binding occurrence in <code>e</code>
+is said to occur <i>free in</i> <code>e</code>.  Otherwise, it is said to be
+bound.
+</p>
+
+<p>
+The set of free identifiers contained in an expression may
+also be inductively defined as follows:
+</p>
+
+\begin{align*}
+\id{FV}(x) &= \set{x}\\
+\id{FV}(e\ e') &= \id{FV}(e) \union \id{FV}(e')\\ 
+\id{FV}(\lambda\ x.\ e) &= \id{FV}(e)\ \backslash\ \set{x}
+\end{align*}
+
+<p>
+Note that it is possible for a identifier to occur free as well
+as bound in an expression.  \(\id{FV}(e)\) denotes the set of
+all identifiers occurring in an expression, whether free or
+bound.
+</p>
+</div>
+</div>
+<div id="outline-container-orgad2201d" class="outline-3">
+<h3 id="orgad2201d"><span class="section-number-3">2.4.</span> Open and closed expressions</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+An expression is <i>open</i> if it contains free identifiers; it is
+closed otherwise.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfef6ced" class="outline-3">
+<h3 id="orgfef6ced"><span class="section-number-3">2.5.</span> Combinators</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+A <i>combinator</i> is an expression that is closed.  Examples of
+some well-known combinators and closed expressions and their
+names are given below.  We use the <code>lambda:</code> notation for
+curried form of <code>lambda</code> and the <code>:</code> for curried application.
+</p>
+
+<pre class="example" id="org2e376b1">
+(lambda (x) x)                  ; I combinator, the identity function
+(lambda: (x y) x)               ; K combinator.  Note that this short for  
+                                ; (lambda (x) (lambda (y) x))
+
+(lambda: (x y z) (: x z (y z))   ; S combinator.  Note that this short for  
+                                 ;  (lambda (x) 
+                                   (lambda (y) 
+                                     (lambda (z) 
+                                       ((x z) (y z))))).
+
+(lambda (x) (x x))             ; omega combinator.  
+(omega omega)                  ; Omega.  An example of self application.
+
+(lambda (g)                     ; Y combinator.
+  ((lambda (x) (g (x x)))       ; Also called the (normal order)
+   (lambda (x) (g (x x)))))     ; fixed point combinator
+
+
+(lambda (g)                                  ; Z combinator
+  ((lambda (x) (g (lambda (y) (: x x y))))   ; Also called the (applicative order)
+   (lambda (x) (g (lambda (y) (: x x y)))))) ;  fixed point combinator
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgafd8459" class="outline-2">
+<h2 id="orgafd8459"><span class="section-number-2">3.</span> Alpha Equivalence</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Consider the expressions \(\lambda\ x.\ x\) and \(\lambda\ y.\ y\).
+Intuitively, they both <i>denote</i> the same entity, namely, the
+identity function.  They are equivalent because it should not
+matter what names are used as bound identifiers.  On the other
+hand \(\lambda\ x.\ x\) is clearly distinct from \(\lambda\ x.\ y\).
+The former is the identity function, while the latter denotes a
+function that returns the (value of) \(y\), independent of the
+parameter \(x\).
+</p>
+
+<p>
+We wish to formalize this notion of equivalence `upto renaming
+of bound identifiers'.  We call this &alpha; equivalence, an
+equivalence relation between expressions that we define
+presently.  Defining &alpha;-equivalence requires the notion of
+renaming, which we introduce next. 
+</p>
+</div>
+
+<div id="outline-container-orgc864ae2" class="outline-3">
+<h3 id="orgc864ae2"><span class="section-number-3">3.1.</span> Renaming</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+A renaming is a syntactic operation on an expression in which an
+identifier is replaced with another in an expression.
+\(e\set{x/y}\) is read as ``rename in \(e\) the identifier \(x\) with
+the identifier \(y\).''  It is defined inductively as follows.
+</p>
+
+
+\begin{align*}
+x\set{x/y} &= y\\
+z\set{x/y} &= z \qquad \mbox{if $x\neq z$}\\
+e\ e'\set{x/y} &= e\set{x/y}\ e'\set{x/y}\\
+(\lambda\ x.\ e)\set{x/y} &= \lambda\ y.\ e\set{x/y}\\
+(\lambda\ z.\ e)\set{x/y} &= \lambda\ z.\ e\set{x/y}
+\end{align*}
+
+<p>
+Used without restriction, a renaming applied on an expression
+could transform not just the expression but also its meaning.
+(Exercise: give an example.)  However, we will employ the
+renaming application sparingly and in the right context so that
+it actually serves our purpose of establishing &alpha;
+equivalance of two expressions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org40d468a" class="outline-3">
+<h3 id="org40d468a"><span class="section-number-3">3.2.</span> Defining &alpha;-equivalence</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+The relation \(\alphaequiv\), read <i>&alpha;-equivalence</i>, is
+defined as the smallest binary relation on \(\lambda\)-expressions
+that is closed under the following rules:
+</p>
+
+\begin{align*}
+\frac{y\not\in \id{FV}(e)}{\lambda\ x.\ e \alphaequiv \lambda\ y.\ e\set{x/y}} \qquad \scriptstyle{ALPHA}\\ \\
+\frac{e \alphaequiv e'}{\lambda\ x.\ e \alphaequiv \lambda\ x.\ e'}\qquad \scriptstyle{ABS}\\ \\
+\frac{{e_1 \alphaequiv e_1'}\quad{e_2\alphaequiv e_2'}}{e_1\ e_2  \alphaequiv e_1\ e_2'}\qquad \scriptstyle{APP}\\ \\ \\ \\
+\frac{}{e\alphaequiv e}\qquad\scriptstyle{REF}\\ \\
+\frac{e'\alphaequiv e}{e\alphaequiv e'}\qquad\scriptstyle{SYM}\\ \\
+\frac{{e\alphaequiv e'}\quad{e'\alphaequiv e''}}{e\alphaequiv e''}\qquad\scriptstyle{TRANS}
+\end{align*}
+
+<p>
+Observe the judicious use of renaming in the definition of
+&alpha;-equivalence.
+</p>
+</div>
+
+
+
+<div id="outline-container-org21e5071" class="outline-4">
+<h4 id="org21e5071"><span class="section-number-4">3.2.1.</span> Exercise</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+Show that if \(e\alphaequiv e'\) then \(\id{FV}(e) =
+\id{FV}(e')\).    Is the converse true?
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org7ff7b5a" class="outline-3">
+<h3 id="org7ff7b5a"><span class="section-number-3">3.3.</span> Examples</h3>
+<div class="outline-text-3" id="text-3-3">
+</div>
+<div id="outline-container-alpha1" class="outline-4">
+<h4 id="alpha1"><span class="section-number-4">3.3.1.</span> \(\lambda x.\ x \alphaequiv \lambda y.\ y\)</h4>
+<div class="outline-text-4" id="text-alpha1">
+<pre class="example">
+CUSTOM_ID: alpha1
+</pre>
+
+\begin{align*}
+1\qquad \lambda x.\ x &\alphaequiv\   \lambda x.\ x  & \text{using REF}\\
+2\qquad \lambda x. \ x &\alphaequiv\  \lambda y.\ y  & \text{from 1, and}\ y\not\in \id{FV}(x), y=\set{x/y}, \text{using ALPHA}\ \\
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-alpha2" class="outline-4">
+<h4 id="alpha2"><span class="section-number-4">3.3.2.</span> \(\lambda x.\lambda x.\ x \alphaequiv \lambda y.\ \lambda y.\ y\)</h4>
+<div class="outline-text-4" id="text-alpha2">
+<pre class="example">
+CUSTOM_ID: alpha2
+</pre>
+
+<p>
+The proof follows by applying the REF rule to \(\lambda\
+x.\lambda\ x.\ x\) with the replacement \(\set{x/y}\) after noting
+that \(y\) does not occur in the body of the \(\lambda\) expression
+in LHS.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3130e08" class="outline-4">
+<h4 id="org3130e08"><span class="section-number-4">3.3.3.</span> \(\lambda x.\lambda y.\ y \alphaequiv \lambda y.\ \lambda x.\ x\)</h4>
+<div class="outline-text-4" id="text-3-3-3">
+<ul class="org-ul">
+<li>1. \(\lambda y.\ y \alphaequiv \lambda x.\ x\qquad\) From Example <a href="#alpha1">3.3.1</a>.</li>
+
+<li>2. \(\lambda y.\ \lambda y.\ y \alphaequiv \lambda y.\ \lambda
+   x.\ x\qquad\) 1, ABS(\(y\)}.</li>
+
+<li>3. \(\lambda x.\ \lambda y.\ y \alphaequiv \lambda x.\ \lambda
+   x.\ x\qquad\) 1, ABS(\(x\)}.</li>
+
+<li>4. \(\lambda x.\ \lambda x.\ x \alphaequiv \lambda y.\ \lambda
+   y.\ y\qquad\) From Example <a href="#alpha2">3.3.2</a>.</li>
+
+<li>5. \(\lambda x.\ \lambda y.\ y \alphaequiv \lambda y.\ \lambda
+   x.\ x\qquad\) 2, 3, 4, EQUIV</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf111569" class="outline-4">
+<h4 id="orgf111569"><span class="section-number-4">3.3.4.</span> Exercise</h4>
+<div class="outline-text-4" id="text-3-3-4">
+<p>
+Prove \[((\lambda\ x.\ (x\ x)) (\lambda\ x.\ (x\ x)))
+ \alphaequiv ((\lambda\ x.\ (x\ x)) (\lambda\ y.\ (y\ y)))\]
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf54e1e3" class="outline-3">
+<h3 id="orgf54e1e3"><span class="section-number-3">3.4.</span> Barendregt identifier convention</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+By &alpha; equivalence, we may ensure that all bound identifiers
+(i.e., formals) in an expression are distinct from each
+other and any free identifiers.  
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7fc6d07" class="outline-2">
+<h2 id="org7fc6d07"><span class="section-number-2">4.</span> Application of a substitution to an expression</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Application of a function abstraction to an argument is the
+primary way in which expressions in &lambda;-calculus are
+reduced.  
+</p>
+
+<p>
+Intuitively, applying a function \(\lambda\ x.\ e\ \) to an argument
+\(e'\) involves substituting occurrences of \(x\) with \(e'\) in
+the body \(e\).  The process of <i>applying</i> a substitution to an
+expression needs to be carefully defined.  For example, in the
+body \(e\), only <i>free</i> occurrences of \(x\), if any, should be
+substituted with \(e\).
+</p>
+
+<p>
+Because of bound identifier names that may clash with identifier
+names in a substitution, a casual replacement of \(x\) in \(e\)
+with \(e'\) could quickly get us into trouble.  The application
+of a substitution on an expression works its way into
+sub-expressions.  The result of the application depends on how
+the substitution ultimately gets applied to the atomic elements
+(indentifiers), but also how it commutes with compound elements:
+applications, and abstractions, which is where the subtleties
+surface.
+</p>
+
+\begin{align}
+x[x/e] &= e\\
+y [x/e]&= y \quad  \mbox{if $y\neq x$}\\
+(e_1\ e_2)[x/e]      &= e_1[x/e]\ e_2[x/e]\\
+(\lambda\ x.\ e')[x/e] &= \lambda\ x.\ e'   \label{eqn:subst-abs-bound}\\
+(\lambda\ y.\ e')[x/e] &= \lambda\ y.\  e'[x/e]         \quad \mbox{if}\ y\neq x\ \mbox{and}\ y\not\in \id{FV}(e) \label{eqn:subst-abs}\\
+(\lambda\ y.\ e')[x/e] &= \lambda\ z.\ \big(e'\set{y/z}\big)[x/e] \quad \mbox{if}\ y\neq x,\ y\in \id{FV}(e)\ \mbox{and} \label{eqn:subst-fresh}\\ 
+                     &               \qquad \qquad \qquad z\ \text{is fresh, i.e.,}\ z\not\in \id{FV}(e)\union\id{FV}(e') \union\set{x,y}\nonumber
+\end{align}
+
+<p>
+Note that because of the side condition in the last clause, any
+number of different fresh variables may be chosen, rendering
+substitution operation not a function, but a relation.  If,
+however, we assume that substitution operation to be defined on
+expressions <i>modulo</i> &alpha;-equivalence, then the substitution
+operation is indeed a function.
+</p>
+</div>
+
+
+<div id="outline-container-org5d4b7f3" class="outline-4">
+<h4 id="org5d4b7f3"><span class="section-number-4">4.0.1.</span> Exercise</h4>
+<div class="outline-text-4" id="text-4-0-1">
+<p>
+Show the steps involved in applying the substitution \([x/(y\
+z)]\) to \(\lambda\ y.\ \ x\ y\ (\lambda\ y.\ \ y)\).  Also refer
+to the clause in the definition employed at each step, along
+with evidence that the side conditions are satisfied.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf72593d" class="outline-3">
+<h3 id="orgf72593d"><span class="section-number-3">4.1.</span> Discussion</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+Here are some cases that would arise if we were less than
+careful with the  definition:
+</p>
+</div>
+
+<div id="outline-container-orgf589de7" class="outline-4">
+<h4 id="orgf589de7"><span class="section-number-4">4.1.1.</span> Accidental elimination of a binding</h4>
+<div class="outline-text-4" id="text-4-1-1">
+<p>
+If we eliminate equation \eqref{eqn:subst-abs-bound} and the
+side condition \(y\neq x\) from \eqref{eqn:subst-abs}, we could
+end up with the following incorrect situation,
+</p>
+
+<p>
+\[\lambda\ \texttt{x}.\ \texttt{x}[\texttt{x}/\texttt{w}] =
+\lambda\ \texttt{x}.\ \texttt{w}\]
+</p>
+
+<p>
+which does not match our intuition about functions.  Intuition
+dictates that an expression with no free identifiers should
+remain invariant under the application of a substitution.  But
+here, the application of a substitution to the identity function
+has turned it into something else.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga52c00f" class="outline-4">
+<h4 id="orga52c00f"><span class="section-number-4">4.1.2.</span> Accidental capture of a free identifier</h4>
+<div class="outline-text-4" id="text-4-1-2">
+<p>
+Without the side condition \(y\not\in \id{FV}(e)\) in
+\eqref{eqn:subst-abs}, we could have
+</p>
+
+<p>
+\[\lambda\ \texttt{w}.\ \texttt{x}[\texttt{x}/\texttt{w}] = \lambda\ \texttt{w}.\ \texttt{w}\]
+</p>
+
+<p>
+which suffers from the opposite problem: the incorrect
+application of the substitution has turned a constant function
+returning \(\texttt{x}\) into the identity function.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6710fd6" class="outline-2">
+<h2 id="org6710fd6"><span class="section-number-2">5.</span> &beta; and &eta; rewrite rules</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orgcf7e974" class="outline-3">
+<h3 id="orgcf7e974"><span class="section-number-3">5.1.</span> &beta; rewrite rule</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+The fundamental rewrite rule in the &lambda;-calculus is the
+&beta; rewrite rule:
+</p>
+
+\begin{align*}
+{(\lambda\ x.\ e)\ \ e'\rewritesto  e[x/e']}\qquad \scriptstyle{BETA}\\
+\end{align*}
+
+<p>
+The &beta; rule captures the fundamental operation involved
+in applying a function to its argument: the formal parameter
+is substituted with the argument in the body of a function.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4e442c4" class="outline-3">
+<h3 id="org4e442c4"><span class="section-number-3">5.2.</span> &eta; rewrite rule</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+&eta; reduction captures an optimization in the way functions
+operate.  If a function \(f\) merely passes its formal
+parameter \(x\) to another function \(g\) we may simply
+eliminate \(f\) and use \(g\) instead.  This idea translates
+to the following \(\eta\) rewrite rule:
+</p>
+
+\begin{align*}
+{\lambda\ x.\ e\ x\rewritesto_{\eta} \ e}\qquad \mbox{provided $x\not\in\id{FV}(e)$}\quad\scriptstyle{ETA}\\
+\end{align*}
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org0d1f666" class="outline-2">
+<h2 id="org0d1f666"><span class="section-number-2">6.</span> &beta;&eta; reduction</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+\(\beta\eta\) reduction, denoted \(\betaetareducesto\) is the
+compatible closure of the rewrite system consisting of
+\(\rewritesto_{\beta}\) and \(\rewritesto_{\eta}\). 
+</p>
+
+
+\begin{align*}
+\frac{e\rewritesto_{\beta} e'}{e\betaetareducesto e'}\quad \scriptstyle{BETA}\\ \\ \\ 
+\frac{e\rewritesto_{\eta} e'}{e\betaetareducesto e'}\quad \scriptstyle{ETA}\\ \\ \\ 
+\frac{{e_1\betaetareducesto e_1'}}{e_1\ e_2\betaetareducesto e_1'\ e_2}\quad \scriptstyle{APP1}\\ \\ \\ 
+\frac{{e_2\betaetareducesto e_2'}}{e_1\ e_2\betaetareducesto e_1\ e_2'}\quad \scriptstyle{APP2}\\ \\ \\ 
+\frac{e\betaetareducesto e'}{\lambda x.\ e\betaetareducesto \lambda\ x.\ e'}\quad \scriptstyle{ABS}\\ \\ \\ 
+\end{align*}
+
+<p>
+It is possible for a term to have zero or more &beta; redexes.  A
+&beta; reduction \(e\betareducesto e'\) may either reduce &beta;
+redexes or increase them.  It is also possible that the &beta;
+reducing an expression results in an expression with a larger
+size.  On the other hand, an &eta; reduction always reduces the
+size of the expression.
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-org7de1786" class="outline-2">
+<h2 id="org7de1786"><span class="section-number-2">7.</span> Normal forms for (full) \(\beta \eta\) reduction</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+\(e\) is in full \(\beta\eta\) normal form if it contains no &beta;
+or &eta;-redexes.  A reduction system is has the <i>strong
+normalization</i> property if for all terms, every sequence of
+rewriting terminates with an normal form.  &lambda; calculus does
+not enjoy this property.  A reduction system has the <i>weak
+normalization</i> property if for every term, there is at least one
+sequence of reductions that terminates in a normal form.
+&lambda; calculus does not enjoy even the weak normalization
+property.  Let \(\omega = \lambda\ x.\ \ x\ x\).  The expression
+\(\Omega = \omega\ \omega\) is has no normal form.
+</p>
+
+<p>
+What the &lambda;-calculus does, however, enjoy is the confluence
+property, also called the Church Rosser property.  
+</p>
+
+
+<dl class="org-dl">
+<dt>CONFLUENCE of &lambda;-calculus</dt><dd>Let \(\reducesto\) denote
+either \(\betareducesto\) or \(\betaetareducesto\).  If
+\(e\simplifiesto e_1\) and \(e\simplifiesto e_2\), then there
+exists an \(e_3\) such that \(e_1\simplifiesto e_3\) and
+\(e_2\simplifiesto e_3\).</dd>
+</dl>
+
+
+<p>
+One consequence of the confluence property of a reduction
+\(\reducesto\) is that if an expression reduces to a normal form,
+then that normal form is unique.  (Convince yourself why.)
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7abdcce" class="outline-2">
+<h2 id="org7abdcce"><span class="section-number-2">8.</span> Confluence (Church-Rosser Property) of the &lambda;-calculus: Proof Sketch</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+We present a proof sketch based on the proof given in <a href="https://arxiv.org/pdf/0804.3434.pdf">Selinger's
+notes</a>.  You are invited to read the entire proof in his notes
+for a much more thorough and complete understanding.
+</p>
+</div>
+
+
+<div id="outline-container-org9c84d80" class="outline-3">
+<h3 id="org9c84d80"><span class="section-number-3">8.1.</span> Confluence and the Diamond Property</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+Recall the the definitions of the following properties of an
+arbitrary reduction system \(\reducesto\):
+</p>
+
+
+<dl class="org-dl">
+<dt>(a) Confluent (Church-Rosser)</dt><dd>\(\reducesto\) is <i>confluent</i>
+or has the <i>Church-Rosser</i> property if \(a\simplifiesto b\)
+and \(a\simplifiesto c\) implies that there exists \(d\)
+such that \(b\simplifiesto d\) and \(c\simplifiesto d\).</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>(c) Diamond property</dt><dd>\(\reducesto\) <i>has the diamond
+property</i> if \(a\reducesto b\) and \(a\reducesto c\) implies
+there exists \(d\) such that \(b\reducesto d\) and
+\(c\reducesto d\).</dd>
+</dl>
+
+
+<p>
+The Diamond property and confluence are related in the following
+way:
+</p>
+
+
+<dl class="org-dl">
+<dt>1. Diamond implies Confluence</dt><dd>the proof is by induction
+on \(\simplifiesto\) deductions.  Geometrically, a grid of
+diamonds may be arranged to fill the area between the
+rectangle between \(a\), \(b\), \(c\) and \(d\) (See
+diagram on page 31 of <a href="https://arxiv.org/pdf/0804.3434.pdf">Selinger's notes</a>.)</dd>
+
+<dt>2 \(\reducesto\) is confluent iff \(\simplifiesto\) satisfies Diamond</dt><dd>this
+is evident from the definitions of transitive closure
+and the definitions of the respective properties.</dd>
+</dl>
+
+
+<p>
+Note that as a consequence of 1., if &beta;&eta;-reduction
+satisfied the Diamond property, we would have a proof of the
+confluence of &beta;&eta;-reduction.  Unfortunately, however,
+&beta;&eta; doesn't satisfy the Diamond property.
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org877a37f" class="outline-3">
+<h3 id="org877a37f"><span class="section-number-3">8.2.</span> Strategy to prove Confluence of &lambda;-calculus</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+If we find a relation, say \(\preducesto\),
+such that:
+</p>
+
+<ul class="org-ul">
+<li>A. \(\psimplifiesto\) coincides with \(\simplifiesto\),</li>
+
+<li>B. \(\preducesto\) satisfies the Diamond property</li>
+</ul>
+
+<p>
+then, from A., B., and 2., we have a proof of the confluence of
+\(\reducesto\).
+</p>
+
+<p>
+In the rest of sketch, we 
+</p>
+
+<ul class="org-ul">
+<li>define a relation \(\preducesto\) on &lambda; expressions,
+called <i>parallel reduction</i> that has the above two
+properties,</li>
+
+<li>show Property A,</li>
+
+<li>define the notion of a <i>maximally parallel reduct</i>, and</li>
+
+<li>use this to prove Property B.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgbf6caa5" class="outline-3">
+<h3 id="orgbf6caa5"><span class="section-number-3">8.3.</span> Definition of Parallel reduction</h3>
+<div class="outline-text-3" id="text-8-3">
+<p>
+Intuitively, <i>parallel reduction</i> allows you to look at <i>all</i>
+redexes in an expression and then apply a subset of them.  
+</p>
+
+
+\begin{align*}
+\frac{}{x\preducesto x}\quad \scriptstyle{IDENT}\\ \\ \\ 
+\frac{{e_1\preducesto e'_1}\quad{e_2\preducesto e_2'}}{e_1\ e_2\ \preducesto\ e_1'\ e_2'}\quad \scriptstyle{APP}\\ \\ \\ 
+\frac{e\preducesto e'}{\lambda\ x.\ e\ \preducesto\ \lambda\ x.\ e'}\quad \scriptstyle{ABS}\\ \\ \\ 
+\frac{{e_1\preducesto e'_1}\quad{e_2\preducesto e_2'}}{(\lambda\ x.\ e_1)e_2\ \preducesto e_1'[x/e_2']}\quad \scriptstyle{BETA}\\ \\ \\ 
+\frac{{e\preducesto e'}\quad x\not\in\id{FV}(e)}{\lambda\ x.\ e\ x\ \preducesto e'}\quad\scriptstyle{ETA}
+\end{align*}
+</div>
+
+<div id="outline-container-org5677c19" class="outline-4">
+<h4 id="org5677c19"><span class="section-number-4">8.3.1.</span> Example 1</h4>
+<div class="outline-text-4" id="text-8-3-1">
+<p>
+Let \(\id{Id}\) denote \(\lambda\ x.\ x\).  Consider the term \(e\)
+</p>
+
+<p>
+\[(\lambda\ z. (\id{Id}\ z)^1)^2\]
+</p>
+
+<p>
+where we have used superscripts to identify locations of redexes:
+</p>
+
+<p>
+We first consider all the possible reductions from \(e\):
+</p>
+
+<ul class="org-ul">
+<li>1. \(e\reducesto_{\beta:1} \lambda\ z.\ z\)</li>
+<li>2. \(e\reducesto_{\eta:2} \id{Id}\)</li>
+</ul>
+
+<p>
+Notice that in this example applying the &beta;-reduction makes
+the &eta;-redex disappear and also the other way round.  In
+general, in the application of a single &beta; or &eta; redex
+</p>
+
+<ul class="org-ul">
+<li>1. An existing redex may disappear.</li>
+<li>2. An existing redex may get replicated.</li>
+<li>3. <i>New</i> redexes may get created.</li>
+</ul>
+
+<p>
+Let us examine the definition carefully: 
+</p>
+
+<ul class="org-ul">
+<li>The IDENT rule says that identifiers parallel-reduce to
+themselves.</li>
+
+<li>The APP rule says that rator \(e_1\) and rand \(e_2\) may
+parallel-reduce to say, \(e_1'\) and \(e_2'\).  This could
+result in the creation of a &beta;-redex, say, if \(e_1'\) is
+an abstraction expression.  However, this <i>new</i> redex
+created by the juxtaposition of \(e_1'\) to \(e_2'\) is not
+to be reduced in \(e_1\ e_2\)'s parallel reduction.</li>
+
+<li>The BETA rule says that  if \(e_1\) and \(e_2\)
+parallel-reduce to \(e_1'\) and \(e_2'\), then the
+<i>existing</i> &beta;-redex \((\lambda\ x.\ e_1)\ e_2\) reduces to
+\(e_1'[x/e_2']\).</li>
+
+<li>The ABS rule says that the parallel-reduction of a
+&lambda;-abstraction is dictated by the parallel-reduction of
+its body.  Note that if \(e\) reduces to \(e''\ x\), then
+there is a new &eta;-redex \(\lambda\ x.\ e''\ x\).  However,
+this redex is not reduced in a parallel-reduction of
+\(\lambda\ x. e\).</li>
+
+<li>The ETA rule is used to handle the case when there is an
+&eta;-redex.</li>
+</ul>
+
+
+<p>
+Intuitively, in parallel reduction, we do the following:
+</p>
+
+<ul class="org-ul">
+<li>Step 1: Identify all the redexes in the expression,</li>
+<li>Step 2: Select a subset of them.</li>
+<li>step 3: Choose an any order to apply them.</li>
+<li>Step 4: In the process some original redexes may get
+replicated due to substitution.</li>
+<li>Step 5: If some original redexes disappear, so be it.</li>
+<li>Step 6: If a <i>new</i> redex gets created, do <i>not</i> reduce it.</li>
+</ul>
+
+<p>
+Now we consider the set of reductions in parallel for the above example:
+</p>
+
+<ul class="org-ul">
+<li>1. \(e\preducesto^{\pair{}} e\)  (no reductions)</li>
+<li>2. \(e\preducesto^{\pair{\beta:1}} \lambda\ z.\ z\)</li>
+<li>3. \(e\preducesto^{\pair{\eta:2}} \id{Id} = \lambda\ x.\ x\)</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-e-preducesto-e" class="outline-4">
+<h4 id="e-preducesto-e"><span class="section-number-4">8.3.2.</span> Lemma: Prove that for each \(e\), \(e\preducesto e\)</h4>
+<div class="outline-text-4" id="text-e-preducesto-e">
+<pre class="example">
+custom_id: e-preducesto-e
+</pre>
+
+<p>
+Proof:   Exercise.  [Hint: use induction on \(e\)]
+</p>
+
+<p>
+Intuitively, the lemma claims that when doing parallel
+reduction, we always have the option of picking none of the
+possible redexes in \(e\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb0a0f58" class="outline-4">
+<h4 id="orgb0a0f58"><span class="section-number-4">8.3.3.</span> Example 2</h4>
+<div class="outline-text-4" id="text-8-3-3">
+<p>
+Note that if \(e\preducesto e'\), then \(e'\) may still have
+redexes that were originally in \(e'\) or new ones created in the
+process of doing the parallel reductions.   This is demonstrated
+via parallel reduction in the following expression:
+</p>
+
+<p>
+\[e=(((\lambda\ z. (\omega\ z)^1)^2) (\id{Id}\ \id{Id})^3)^4\]
+</p>
+
+<p>
+\(e\) contains four redexes identified as \(\beta:1\), \(\eta:2\),
+\(\beta:3\) and \(\beta:4\). 
+</p>
+
+
+<p>
+Here are some examples of parallel reductions of \(e\)
+</p>
+</div>
+
+<div id="outline-container-org0120b91" class="outline-5">
+<h5 id="org0120b91"><span class="section-number-5">8.3.3.1.</span> \(S1\)</h5>
+<div class="outline-text-5" id="text-8-3-3-1">
+<p>
+\[e\preducesto (\id{Id}\ \id{Id})\]
+</p>
+
+<p>
+The reduct \((\id{Id}\ \id{Id})\) is obtained by choosing and
+applying in sequence the redexes \(\beta:1\), \(\beta:3\) and
+\(\beta:4\).
+</p>
+
+\begin{align*}
+  e &=\\
+  (((\lambda\ z. (\omega\ z)^1)^2) (\id{Id}\ \id{Id})^3)^4 & \reducesto_{\beta:1} \\
+ ((\lambda\ z.\ (z\ z))(\id{Id}\
+   \id{Id})^3)^4 & \reducesto_{\beta:3} \\
+((\lambda\ z.\ (z\ z))\
+   \id{Id})^4  & \reducesto_{\beta:4}\\
+(\id{Id}\ \id{Id})^5
+\end{align*}
+
+<p>
+Notice at this point, we have exhausted all the original redexes
+in \(e\).  The redex \(\beta:5\) in \((\id{Id}\ \id{Id})\) is <i>new</i>
+and is left untouched. 
+</p>
+</div>
+
+
+<div id="outline-container-orgd427bf0" class="outline-6">
+<h6 id="orgd427bf0"><span class="section-number-6">8.3.3.1.1.</span> Exercise</h6>
+<div class="outline-text-6" id="text-8-3-3-1-1">
+<p>
+Using the rules of \(\preducesto\), derive the result
+\(e\preducesto \id{Id}\ \id{Id}\).
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org9936c95" class="outline-5">
+<h5 id="org9936c95"><span class="section-number-5">8.3.3.2.</span> \(S2\)</h5>
+<div class="outline-text-5" id="text-8-3-3-2">
+<p>
+\[e \preducesto ((\id{Id}\ \id{Id}) (\id{Id}\ \id{Id}))\]
+</p>
+
+\begin{align*}
+  e &=\\
+  (((\lambda\ z. (\omega\ z)^1)^2) (\id{Id}\ \id{Id})^3)^4 & \reducesto_{\beta:1} \\
+((\lambda\ z.\ (z\ z))(\id{Id}\ \id{Id})^3)^4 &\reducesto_{\beta:4} \\
+((\id{Id}\ \id{Id})^{6} (\id{Id}\ \id{Id})^{7})^{5}
+\end{align*}
+</div>
+
+<div id="outline-container-org67e8ebc" class="outline-6">
+<h6 id="org67e8ebc"><span class="section-number-6">8.3.3.2.1.</span> Exercise</h6>
+<div class="outline-text-6" id="text-8-3-3-2-1">
+<p>
+Derive, using the rules of \(\preducesto\), the result
+\(e\preducesto \id{Id}\ \id{Id}\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org322b260" class="outline-6">
+<h6 id="org322b260"><span class="section-number-6">8.3.3.2.2.</span> Exercise</h6>
+<div class="outline-text-6" id="text-8-3-3-2-2">
+<p>
+Show that 
+\[(\id{Id}\ \id{Id}) (\id{Id}\ \id{Id}) \preducesto
+\id{Id}\ \id{Id}\]
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcf0a298" class="outline-3">
+<h3 id="orgcf0a298"><span class="section-number-3">8.4.</span> Relating \(\psimplifiesto\) with \(\simplifiesto\)</h3>
+<div class="outline-text-3" id="text-8-4">
+<p>
+The examples above hint that parallel reduction can be simulated
+with a sequence of reductions.  In fact, something stronger is
+true:
+</p>
+
+<p>
+\[\psimplifiesto = \simplifiesto\]
+</p>
+
+<p>
+The proof is in three parts:
+</p>
+
+<dl class="org-dl">
+<dt>(a) \(e\reducesto e' \implies e\preducesto e'\)</dt><dd>Each
+\(\beta\eta\) reduction is a parallel reduction.    The
+proof of this is by induction on \(\reducesto\).  The
+details are in Lemma 4.6(a) of Selinger.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>(b)  \(e\preducesto e' \implies e\simplifiesto e'\)</dt><dd>Each
+parallel reduction \(\preducesto\) may be simulated by
+a sequence of \(\reducesto\) reductions, i.e., by a
+single \(\simplifiesto\) relation.  The proof is by
+induction on \(\preducesto\).  Details are Lemma 4.6(b)
+of Selinger's notes.</dd>
+
+<dt>(c) \(\psimplifiesto\) and \(\simplifiesto\) coincide</dt><dd>This is a consequence of (a) and (b) and the
+definition of reflexive transitive closure.  Details
+are in Lemma 4.6(c) of Selinger's notes.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-orgb62fa91" class="outline-3">
+<h3 id="orgb62fa91"><span class="section-number-3">8.5.</span> Definition of Maximally Parallel Reduct</h3>
+<div class="outline-text-3" id="text-8-5">
+<p>
+When all original redexes are applied exhaustively in parallel
+on an expression \(e\), we get its <i>maximally parallel reduct</i>
+\(e^*\).  Assume that we have an expression \(e\).  We define
+\(e^*\), the unique maximally parallel one-step reduct of \(e\) as
+follows:
+</p>
+
+\begin{align*}
+x^* &= x\\
+(e_1\ e_2)^* &= (e_1^*\ e_2^*) \qquad \mbox{if $e_1\ e_2$ is not a $\beta$-redex}\\
+((\lambda\ x.\ e_1)e_2)^* &= e_1^*[x/e_2^*]\\
+(\lambda\ x.\ e)^* &= \lambda\ x.\ e^* \qquad \mbox{if $(\lambda\ x.\ e)$ is not an $\eta$-redex}\\
+(\lambda\ x.\ e\ x)^* &= e^* \qquad \mbox{if $x\not\in \id{FV}(e)$}
+\end{align*}
+</div>
+
+
+<div id="outline-container-org2205cff" class="outline-4">
+<h4 id="org2205cff"><span class="section-number-4">8.5.1.</span> Exercise.  Computing maximally parallel reduct</h4>
+<div class="outline-text-4" id="text-8-5-1">
+<p>
+Show that \[(((\lambda\ z. (\omega\ z))) (\id{Id}\ \id{Id}))^*=\id{Id}\ \id{Id}\]
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9b7a86f" class="outline-3">
+<h3 id="org9b7a86f"><span class="section-number-3">8.6.</span> Proof of Property B: \(\preducesto\) satisfies the Diamond property</h3>
+<div class="outline-text-3" id="text-8-6">
+<p>
+The proof is in two parts:
+</p>
+
+<dl class="org-dl">
+<dt>(a) \(e\preducesto e' \implies e'\preducesto e^*\)</dt><dd>the
+intuition that once a subset of redexes are applied on
+an expression \(e\) to yield a <i>residual</i> expression
+\(e'\), i.e., \(e\preducesto e'\), the residual \(e'\)
+still has some of the original redexes of \(e\).  By
+applying these remaining original redexes \(e\) via
+parallel reduction, we can arrive at \(e^*\).  Recall that
+its possible to steer \(e'\) into a reduction sequence
+that takes us into an expression quite different from
+\(e^*\).  But all we are saying here is that there is a
+way to get from \(e'\) to \(e^*\).  The formal proof is
+by induction on \(e\) and given as Lemma 4.8 in
+Selinger's notes.  The second case in the proof of Lemma
+4.8 depends on a Substitution Lemma (Lemma 4.7) in
+Selinger's notes.  Please read both proofs.</dd>
+
+<dt>(b)  \(\preducesto\) satisfies the Diamond Property</dt><dd>Pick
+any two expressions \(e_1\) and \(e_2\) such that
+\(e\preducesto e_1\) an \(e\preducesto e_2\).  From (a), it
+follows that \(e_1\preducesto e^{*}\) and \(e_2\preducesto
+        e^{*}\).  Thus, \(\preducesto\) satisfies the Diamond
+Property.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgec678df" class="outline-2">
+<h2 id="orgec678df"><span class="section-number-2">9.</span> Significance of the Confluence (Church-Rosser) property of &lambda; calculus</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+The confluence of &lambda;-calculus is one of the most important
+results in the theory of programming languages.
+</p>
+
+
+<p>
+The confluence  of &lambda;-calculus means that:
+</p>
+
+<dl class="org-dl">
+<dt>1. &lambda;-calculus reduction is non-deterministic</dt><dd>As long
+as the simplification does not diverge, (i.e., continue
+forever), it does <i>not</i> matter in what order we perform
+the reductions.</dd>
+
+<dt>2. &lambda;-calculus models evaluation</dt><dd>Every expression
+reduces to at most <i>one</i> normal form.</dd>
+
+<dt>3. &lambda;-calculus is parallel</dt><dd>It is possible to apply
+reductions in parallel, opening up many opportunities for
+parallelism for implementors of &lambda;-calculus based
+languages.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-orgf27fd78" class="outline-2">
+<h2 id="orgf27fd78"><span class="section-number-2">10.</span> Reduction Strategies</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+In any given expression, there may be zero or more redexes
+present.  A reduction strategy determines which redex gets
+picked next for reduction.    We have the following two main
+strategies:
+</p>
+</div>
+
+
+<div id="outline-container-org119cbe6" class="outline-3">
+<h3 id="org119cbe6"><span class="section-number-3">10.1.</span> Full Reduction</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+In full reduction, any redex in the expression may be picked as
+the next one for reduction.  In the example below, adapted from
+Pierce's book (TAPL), the following is one possible full
+reduction sequence:
+</p>
+
+
+\begin{align*}
+(\id{Id}\ (\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^2)^1 &\reducesto_{\beta:4} \\
+(\id{Id}\ (\id{Id}\ (\lambda\ z.\ z))^2)^1 &\reducesto_{\beta:2} \\
+(\id{Id}\ (\lambda\ z.\ z))^1 &\reducesto_{\beta:1} \\
+(\lambda\ z.\ z) &\ \not\reducesto
+\end{align*}
+
+
+<p>
+Note that the disadvantage of complete choice in full reduction
+is that one may veer off into a non-terminating reduction of an
+expression sequence even though the expression has a normal
+form.  Just consider the expression \((\lambda\ x.\ \id{Id})\
+\Omega\) with the hopeless strategy of <i>always</i> ignoring the top
+level redex and choosing instead to reduce &Omega;.
+</p>
+
+<p>
+If an expression has a normal form, is there a strategy that
+guarantees arriving at it, without getting sucked into an
+infinite reduction sequence?   The next strategy answers this in
+the affirmative.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2b4f21f" class="outline-3">
+<h3 id="org2b4f21f"><span class="section-number-3">10.2.</span> Normal order reduction</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+The normal order strategy is based on the observation that given
+any two redexes at positions \(i\) and \(j\) in an expression \(e\):
+</p>
+
+<ul class="org-ul">
+<li>1. Seen from the root, \(i\)  `above' \(j\) (or vice versa), or</li>
+<li>2. Either \(i\) is to the left of \(j\) (or vice versa).</li>
+<li>It is not possible for two redexes in a \(\lambda\) expression
+to overlap.</li>
+</ul>
+
+<p>
+Normal order strategy involves locating the next redex in the
+expression \(e\) as follows:
+</p>
+<ul class="org-ul">
+<li>1. If \(e\) is a redex, use it</li>
+<li>2. If \(e\) is not a redex but a &lambda; abstraction \(\lambda\
+    x.\ e'\), then locate the redex inside the body \(e'\).</li>
+<li>3. If \(e\) is not a redex but an application, \((e_1\ e_2)\),
+then locate the redex in the \(e_1\).</li>
+<li>4. If there's no redex in \(e_1\), then locate a redex in
+\(e_2\).</li>
+</ul>
+
+\begin{align*}
+(\id{Id}\ (\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^2)^1 &\reducesto_{\beta:1} \\
+(\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^2 &\reducesto_{\beta:2} \\
+(\lambda\ z.\ (\id{Id}\ z)^4)^3 &\reducesto_{\eta:3} \\
+\id{Id} &\ \not\reducesto
+\end{align*}
+</div>
+</div>
+
+
+<div id="outline-container-orgba6627a" class="outline-3">
+<h3 id="orgba6627a"><span class="section-number-3">10.3.</span> Proof that Normal Order reduction guarantees a normal form if one exists</h3>
+<div class="outline-text-3" id="text-10-3">
+<p>
+This result is called the `Standardization' theorem in &lambda;
+calculus.  A proof of this result using parallel reductions (see
+above) is given in Takahashi's Parallel Reductions in
+&lambda;-calculus 1995 paper (Information and Computation
+No. 118, 120-127).  Another approach for the standardization
+result &lambda;-calculus is in <a href="http://www.is.titech.ac.jp/~kashima/pub/C-145.pdf">Ryo Kashima's 2000 paper</a>, using a
+inductively defined notion of &beta;-reducibility with a standard
+sequence.   
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org53321a8" class="outline-3">
+<h3 id="org53321a8"><span class="section-number-3">10.4.</span> Applicative Order</h3>
+<div class="outline-text-3" id="text-10-4">
+<p>
+The applicative order strategy requires that in any &beta; redex,
+the argument position is in normal form before the &beta; redex
+is chosen for reduction.  
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orge17b2a5" class="outline-3">
+<h3 id="orge17b2a5"><span class="section-number-3">10.5.</span> Call by name reduction</h3>
+<div class="outline-text-3" id="text-10-5">
+<ul class="org-ul">
+<li>Apply normal order strategy but stop when you hit an
+abstraction: no reductions inside abstractions.</li>
+</ul>
+
+<p>
+This was the strategy adopted in the Algol programming language.
+Although now dead, Algol pioneered many concepts in the design
+of programming.  It was amongst the first high level programming
+languages based directly on &lambda;-calculus.  The official
+report defining the Scheme/Racket language is dedicated to the
+memory of Algol.
+</p>
+
+<p>
+The call by name strategy can cause duplicate evaluations.
+</p>
+
+<p>
+The other language that is based on the call by name strategy is
+the programming language Haskell.  Actually Haskell uses a
+strategy called <i>lazy evaluation</i>.  Lazy evaluation may be seen
+as an optimization over the call by name strategy in which
+values once computed are stored, to avoid recomputation.
+</p>
+
+
+\begin{align*}
+(\id{Id}\ (\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^2)^1 &\reducesto_{\beta:1} \\
+(\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^2 &\reducesto_{\beta:2} \\
+(\lambda\ z.\ (\id{Id}\ z)^4)^3 &\not\reducesto \\
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-org10e129f" class="outline-3">
+<h3 id="org10e129f"><span class="section-number-3">10.6.</span> Call by value</h3>
+<div class="outline-text-3" id="text-10-6">
+<p>
+The call by value strategy uses the following rules:
+</p>
+
+<ul class="org-ul">
+<li>1. Choose the outermost redex</li>
+
+<li>2. Do not choose any redex inside a &lambda; abstraction.</li>
+
+<li>3. When applying a &beta;-redex, ensure that the argument
+expression is in normal form.</li>
+</ul>
+
+<p>
+Here is an example of simplification using a call-by-value strategy:
+</p>
+
+\begin{align*}
+(\id{Id}\ (\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^2)^1 &\reducesto_{\beta:2} \\
+(\id{Id}\ (\lambda\ z.\ (\id{Id}\ z)^4)^3)^1 &\reducesto_{\beta:1} \\
+(\lambda\ z.\ (\id{Id}\ z)^4)^3 &\not\reducesto \\
+\end{align*}
+
+
+<p>
+The call-by-value strategy is the one most commonly by
+programming languages: C, Java, Scheme, Python, included.
+</p>
+
+<p>
+We say that in call-by-value, function application is strict on
+the arguments: the application doesn't trigger unless the
+arguments are in normal forms.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org427b673" class="outline-3">
+<h3 id="org427b673"><span class="section-number-3">10.7.</span> Comparison</h3>
+<div class="outline-text-3" id="text-10-7">
+<p>
+Here is an example of the expression  
+</p>
+
+<p>
+\[(\lambda\ x.\ (\lambda\ z.\ \id{Id}\ \  \id{Id})) (\lambda\
+y. \Omega)\]
+</p>
+
+<p>
+simplified under various reduction strategies
+</p>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Strategy</th>
+<th scope="col" class="org-left">Result</th>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">&#xa0;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Full reduction</td>
+<td class="org-left">non-termination or  \(\lambda\ z.\ \id{Id}\)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Normal Order</td>
+<td class="org-left">\(\lambda\ z.\ \id{Id}\)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Applicative Order</td>
+<td class="org-left">non-termination</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Call by name</td>
+<td class="org-left">\(\lambda\ z. \id{Id}\ \id{Id}\)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Call by value</td>
+<td class="org-left">\(\lambda\ z.\ \id{Id}\ \id{Id}\)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org194ae4e" class="outline-2">
+<h2 id="org194ae4e"><span class="section-number-2">11.</span> References</h2>
+<div class="outline-text-2" id="text-11">
+</div>
+<div id="outline-container-org37392a7" class="outline-3">
+<h3 id="org37392a7"><span class="section-number-3">11.1.</span> Online notes/papers</h3>
+<div class="outline-text-3" id="text-11-1">
+<dl class="org-dl">
+<dt><a href="https://nptel.ac.in/courses/pdf_link/106102067/lec30.pdf">NPTEL course on POPL: Church-Rosser lecture notes</a></dt><dd></dd>
+
+
+<dt>TAPL chapter on The Untyped Lambda Calculus</dt><dd>Photocopy of
+chapter from Types and Programming Languages by Benjamin
+Pierce.  Available on reserve at the library.</dd>
+
+<dt><a href="https://arxiv.org/pdf/0804.3434.pdf">Peter Selinger's notes on the Lambda Calculus</a></dt><dd>The definitions of renaming, &alpha; equivalence,
+substitution application and the proof sketch for the
+Church-Rosser property of &lambda;-calculus is based on
+these notes.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="https://pages.cs.wisc.edu/~horwitz/CS704-NOTES/1.LAMBDA-CALCULUS.html">Susan Horwtiz's notes on the lambda calulus</a></dt><dd>Has lot's of
+good examples.</dd>
+
+<dt><a href="http://delivery.acm.org/10.1145/50000/44484/p475-shankar.pdf?ip=14.139.82.7&amp;id=44484&amp;acc=ACTIVE%20SERVICE&amp;key=045416EF4DDA69D9%2E1E2B3508530718A8%2E4D4702B0C3E38B35%2E4D4702B0C3E38B35&amp;__acm__=1536473539_19e4e7adefab7e985137baf4abbfe935">A mechanical proof of the Church Rosser Theorem</a></dt><dd>by
+N. Shankar. JACM 1988.  An account of perhaps the
+earliest mechanised proof of the Church-Rosser
+theorem for Lambda Calculus.  Uses the main idea of a
+walk (parallel reduction).  Shankar quotes Rosser
+about the long and somewhat tortuous history of the
+proof of the theorem.  Note that "reduction" in the
+paper refers to the notion of simplification as done
+in class.</dd>
+
+<dt><a href="http://www.is.titech.ac.jp/~kashima/pub/C-145.pdf">Kashima's proof of the Standardization theorem</a></dt><dd></dd>
+
+
+<dt><a href="http://people.cs.ksu.edu/~schmidt/705a/Lectures/ch6.pdf">Dave Schmidt's (Kansas State Univ) chapter on Lambda  Calculus</a></dt><dd></dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org8bca847" class="outline-3">
+<h3 id="org8bca847"><span class="section-number-3">11.2.</span> Other resources</h3>
+<div class="outline-text-3" id="text-11-2">
+<dl class="org-dl">
+<dt><a href="https://www.irif.fr/~krivine/articles/Lambda.pdf">Lambda Calculus Types and Models by Jean-Louis Krivine</a></dt><dd></dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="http://ttic.uchicago.edu/~pl/classes/CMSC336-Winter08/lectures/lec3.pdf">Univ Chicago Class notes on &lambda;-calculus</a></dt><dd>by Acar and
+Ahmed.</dd>
+
+<dt><a href="https://opendsa.cs.vt.edu/ODSA/Books/PL/html/index.html">OpenDSA Programming Languages</a></dt><dd></dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="http://www.cse.chalmers.se/research/group/logic/TypesSS05/Extra/geuvers.pdf">Introduction to Lambda calculus by Barendregt and Barendsen</a></dt><dd></dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="http://www.users.waitrose.com/~hindley/SomePapers_PDFs/2006CarHin,HistlamRp.pdf">History of the Lambda-Calculus and Combinatory Logic</a></dt><dd>by Felice Cardone and J Roger Hindley</dd>
+
+<dt><a href="https://www.ps.uni-saarland.de/courses/sem-ws15/ars.pdf">Smolka's notes on Confluence and Normalization in Reduction Systems</a></dt><dd></dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="https://www.cs.vu.nl/~jbe248/lv2017/12x4.pdf">Logical Verification slides on Confluence</a></dt><dd></dd>
+
+
+<dt><a href="https://softoption.us/content/node/37">Normal forms</a></dt><dd>discusses diff between NF, HNF and WHNF.</dd>
+
+<dt><a href="https://www.seas.harvard.edu/courses/cs152/2018sp/lectures/lec07-lambdacalc.pdf">Harvard CS152 lec on Reductions and &lambda; calculus</a></dt><dd></dd>
+
+
+<dt><a href="https://www.cs.vu.nl/~tcs/trs/tereselite06.pdf">Vriej University book on Term Rewriting</a></dt><dd></dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="http://www.cs.yale.edu/homes/hudak-paul/CS201S08/lambda.pdf">Short, neat intro to the Lambda calculus by Paul Hudak</a></dt><dd></dd>
+
+
+<dt><a href="http://www.cs.columbia.edu/~sedwards/classes/2012/w4115-summer/lambda.pdf">Columbia Univ Fall 2010 slides on the lambda calculus</a></dt><dd></dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="http://foldoc.org/head+normal+form">Head Normal Form</a></dt><dd></dd>
+
+
+<dt><a href="http://foldoc.org/Weak+Head+Normal+Form">WHNF</a></dt><dd></dd>
+
+
+<dt><a href="https://en.wikipedia.org/wiki/Beta_normal_form">Wikipedia page on Beta normal form</a> </dt><dd>gives formal defn of
+head normal form.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><a href="http://people.cs.aau.dk/~normark/prog3-03/html/notes/eval-order_themes-reduction-section.html">Normark's online book on Programming Languages</a></dt><dd>Rewrite rules, reduction and normal forms.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org82e513f" class="outline-3">
+<h3 id="org82e513f"><span class="section-number-3">11.3.</span> Video Resources</h3>
+<div class="outline-text-3" id="text-11-3">
+<dl class="org-dl">
+<dt><a href="https://www.youtube.com/watch?v=QlYJz1B5XLU">Church-Turing Thesis: Story and Recent Progress</a></dt><dd>Lecture by
+Yuri Gurevich</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-16 Fri 00:03</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

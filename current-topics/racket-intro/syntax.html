@@ -4,7 +4,7 @@
 <!-- 2024-08-16 Fri 00:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
+<title>A subset of Racket Syntax</title>
 <meta name="author" content="noteness" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -191,16 +191,22 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<script src="../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
-<link rel="stylesheet" type="text/css" href="../themes/math/style/css/math.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css">
-<script src="https://tikzjax.com/v1/tikzjax.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
 <div style="display: none"> \(
 % Latex Preamble definitions here (mostly usepackage)
-% \usepackage%
-% %[dvipsnames]
-% {xcolor}
+\usepackage%
+%[dvipsnames]
+{xcolor}
 % make sure this is before the loading font packages
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
@@ -493,8 +499,165 @@
 <div id="org-div-home-and-up">
  <a accesskey="h" href="../index.html"> UP </a>
  |
- <a accesskey="H" href="../index.html"> HOME </a>
+ <a accesskey="H" href="../../index.html"> HOME </a>
 </div><div id="content" class="content">
+<h1 class="title">A subset of Racket Syntax</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org179dda2">1. Minimal Racket Syntax</a>
+<ul>
+<li><a href="#org30de9ad">1.1. Program</a></li>
+<li><a href="#org1547554">1.2. Definition and Expression</a></li>
+</ul>
+</li>
+<li><a href="#orgf386a14">2. Derived Forms</a>
+<ul>
+<li><a href="#org692ca4e">2.1. What are derived forms?</a></li>
+<li><a href="#org9fae3ba">2.2. Lexical (non-recursive) definitions</a></li>
+<li><a href="#org6179f3f">2.3. Sequencing</a></li>
+<li><a href="#orgd57f9e3">2.4. Conditionals</a></li>
+<li><a href="#org3b1b9a5">2.5. Function definition</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org179dda2" class="outline-2">
+<h2 id="org179dda2"><span class="section-number-2">1.</span> Minimal Racket Syntax</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org30de9ad" class="outline-3">
+<h3 id="org30de9ad"><span class="section-number-3">1.1.</span> Program</h3>
+<div class="outline-text-3" id="text-1-1">
+<pre class="example" id="orgdc4eef4">
+&lt;pgm&gt; ::= #lang racket &lt;form&gt; ...
+&lt;form&gt; ::= &lt;defn&gt; | &lt;exp&gt; | &lt;require&gt; | &lt;provide&gt;
+
+
+
+&lt;require&gt; ::= See Racket Reference
+&lt;provide&gt; ::= See Racket Reference
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org1547554" class="outline-3">
+<h3 id="org1547554"><span class="section-number-3">1.2.</span> Definition and Expression</h3>
+<div class="outline-text-3" id="text-1-2">
+<pre class="example" id="org2819396">
+&lt;defn&gt; ::= (define &lt;id&gt; &lt;exp&gt;)
+&lt;exp&gt; ::= &lt;literal&gt;
+          &lt;id&gt;                                    ; &lt;identifier&gt;
+          (if &lt;exp&gt; &lt;exp&gt; &lt;exp&gt;) |                ; 
+          (lambda &lt;formals&gt; &lt;exp&gt;) |              ; lambda expression
+          (letrec (&lt;bind&gt; ...) &lt;exp&gt;)             ; recursive binding
+          (&lt;exp&gt; &lt;exp&gt; ...)  |                    ; application
+          (&lt;quote &lt;exp&gt;)                          ; quote
+
+&lt;literal&gt; ::=  &lt;number&gt;                                ; number
+             | &lt;boolean&gt;                               ; boolean
+             | &lt;character&gt;                             ; char
+             | &lt;string&gt;                                ; string    
+
+&lt;id&gt; ::=   &lt;symbol&gt;
+&lt;bind&gt; ::= (&lt;id&gt; &lt;exp&gt;) 
+&lt;formals&gt; ::= (&lt;id&gt; ...) | (&lt;id&gt; ... . &lt;id&gt;) | &lt;id&gt;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf386a14" class="outline-2">
+<h2 id="orgf386a14"><span class="section-number-2">2.</span> Derived Forms</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org692ca4e" class="outline-3">
+<h3 id="org692ca4e"><span class="section-number-3">2.1.</span> What are derived forms?</h3>
+<div class="outline-text-3" id="text-2-1">
+<dl class="org-dl">
+<dt>Derived keywords</dt><dd>defined in terms of old keywords.</dd>
+
+<dt>Pattern matching</dt><dd>definitions are through
+transformations and pattern matching</dd>
+
+<dt>Built-in</dt><dd>some derived keywords are biult-in</dd>
+
+<dt><code>define-syntax</code></dt><dd>Mechanism in Racket to define new
+syntax</dd>
+</dl>
+</div>
+</div>
+
+
+<div id="outline-container-org9fae3ba" class="outline-3">
+<h3 id="org9fae3ba"><span class="section-number-3">2.2.</span> Lexical (non-recursive) definitions</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+<code>let</code> is derived syntax built as an application of a lambda
+expression to arguments.
+</p>
+<pre class="example" id="org1ffae74">
+(let ([&lt;id&gt; &lt;e&gt;] ...) &lt;body&gt;) =&gt; ((lambda (&lt;id&gt; ...) &lt;body&gt;) &lt;e&gt; ...)
+</pre>
+
+<p>
+Here <code>&lt;body&gt;</code> is any expression.  Note again the use of
+<code>...</code> to denote zero or more of the previous syntactic
+datum.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6179f3f" class="outline-3">
+<h3 id="org6179f3f"><span class="section-number-3">2.3.</span> Sequencing</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+<code>begin</code> is a way of evaluating a sequence of expressions and
+returning the last one.
+</p>
+
+<pre class="example" id="org44d5142">
+(begin e) =&gt; e
+(begin e1 e2 ...) =&gt; (let ([x e1]) (begin e2 ...))
+</pre>
+<p>
+Here <code>x</code> is assumed to be a `fresh' identifier name not
+occur anywhere in the <code>begin</code> expression. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd57f9e3" class="outline-3">
+<h3 id="orgd57f9e3"><span class="section-number-3">2.4.</span> Conditionals</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Conditional expressions (starting with the <code>cond</code> keyword)
+are derived using <code>if</code>.  Note the recursive nature of the
+transformation.
+</p>
+
+<pre class="example" id="orgd861b79">
+(cond [else e]) =&gt; e
+(cond [e e1 ...] clause ...)  =&gt; 
+(if e 
+   (begin e1 ...)
+   (cond clause ...))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org3b1b9a5" class="outline-3">
+<h3 id="org3b1b9a5"><span class="section-number-3">2.5.</span> Function definition</h3>
+<div class="outline-text-3" id="text-2-5">
+<pre class="example" id="org473463f">
+(define (f formal ...) exp) =&gt; (define f (lambda (formal ...) exp))
+</pre>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: noteness</p>

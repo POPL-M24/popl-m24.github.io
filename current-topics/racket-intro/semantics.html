@@ -4,8 +4,8 @@
 <!-- 2024-08-16 Fri 00:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
-<meta name="author" content="noteness" />
+<title>Basic Evaluation mechanism of Racket</title>
+<meta name="author" content="Venkatesh Choppella" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -191,16 +191,22 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<script src="../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
-<link rel="stylesheet" type="text/css" href="../themes/math/style/css/math.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css">
-<script src="https://tikzjax.com/v1/tikzjax.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
 <div style="display: none"> \(
 % Latex Preamble definitions here (mostly usepackage)
-% \usepackage%
-% %[dvipsnames]
-% {xcolor}
+\usepackage%
+%[dvipsnames]
+{xcolor}
 % make sure this is before the loading font packages
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
@@ -493,11 +499,221 @@
 <div id="org-div-home-and-up">
  <a accesskey="h" href="../index.html"> UP </a>
  |
- <a accesskey="H" href="../index.html"> HOME </a>
+ <a accesskey="H" href="../../index.html"> HOME </a>
 </div><div id="content" class="content">
+<h1 class="title">Basic Evaluation mechanism of Racket</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orge81f925">1. Basic Evaluation mechanism of Racket</a>
+<ul>
+<li><a href="#orgf8b5d8e">1.1. Value</a></li>
+<li><a href="#orgf9de01c">1.2. Elaboration of define</a></li>
+<li><a href="#org60e39b3">1.3. Evaluation of literals</a></li>
+<li><a href="#org31bd35d">1.4. Evaluation of a lambda expression</a></li>
+<li><a href="#orgaff7670">1.5. If</a></li>
+<li><a href="#org59555b3">1.6. Application</a></li>
+<li><a href="#org9d69149">1.7. Identifier</a></li>
+<li><a href="#org7fe93e2">1.8. Quotation</a></li>
+<li><a href="#org302efe6">1.9. Keywords control evaluation</a></li>
+<li><a href="#orge798567">1.10. Application forces evaluation</a></li>
+<li><a href="#orgaafae7c">1.11. Initial environment</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge81f925" class="outline-2">
+<h2 id="orge81f925"><span class="section-number-2">1.</span> Basic Evaluation mechanism of Racket</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orgf8b5d8e" class="outline-3">
+<h3 id="orgf8b5d8e"><span class="section-number-3">1.1.</span> Value</h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li>A value is a datum.</li>
+
+<li>Evaluation means taking an expression and returning a
+value or raising an error.</li>
+
+<li>Each construct is associated with an evaluation rule.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf9de01c" class="outline-3">
+<h3 id="orgf9de01c"><span class="section-number-3">1.2.</span> Elaboration of define</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+<code>(define x &lt;exp&gt;)</code>
+</p>
+
+<p>
+Evaluate <code>&lt;exp&gt;</code> and bind the result to <code>x</code> and extend the
+top-level environment.  Return nothing.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org60e39b3" class="outline-3">
+<h3 id="org60e39b3"><span class="section-number-3">1.3.</span> Evaluation of literals</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+<code>&lt;literal&gt;</code>
+</p>
+
+
+<p>
+Return the value of the literal. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org31bd35d" class="outline-3">
+<h3 id="org31bd35d"><span class="section-number-3">1.4.</span> Evaluation of a lambda expression</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+<code>(lambda (x ...) &lt;exp&gt;)</code>
+</p>
+
+<p>
+Create and return a procedure whose formals are <code>(x ...)</code>
+    and body is <code>&lt;exp&gt;</code>.  The internal structure of a
+    procedure is unavailable (but what it is will be
+    investigated later).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaff7670" class="outline-3">
+<h3 id="orgaff7670"><span class="section-number-3">1.5.</span> If</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+<code>(if &lt;test-exp&gt; &lt;then-exp&gt; &lt;else-exp&gt;)</code> 
+</p>
+
+<p>
+Evaluate <code>&lt;test-exp&gt;</code>.  If the result is not <code>#f</code>, then
+evaluated <code>&lt;then-exp&gt;</code> and return the result of that
+evaluation.  Else, evaluated <code>&lt;else-exp&gt;</code> and return that as
+the value of the entire expression.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org59555b3" class="outline-3">
+<h3 id="org59555b3"><span class="section-number-3">1.6.</span> Application</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+<code>(&lt;rator-exp&gt; &lt;operand-exp&gt; ...)</code> 
+</p>
+
+
+<ol class="org-ol">
+<li>Evaluate  <code>&lt;rator-exp&gt;</code>.</li>
+
+<li>If it is not a procedure, then raise an error.</li>
+
+<li>Otherwise, evaluate each of the <code>&lt;operand-exp&gt;</code> to
+create a list of values.</li>
+
+<li>Pass these values as arguments to the procedure resulting from evaluating</li>
+</ol>
+<p>
+<code>&lt;rator-exp&gt;</code>.  
+</p>
+
+<ol class="org-ol">
+<li>If the number of arguments do not match, raise an error.</li>
+
+<li>Otherwise, bind the formals of the procedure to the
+corresponding arguments.</li>
+
+<li>Under these bindings, evaluate the body of the procedure.</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-org9d69149" class="outline-3">
+<h3 id="org9d69149"><span class="section-number-3">1.7.</span> Identifier</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+<code>&lt;id&gt;</code> 
+</p>
+
+<p>
+Return the value to which the <code>&lt;id&gt;</code> is bound.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7fe93e2" class="outline-3">
+<h3 id="org7fe93e2"><span class="section-number-3">1.8.</span> Quotation</h3>
+<div class="outline-text-3" id="text-1-8">
+<p>
+<code>(quote &lt;exp&gt;)</code> 
+</p>
+
+<p>
+Return <code>&lt;exp&gt;</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org302efe6" class="outline-3">
+<h3 id="org302efe6"><span class="section-number-3">1.9.</span> Keywords control evaluation</h3>
+<div class="outline-text-3" id="text-1-9">
+<dl class="org-dl">
+<dt>Head position</dt><dd>Keywords occur in the head position of
+a list, and</dd>
+
+<dt>Keywords control evaluation</dt><dd>whether  subsequent
+subexpressions are evaluated depends on the keyword</dd>
+</dl>
+</div>
+</div>
+
+
+<div id="outline-container-orge798567" class="outline-3">
+<h3 id="orge798567"><span class="section-number-3">1.10.</span> Application forces evaluation</h3>
+<div class="outline-text-3" id="text-1-10">
+<p>
+=(&lt;fn-exp&gt; &lt;rand-exp1&gt; &#x2026;)
+</p>
+
+<dl class="org-dl">
+<dt>Function</dt><dd>Function expression must evaluate to a
+procedure.</dd>
+
+<dt>Operands</dt><dd>Each operand expression  is evaluated.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-orgaafae7c" class="outline-3">
+<h3 id="orgaafae7c"><span class="section-number-3">1.11.</span> Initial environment</h3>
+<div class="outline-text-3" id="text-1-11">
+<dl class="org-dl">
+<dt>Initial environment</dt><dd>or library comes with many
+identifier bindings</dd>
+
+<dt>Common identifier bindings</dt><dd>like <code>cons</code>, <code>car</code>,
+<code>list</code>, <code>null?</code>, arithmetic identifiers like <code>+</code>,
+<code>*</code>, etc.</dd>
+
+<dt>identifiers are not  keywords</dt><dd>Note, none of these
+are keywords, they are identifies bound to built-in
+values (mostly functions).</dd>
+</dl>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: noteness</p>
+<p class="author">Author: Venkatesh Choppella</p>
 <p class="date">Created: 2024-08-16 Fri 00:03</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

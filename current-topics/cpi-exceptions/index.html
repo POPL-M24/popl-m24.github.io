@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-16 Fri 00:03 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CPS Interpreter:  Exceptions and Reification of Continuations</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">CPS Interpreter:  Exceptions and Reification of Continuations</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgd87cb9e">1. Introduction</a>
+<ul>
+<li><a href="#org49e2346">1.1. Examples and test cases</a>
+<ul>
+<li><a href="#org461decf">1.1.1. Recursive Functions</a></li>
+<li><a href="#orgcb4f9e6">1.1.2. Errors with primitives</a></li>
+<li><a href="#org1733496">1.1.3. Abort</a></li>
+<li><a href="#orga6e3bb0">1.1.4. Break</a></li>
+<li><a href="#orgffb958b">1.1.5. Throw</a></li>
+<li><a href="#org59ce74b">1.1.6. Try</a></li>
+<li><a href="#orga95d04b">1.1.7. Letcc</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgb29c39e">2. Syntax</a>
+<ul>
+<li><a href="#orga2e4e66">2.1. Concrete Syntax</a></li>
+<li><a href="#orgd4b149e">2.2. Abstract Syntax</a></li>
+<li><a href="#orge37d14c">2.3. Parser</a>
+<ul>
+<li><a href="#orga8f4da6">2.3.1. Test cases</a></li>
+<li><a href="#org10d0e42">2.3.2. Implementation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org71ba2fa">3. Semantic Domains</a>
+<ul>
+<li><a href="#orgd248521">3.1. Expressible and Denotable Values</a></li>
+<li><a href="#org47e0f16">3.2. Procedures</a></li>
+</ul>
+</li>
+<li><a href="#org1e3e2fd">4. Environments</a>
+<ul>
+<li><a href="#org1f3722f">4.1. Environment Lookup</a></li>
+</ul>
+</li>
+<li><a href="#orgff06546">5. Interpreter <code>eval-ast/k</code></a>
+<ul>
+<li><a href="#orga3257bb">5.1. Answer domain</a></li>
+<li><a href="#orgc293de5">5.2. Evaluator</a>
+<ul>
+<li><a href="#org414cbc3">5.2.1. Literals</a></li>
+<li><a href="#org8644350">5.2.2. Identifier</a></li>
+<li><a href="#orgac90e47">5.2.3. Conditional</a></li>
+<li><a href="#org285252e">5.2.4. Function</a></li>
+<li><a href="#org16667ab">5.2.5. Application</a></li>
+<li><a href="#org50bee59">5.2.6. Assume</a></li>
+<li><a href="#org50b328b">5.2.7. Recursive</a></li>
+<li><a href="#orge5e59a2">5.2.8. Abort</a></li>
+<li><a href="#orgfa5f61e">5.2.9. Break</a></li>
+<li><a href="#org5250857">5.2.10. Throw</a></li>
+<li><a href="#orgd98b770">5.2.11. Try-catch</a></li>
+<li><a href="#orgdc3d0b2">5.2.12. Let-cc</a></li>
+<li><a href="#orgfe5788d">5.2.13. <code>eval-asts/k</code></a></li>
+</ul>
+</li>
+<li><a href="#org131344f">5.3. Applying procedures</a>
+<ul>
+<li><a href="#org37c9bdc">5.3.1. <code>apply-proc/k</code></a></li>
+<li><a href="#orgb0a7eca">5.3.2. <code>apply-prim-proc/k</code></a></li>
+<li><a href="#org903b9c7">5.3.3. <code>apply-closure/k</code></a></li>
+<li><a href="#org1351683">5.3.4. <code>apply-continuation</code></a></li>
+<li><a href="#orge72d17c">5.3.5. Top level continuations</a></li>
+<li><a href="#orgb9bb75b">5.3.6. <code>eval-ast</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgd4dbca5">6. Initial Environment and driver <code>go</code></a>
+<ul>
+<li><a href="#orgd902b0d">6.1. Primitive Procedures</a></li>
+<li><a href="#org218c12b">6.2. Initial Environment</a></li>
+<li><a href="#org4ae9cd7">6.3. Run and go</a></li>
+</ul>
+</li>
+<li><a href="#org296f635">7. Link to code</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd87cb9e" class="outline-2">
+<h2 id="orgd87cb9e"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The goal of this set of notes is to demonstrate how to
+implement language features that deal with exceptional flow
+of control.   We call the resultant language <code>LETCC</code>.
+</p>
+
+<p>
+We are interested in the following four types of exceptional
+flow of control:
+</p>
+
+<ol class="org-ol">
+<li><b>Aborting</b>: Aborting a program with a value</li>
+<li><b>Break-resume</b>:  Breaking the execution of a program by
+returning a value and resuming its execution with a value.</li>
+<li><b>Exceptions</b>:  Throwing an exception and catching it
+inside a try-catch block.</li>
+<li><b>Letcc</b>:  Capture the current continuation and bind it
+to an identifier.</li>
+</ol>
+</div>
+
+
+<div id="outline-container-org49e2346" class="outline-3">
+<h3 id="org49e2346"><span class="section-number-3">1.1.</span> Examples and test cases</h3>
+<div class="outline-text-3" id="text-1-1">
+</div>
+<div id="outline-container-org461decf" class="outline-4">
+<h4 id="org461decf"><span class="section-number-4">1.1.1.</span> Recursive Functions</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org3cce7c3">(check-equal?
+  (go '(recursive ([f (n) (ifte (0? n) 1 (* n (f (- n 1))))])
+         (f 3)))
+  6
+  "go-factorial")
+
+(check-equal?
+  (go
+    '(recursive ([even? (n) (ifte (0? n) #t (odd? (- n 1)))]
+                 [odd?  (n) (ifte (0? n) #f (even? (- n 1)))])
+       (even? 3)))
+  #f
+  "go-even")
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgcb4f9e6" class="outline-4">
+<h4 id="orgcb4f9e6"><span class="section-number-4">1.1.2.</span> Errors with primitives</h4>
+</div>
+<div id="outline-container-org1733496" class="outline-4">
+<h4 id="org1733496"><span class="section-number-4">1.1.3.</span> Abort</h4>
+<div class="outline-text-4" id="text-1-1-3">
+<div class="org-src-container">
+<pre class="src src-racket" id="org85b2888">(check-equal?
+  (go '(+ 2 (abort 5))) 5 "go-abort")
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga6e3bb0" class="outline-4">
+<h4 id="orga6e3bb0"><span class="section-number-4">1.1.4.</span> Break</h4>
+<div class="outline-text-4" id="text-1-1-4">
+<div class="org-src-container">
+<pre class="src src-racket" id="orgcc8d6de">(check-equal? (go  '(+ 2  (break 3))) "breaking with value 3" "go-break-3")
+(check-equal? (*resume*) 5 "go-resume")
+(check-equal? (*resume* 4) 6 "go-resume-6")
+
+(check-equal? (go  '(* (+ 2  (break 3)) (break 4))) "breaking with value 3" "go-break2-3")
+(check-equal? (*resume*) "breaking with value 4" "go-resume2")
+(check-equal? (*resume*) 20 "go-resume3")
+(check-equal? (*resume* 8) 40 "go-resume-8")
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgffb958b" class="outline-4">
+<h4 id="orgffb958b"><span class="section-number-4">1.1.5.</span> Throw</h4>
+<div class="outline-text-4" id="text-1-1-5">
+<div class="org-src-container">
+<pre class="src src-racket" id="org4f02ee4">(check-equal? (go '(throw 5)) "uncaught exception" "throw-uncaught")
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org59ce74b" class="outline-4">
+<h4 id="org59ce74b"><span class="section-number-4">1.1.6.</span> Try</h4>
+<div class="outline-text-4" id="text-1-1-6">
+<div class="org-src-container">
+<pre class="src src-racket" id="orgc27c254">(check-equal? (go '(+ 2 (try (* 3 4) v (+ v 7)))) 14 "try0")
+(check-equal? (go '(+ 2 (try (+ 3 (throw 7)) v (+ v 4)))) 13 "try1")
+(check-equal? (go '(+ 2 (try (+ 3 (throw (* 2 (throw 7)))) v (+ v 4)))) 13 "try2")
+(check-equal? (go '(+ 2 (try (+ 3 (throw (* 2 (throw 7)))) v (+ v (throw 6)))))
+              "uncaught exception" "try3")
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga95d04b" class="outline-4">
+<h4 id="orga95d04b"><span class="section-number-4">1.1.7.</span> Letcc</h4>
+<div class="outline-text-4" id="text-1-1-7">
+<div class="org-src-container">
+<pre class="src src-racket" id="org73e72df">(check-equal? (go '(letcc k (k 3))) 3 "letcc-1")
+(check-equal? (go '(letcc k (+ 2 (k 3)))) 3 "letcc-2")
+(check-equal? (go '(+ 2 (letcc k (* 3 (k 4))))) 6 "letcc-3")
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb29c39e" class="outline-2">
+<h2 id="orgb29c39e"><span class="section-number-2">2.</span> Syntax</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orga2e4e66" class="outline-3">
+<h3 id="orga2e4e66"><span class="section-number-3">2.1.</span> Concrete Syntax</h3>
+<div class="outline-text-3" id="text-2-1">
+<pre class="example" id="orgbf5a9c6">
+ &lt;exp&gt; ::= &lt;literal&gt;                               Literal  (Number or Boolean)
+           | &lt;id&gt;                                  Identifier reference
+           | (function (&lt;id&gt; ...) &lt;exp&gt;)           Function
+           | (&lt;exp&gt; ...)                           Application
+           | (if &lt;exp&gt; &lt;exp&gt; &lt;exp&gt;)                Conditional
+		   | (let (&lt;bind&gt; ...) &lt;exp&gt;)              Let
+		   | (recursive (&lt;fbind&gt; ...) &lt;exp&gt;)       Recursive Functions
+		   | (abort &lt;exp&gt;)                         Abort
+		   | (break &lt;exp&gt;)                         Abort
+		   | (try &lt;exp&gt; catch &lt;id&gt; &lt;exp&gt;)          Try-catch
+		   | (throw &lt;exp&gt;)                         Throw
+		   | (letcc &lt;id&gt; &lt;exp&gt; &lt;exp&gt;)              Letcc
+
+&lt;bind&gt; ::= [&lt;id&gt; &lt;exp&gt;]                            bind
+&lt;fbind&gt; ::= [&lt;id&gt; (&lt;id&gt; ...) &lt;exp&gt;]                fbind
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgd4b149e" class="outline-3">
+<h3 id="orgd4b149e"><span class="section-number-3">2.2.</span> Abstract Syntax</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+The <code>define-datatype</code> construct is used to define the
+abstract syntax of the language <code>LETCC</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="orgafccd16">(define-datatype ast ast?
+  [number (datum number?)]
+  [boolean (datum boolean?)]
+  [ifte (test ast?) (then ast?) (else-ast ast?)]
+  [function (formals (list-of id?)) (body ast?)]
+  [recursive (fbinds (list-of fbind?)) (body ast?)]
+  [app (rator ast?) (rands (list-of ast?))]
+  [id-ref (sym id?)]
+  [assume (binds  (list-of bind?)) (body ast?)]
+  [abort (ans-ast ast?)]
+  [break (ans-ast ast?)]
+  [try (body ast?) (exn-id id?) (handler ast?)]
+  [throw (exn-ast ast?)]
+  [letcc (sym id?) (body ast?)])
+
+(define-datatype bind bind?
+  [make-bind (b-id id?) (b-ast ast?)])
+
+;;; bind-id : bind? -&gt; id?
+(define bind-id
+  (lambda (b)
+    (cases bind b
+      [make-bind (b-id b-ast) b-id])))
+
+;;; bind-ast : bind? -&gt; ast?
+(define bind-ast
+  (lambda (b)
+    (cases bind b
+      [make-bind (b-id b-ast) b-ast])))
+
+
+(define-datatype fbind fbind?
+  [make-fbind (fb-id id?)
+              (fb-formals (list-of id?))
+              (fb-body ast?)])
+
+;;; fbind-id : fbind? -&gt; id?
+(define fbind-id
+  (lambda (b)
+    (cases fbind b
+      [make-fbind (fb-id fb-formals fb-body) fb-id])))
+
+;;; fbind-formals : fbind? -&gt; (list-of id?)
+(define fbind-formals
+  (lambda (b)
+    (cases fbind b
+      [make-fbind (fb-id fb-formals fb-body) fb-formals])))
+
+;;; fbind-body : fbind? -&gt; ast?
+(define fbind-body
+  (lambda (b)
+    (cases fbind b
+      [make-fbind (fb-id fb-formals fb-body) fb-body])))
+
+
+(define id? symbol?)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge37d14c" class="outline-3">
+<h3 id="orge37d14c"><span class="section-number-3">2.3.</span> Parser</h3>
+<div class="outline-text-3" id="text-2-3">
+</div>
+<div id="outline-container-orga8f4da6" class="outline-4">
+<h4 id="orga8f4da6"><span class="section-number-4">2.3.1.</span> Test cases</h4>
+<div class="outline-text-4" id="text-2-3-1">
+<div class="org-src-container">
+<pre class="src src-racket" id="org1119905">(check-equal? (parse 4) (number 4) "parse-number")
+(check-equal? (parse #t) (boolean #t) "parse-boolean")
+(check-equal? (parse 'x) (id-ref 'x) "parse-id")
+
+(check-equal?
+ (parse '(ifte 3 4 8))
+ (ifte (number 3) (number 4) (number 8))
+ "parse-ifte")
+
+
+(check-equal?
+ (parse '(function (x y) 4))
+ (function '(x y) (number 4))
+ "parse-function")
+
+
+(check-equal?
+  (parse '(assume ([x 3]) 6))
+  (assume (list (make-bind 'x (number 3))) (number 6))
+  "parse-assume")
+
+
+(check-equal?
+  (parse '(recursive ([f (x y) x] [g (m n) 5]) 9))
+  (recursive
+    (list
+      (make-fbind 'f '(x y) (id-ref 'x))
+      (make-fbind 'g '(m n) (number 5)))
+    (number 9))
+  "parse-recursive")
+
+
+(check-equal?
+  (parse '(recursive () 9))
+  (recursive
+    (list)
+    (number 9))
+  "parse-empty-recursive")
+
+
+(check-equal?
+  (parse '(x y))
+  (app (id-ref 'x)
+       (list (id-ref 'y)))
+  "parse-app")
+
+(check-equal?
+  (parse '(abort 5))
+  (abort (number 5))
+  "parse-app")
+
+(check-exn exn? (lambda () (parse "hello")) "parse-string-error")
+(check-exn exn? (lambda () (parse '#(1 2))) "parse-vector-error")
+(check-exn exn? (lambda () (parse '(1 . 2)) "parse-cons-error"))
+(check-exn exn? (lambda () (parse '()) "parse-empty-error"))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org10d0e42" class="outline-4">
+<h4 id="org10d0e42"><span class="section-number-4">2.3.2.</span> Implementation</h4>
+<div class="outline-text-4" id="text-2-3-2">
+<div class="org-src-container">
+<pre class="src src-racket" id="org02b3552">(define parse
+  (lambda (d)
+    (match d
+     [(? number? n) (number n)]
+     [(? boolean? b) (boolean b)]
+     [(list 'ifte a b c)  (ifte (parse a) (parse b) (parse c))]
+
+     [(list 'function
+       (list (? id? x) ...)
+       body)
+      (function x (parse body))]
+
+     [(list 'assume
+        (list (list (? id? x) e) ...) body)
+      (let* ([a (map parse e)]
+             [b (map make-bind x a)])
+        (assume b (parse body)))]
+
+     [(list 'recursive
+        (list
+          (list
+            (? id? f)
+            (and formals (list (? id? x) ...))
+            fbody) ...)
+        body)
+      (let* ([fast (map parse fbody)]
+             [fbinds (map make-fbind f formals fast)])
+        (recursive fbinds (parse body)))]
+
+     [(list 'abort exp)
+      (abort (parse exp))]
+
+     [(list 'break exp)
+      (break (parse exp))]
+     [(list 'try body (? id? x) handler)
+      (try (parse body) x (parse handler))]
+     [(list 'throw exp) (throw (parse exp))]
+     [(list 'letcc (? id? x) exp) (letcc x (parse exp))]
+     [(? id? x) (id-ref x)]
+     [(list rator rands ...)
+      (let* ([rator (parse rator)]
+             [rands (map parse rands)])
+        (app rator rands))]
+     [_ (error 'parse "don't know how to parse ~a" d)])))
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org71ba2fa" class="outline-2">
+<h2 id="org71ba2fa"><span class="section-number-2">3.</span> Semantic Domains</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orgd248521" class="outline-3">
+<h3 id="orgd248521"><span class="section-number-3">3.1.</span> Expressible and Denotable Values</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+The expressible values are numbers, booleans and procedures:
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="orgc0e6515">;;; expressible-value? : any/c -&gt; boolean?
+(define expressible-value?
+  (or/c number? boolean? proc?))
+</pre>
+</div>
+
+<p>
+Denotable values are identical to expressible values.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org04175f6">;;; denotable-value? :any/c -&gt; boolean?
+(define denotable-value? expressible-value?)
+</pre>
+</div>
+
+<p>
+Here <code>proc?</code> denotes procedures.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org47e0f16" class="outline-3">
+<h3 id="org47e0f16"><span class="section-number-3">3.2.</span> Procedures</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+A procedure is one of the following:
+</p>
+<ol class="org-ol">
+<li>Primitive</li>
+<li>Closure</li>
+<li>Continuation</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org6a48c3c">(define-datatype proc proc?
+  [prim-proc
+    ;; prim refers to a racket procedure
+    (prim procedure?)
+    ;; sig is the signature, a list of type predicates
+    (sig (list-of procedure?))] 
+  [closure
+    (formals (list-of symbol?))
+    (body ast?)
+    (env env?)]
+  [continuation-proc (kont procedure?)])
+
+(define prim-proc?
+  (lambda (p)
+    (cases proc p
+      [prim-proc (prim sig) #t]
+      [else #f])))
+
+(define closure? 
+  (lambda (p)
+    (cases proc p
+      [closure (formals body env) #t]
+      [else #f])))
+
+
+(define continuation-proc? 
+  (lambda (p)
+    (cases proc p
+      [continuation-proc (kont) #t]
+      [else #f])))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1e3e2fd" class="outline-2">
+<h2 id="org1e3e2fd"><span class="section-number-2">4.</span> Environments</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+An environment is either empty, extended or recursive:
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="orgd9b3068">(define-datatype env env?
+  [empty-env]
+  [extended-env
+    (syms (list-of symbol?))
+    (vals (list-of any/c))
+    (outer-env env?)]
+  [extended-rec-env
+    (fsyms (list-of symbol?))
+    (lformals (list-of (list-of symbol?)))
+    (bodies (list-of ast?))
+    (outer-env env?)])
+
+(define *empty-env* (empty-env))
+(define *top-env* (extended-env '(x y z) '(2 4 6) *empty-env*))
+</pre>
+</div>
+</div>
+<div id="outline-container-org1f3722f" class="outline-3">
+<h3 id="org1f3722f"><span class="section-number-3">4.1.</span> Environment Lookup</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+The <code>lookup-env</code> takes two continuations: success and
+failure.  When looking up a recursive environment, a closure
+is built at the time of the lookup, which includes the
+environment being looked up.
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="orgba3b901">
+;;; lookup-env/k:
+;;; [env?  symbol? (K any/c) (K)] -&gt;  
+(define lookup-env/k
+  (lambda (e x succ fail)
+    (cases env e
+      [empty-env () (fail)]
+      [extended-env (syms vals outer-env)
+        (list-index/k syms x
+          (lambda (j)
+            (succ (list-ref vals j)))
+          (lambda ()
+            (lookup-env/k outer-env x succ fail)))]
+
+      [extended-rec-env
+       (fsyms lformals bodies outer-env)
+        (list-index/k fsyms x
+          (lambda (j)
+            (let ([formals
+                    (list-ref lformals j)]
+                  [body (list-ref bodies j)])
+              (succ (closure formals body e))))  ;; builds closure
+          (lambda ()
+            (lookup-env/k outer-env x succ fail)))])))
+
+(define list-index/k
+  (lambda (ls a succ fail)
+    (letrec
+     ([loop
+        (lambda (ls ans)
+          (cond
+            [(null? ls) (fail)]
+            [(eq? (first ls) a) (succ ans)]
+            [#t (loop (rest ls) (+ 1 ans))]))])
+     (loop ls 0))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgff06546" class="outline-2">
+<h2 id="orgff06546"><span class="section-number-2">5.</span> Interpreter <code>eval-ast/k</code></h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orga3257bb" class="outline-3">
+<h3 id="orga3257bb"><span class="section-number-3">5.1.</span> Answer domain</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+The interpreter maps ast's to answers.  An answer is now
+either an expressible value or error string.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org518bf9b">(define err-msg? string?)
+(define answer? (or/c expressible? err-msg?))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc293de5" class="outline-3">
+<h3 id="orgc293de5"><span class="section-number-3">5.2.</span> Evaluator</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+The interpreter <code>eval-ast/k</code> now has two continuations as
+part of its state: a continuation <code>k</code> to capture normal flow
+of control, and <code>ex-k</code> to capture exceptional flow of
+control.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org457d0f6">(define eval-ast/k
+  (lambda (a env k ex-k)
+    (cases ast a
+
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org414cbc3" class="outline-4">
+<h4 id="org414cbc3"><span class="section-number-4">5.2.1.</span> Literals</h4>
+<div class="outline-text-4" id="text-5-2-1">
+<p>
+Literals are simply passed to the waiting continuation <code>k</code>. #
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="org10e2371">[number (datum) (k datum)]
+[boolean (datum) (k datum)]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8644350" class="outline-4">
+<h4 id="org8644350"><span class="section-number-4">5.2.2.</span> Identifier</h4>
+<div class="outline-text-4" id="text-5-2-2">
+<p>
+An identifier is looked up in the environment with the the
+failure continuation invoking <code>*top-k*</code> to report an
+"unbound identifier" error.  The cps style obviates the need
+for Racket's built-in <code>error</code> function.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgcdf74a3">[id-ref (sym)
+  (lookup-env/k env sym k
+    (lambda ()
+      (*top-k* 
+        (format "unbound identifier ~a" sym))))]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgac90e47" class="outline-4">
+<h4 id="orgac90e47"><span class="section-number-4">5.2.3.</span> Conditional</h4>
+<div class="outline-text-4" id="text-5-2-3">
+<p>
+The test condition needs to evaluate always to a boolean,
+otherwise it is a type error.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org6c6a390">[ifte (test then else-ast)
+  (eval-ast/k test env
+    (lambda (b) 
+      (if (boolean? b)
+        (eval-ast/k (if b then else-ast) env k ex-k)
+        (*top-k*
+          (format
+            "ifte test is not a boolean ~a" a))))
+    ex-k)]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org285252e" class="outline-4">
+<h4 id="org285252e"><span class="section-number-4">5.2.4.</span> Function</h4>
+<div class="outline-text-4" id="text-5-2-4">
+<p>
+The case of function is simple.  A closure is built and
+passed to the  waiting continuation <code>k</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org5712bba">[function (formals body)
+  (k (closure formals body env))]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org16667ab" class="outline-4">
+<h4 id="org16667ab"><span class="section-number-4">5.2.5.</span> Application</h4>
+<div class="outline-text-4" id="text-5-2-5">
+<p>
+The rator evaluates to <code>p</code>.  It is then checked that it is a
+procedure.  Then, the rands are evaluated to <code>args</code> and
+<code>apply-proc/k</code> applies <code>p</code> to <code>args</code>.  If <code>p</code> is not a
+procedure, a runtime error is flagged.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgf0f17b1">[app (rator rands)
+  (eval-ast/k rator env
+    (lambda (p)
+      (if (proc? p)
+        (eval-asts/k rands env
+          (lambda (args)
+            (apply-proc/k p args k ex-k)) ex-k)
+        (*top-k*
+          (format
+            "application rator is not a proc ~a"
+            a)))) ex-k)]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org50bee59" class="outline-4">
+<h4 id="org50bee59"><span class="section-number-4">5.2.6.</span> Assume</h4>
+<div class="outline-text-4" id="text-5-2-6">
+<p>
+<code>bind-id</code> and <code>bind-ast</code> are extractors (simple
+expressions).  The <code>asts</code> are evaluated to <code>vals</code>.  The
+environment is extended and then the body is evaluated in
+this new environment.  The continuations go along for a
+ride.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgbc388f0">[assume (binds body)
+  (let ([ids  (map bind-id binds)]
+        [asts (map bind-ast binds)])
+    (eval-asts/k asts env
+      (lambda (vals)
+        (let ([new-env
+                (extended-env ids vals env)])
+          (eval-ast/k body new-env k ex-k))) ex-k))]
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org50b328b" class="outline-4">
+<h4 id="org50b328b"><span class="section-number-4">5.2.7.</span> Recursive</h4>
+<div class="outline-text-4" id="text-5-2-7">
+<p>
+The body of the <code>recursive</code> expression is evaluated in the
+<code>extended-rec-env</code> built from the components of <code>fbinds</code> and
+the existing <code>env</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org10bb2ed">[recursive (fbinds body)
+  (let*
+    ([fids (map fbind-id fbinds)]
+     [lformals (map fbind-formals fbinds)]
+     [bodies (map fbind-body fbinds)]
+     [new-env
+       (extended-rec-env
+         fids lformals bodies env)])
+    (eval-ast/k body new-env k ex-k))]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge5e59a2" class="outline-4">
+<h4 id="orge5e59a2"><span class="section-number-4">5.2.8.</span> Abort</h4>
+<div class="outline-text-4" id="text-5-2-8">
+<p>
+The subexpression <code>ans-ast</code> of the abort expression is
+evaluated with <code>*top-k*</code> replacing the current continuation
+<code>k</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgb515a4b">[abort (ans-ast)
+  (eval-ast/k ans-ast env *top-k* ex-k)]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfa5f61e" class="outline-4">
+<h4 id="orgfa5f61e"><span class="section-number-4">5.2.9.</span> Break</h4>
+<div class="outline-text-4" id="text-5-2-9">
+<p>
+The <code>break</code> expression's subexpression is evaluated in the
+context of the regular continuation that takes 
+<code>v</code> and does two things:
+</p>
+
+<ol class="org-ol">
+<li>Sets The top-level variable <code>*resume*</code> to function
+that invokes the current continuation <code>k</code> either with
+the value <code>v</code> or whatever is supplied in place of <code>v</code>.</li>
+
+<li>Escapes to the top-level with the top-level
+continuation <code>*top-k*</code>.</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgff30617">[break (ans-ast)
+  (eval-ast/k ans-ast env
+    (lambda (v)
+      (set! *resume*
+        (match-lambda*
+          ['() (k v)]
+          [(list x) (k x)]
+          [_ (*top-k* "Error: *resume* takes at most one argument")]))
+      (*top-k* (format "breaking with value ~a" v))) ex-k)]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5250857" class="outline-4">
+<h4 id="org5250857"><span class="section-number-4">5.2.10.</span> Throw</h4>
+<div class="outline-text-4" id="text-5-2-10">
+<p>
+Evaluating a throw expression reduces to evaluating the
+subexpression <code>exn-ast</code> in the context of the current
+exception continuation.
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="orgb80c99c">[throw (exn-ast)
+  (eval-ast/k exn-ast env ex-k ex-k)]
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd98b770" class="outline-4">
+<h4 id="orgd98b770"><span class="section-number-4">5.2.11.</span> Try-catch</h4>
+<div class="outline-text-4" id="text-5-2-11">
+<p>
+The <code>try</code> expression's body is evaluated in an exception
+continuation that receives the exception <code>exn</code>.  
+The environment <code>env</code> is extended with the
+binding that binds <code>exn-id</code> with the exception <code>exn</code> and the
+<code>handler</code> is evaluated in this extended environment, the
+current continuation <code>k</code> and the current exception
+continuation <code>ex-k</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="org208c4b0">[try (body exn-id handler)
+  (eval-ast/k body env k
+    (lambda (exn)
+      (let ([new-env (extended-env (list exn-id) (list exn) env)])
+        (eval-ast/k handler new-env k ex-k))))]
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgdc3d0b2" class="outline-4">
+<h4 id="orgdc3d0b2"><span class="section-number-4">5.2.12.</span> Let-cc</h4>
+<div class="outline-text-4" id="text-5-2-12">
+<p>
+The current continuation <code>k</code> is packaged as a procedure and
+bound to <code>sym</code> and this binding is used to extend the
+environment to obtain <code>new-env</code>.  The <code>body</code> of the letcc
+expression is evaluated in <code>new-env</code> and the current regular
+and exception continuations.
+</p>
+
+<p>
+A <code>continuation-proc</code> is a procedure that when evaluated
+applies <code>k</code> to its argument and escapes to the top level.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgbc0795f">[letcc (sym body)
+  (let ([new-env (extended-env (list sym)
+                   (list (continuation-proc k)) env)])
+    (eval-ast/k body new-env k ex-k))]
+)))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfe5788d" class="outline-4">
+<h4 id="orgfe5788d"><span class="section-number-4">5.2.13.</span> <code>eval-asts/k</code></h4>
+<div class="outline-text-4" id="text-5-2-13">
+<p>
+<code>eval-asts/k</code> evaluates a list of asts in the current normal
+and exception continuations:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org5096b83">(define eval-asts/k 
+  (lambda (asts env k ex-k)
+    (if (null? asts)
+        (k '())
+        (eval-ast/k (first asts) env
+          (lambda (v)
+            (eval-asts/k (rest asts) env
+              (lambda (vals)
+                (k (cons v vals))) ex-k)) ex-k))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org131344f" class="outline-3">
+<h3 id="org131344f"><span class="section-number-3">5.3.</span> Applying procedures</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+The job of <code>apply-proc/k</code> is to apply a procedure to
+arguments.  Recall that we have three kinds of procedures:
+primitives, closures and continuations.
+</p>
+</div>
+
+<div id="outline-container-org37c9bdc" class="outline-4">
+<h4 id="org37c9bdc"><span class="section-number-4">5.3.1.</span> <code>apply-proc/k</code></h4>
+<div class="outline-text-4" id="text-5-3-1">
+<p>
+A primitive procedures comes with primitive operation and a
+signature.  A closure has formal, body and environment.  A
+continuation procedure comes with a continuatio (a Racket
+procedure).
+</p>
+
+<p>
+When applying a primitive, any error (either due to
+argument-signature mismatch, or say a divide by zero)
+directly escapes to the top level.  The current
+<code>ex-k</code> has no role and hence is not an argument to
+<code>apply-prim-proc/k</code>.
+</p>
+
+<p>
+When applying a closure, the current environment has no
+role.
+</p>
+
+<p>
+When applying a continuation procedure, the current
+continuation <code>k</code> and <code>ex-k</code> have no role; they are ignored.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org365de99">(define apply-proc/k
+  (lambda (p args k ex-k)
+    (cases proc p
+      [prim-proc (prim sig)
+        (apply-prim-proc/k prim sig args k)]
+      [closure (formals body env)
+        (apply-closure/k formals body env args k ex-k)]
+      [continuation-proc (kont)  
+        (apply-continuation kont args)] ; ignore k and ex-k !
+      )))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb0a7eca" class="outline-4">
+<h4 id="orgb0a7eca"><span class="section-number-4">5.3.2.</span> <code>apply-prim-proc/k</code></h4>
+<div class="outline-text-4" id="text-5-3-2">
+<p>
+The length and types of the signature <code>sig</code> are compared
+with the types of the argument.  If everything matches,
+<code>prim</code> is applied to <code>args</code> and the result passed to the
+waiting normal continuation <code>k</code>.  Otherwise, a runtime error
+is raised and the answer is an error message.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org4fab003">(define apply-prim-proc/k
+  (lambda (prim sig args k)
+    (let* ([args-sig (rest sig)]) ; argument signatures
+      (cond
+       [(and
+          (= (length args-sig) (length args))
+          (andmap match-arg-type args-sig args))
+        (k (apply prim  args))]
+        ;; notice how the incoming k is dropped
+       [#t (*top-k* (format "incorrect number or type of arguments to ~a" prim))]))))
+
+;;; match-arg-type : [procedure? any/c] -&gt; boolean?
+(define match-arg-type
+  (lambda (arg-type? val)
+    (arg-type? val)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org903b9c7" class="outline-4">
+<h4 id="org903b9c7"><span class="section-number-4">5.3.3.</span> <code>apply-closure/k</code></h4>
+<div class="outline-text-4" id="text-5-3-3">
+<p>
+<code>body</code> is evaluated in <code>new-env</code>, which is the environment
+obtained by extending <code>env</code> with the bindings of <code>formals</code>
+with <code>args</code>.  The control context is unchanged.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org420cabf">(define apply-closure/k
+  (lambda (formals body env args k ex-k)
+    (let ([new-env (extended-env formals args env)])
+      (eval-ast/k body new-env k ex-k))))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org1351683" class="outline-4">
+<h4 id="org1351683"><span class="section-number-4">5.3.4.</span> <code>apply-continuation</code></h4>
+<div class="outline-text-4" id="text-5-3-4">
+<div class="org-src-container">
+<pre class="src src-racket" id="org3e2bd56">(define apply-continuation
+  (lambda (k args)
+    (cond [(= (length args) 1)
+           (*top-k* (apply k args))]
+          [#t (*top-k* (format "incorrect number of arguments to continuation procedure ~a" k))])))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge72d17c" class="outline-4">
+<h4 id="orge72d17c"><span class="section-number-4">5.3.5.</span> Top level continuations</h4>
+<div class="outline-text-4" id="text-5-3-5">
+<div class="org-src-container">
+<pre class="src src-racket" id="org1487ddc">;;; top-k : [] -&gt; (K any/c)
+(define top-k
+  (lambda ()
+    (lambda (v) ; v is an answer
+      v)))
+
+;;; THE top-level continuation
+(define *top-k* (top-k))
+
+(define *top-ex-k*
+  (lambda (v) "uncaught exception"))
+
+(define *resume-init*
+  (lambda args
+    (*top-k* "Error: nothing to resume")))
+
+(define *resume* *resume-init*)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgb9bb75b" class="outline-4">
+<h4 id="orgb9bb75b"><span class="section-number-4">5.3.6.</span> <code>eval-ast</code></h4>
+<div class="outline-text-4" id="text-5-3-6">
+<div class="org-src-container">
+<pre class="src src-racket" id="org03ca33f">;;; eval-ast : [ast? env?] -&gt; answer?
+(define eval-ast
+  (lambda (ast env)
+    (eval-ast/k ast env *top-k* *top-ex-k*)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd4dbca5" class="outline-2">
+<h2 id="orgd4dbca5"><span class="section-number-2">6.</span> Initial Environment and driver <code>go</code></h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-orgd902b0d" class="outline-3">
+<h3 id="orgd902b0d"><span class="section-number-3">6.1.</span> Primitive Procedures</h3>
+<div class="outline-text-3" id="text-6-1">
+<div class="org-src-container">
+<pre class="src src-racket" id="org54ae943">;;; Primitive Procedures
+;;; ====================
+(define nonzero? (and/c number? (not/c zero?)))
+(define +p
+  (prim-proc +
+    (list number? number? number?)))
+
+(define -p
+  (prim-proc -
+    (list number? number? number?)))
+
+(define *p
+  (prim-proc *
+    (list number? number? number?)))
+
+(define /p
+  (prim-proc /
+    (list number? number? nonzero?)))
+
+(define &lt;p
+  (prim-proc  &lt;
+    (list boolean? number? number?)))
+
+(define &lt;=p
+  (prim-proc   &lt;=
+    (list boolean? number? number?)))
+
+(define eq?p
+  (prim-proc eq?
+    (list boolean? expressible-value? expressible-value?)))
+
+(define 0?p
+  (prim-proc zero?
+    (list boolean? number?)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org218c12b" class="outline-3">
+<h3 id="org218c12b"><span class="section-number-3">6.2.</span> Initial Environment</h3>
+<div class="outline-text-3" id="text-6-2">
+<div class="org-src-container">
+<pre class="src src-racket" id="org099add2">(define *init-env*
+  (extended-env
+   '(+ - * / &lt; &lt;= eq? 0?)
+   (list +p -p *p /p &lt;p &lt;=p eq?p 0?p)
+   (empty-env)))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org4ae9cd7" class="outline-3">
+<h3 id="org4ae9cd7"><span class="section-number-3">6.3.</span> Run and go</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+<code>run</code> evaluates an <code>ast</code> in  <code>*init-env*</code>.  <code>go</code> parses an
+expression and then runs it.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgc08e478">;;; run: ast? -&gt; expressible-value?
+(define run
+  (lambda (ast)
+    (eval-ast ast *init-env*)))
+
+(define go
+  (lambda (e)
+    (run (parse e))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org296f635" class="outline-2">
+<h2 id="org296f635"><span class="section-number-2">7.</span> Link to code</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li><a href="./ast.rkt">ast.rkt</a></li>
+<li><a href="./parser.rkt">parser.rkt</a></li>
+<li><a href="./parser-tests.rkt">parser-tests.rkt</a></li>
+<li><a href="./env.rkt">env.rkt</a></li>
+<li><a href="./semantic-domains.rkt">semantic-domains.rkt</a></li>
+<li><a href="./eval-ast-k.rkt">eval-ast-k.rkt</a></li>
+<li><a href="./run.rkt">run.rkt</a></li>
+<li><a href="./run-tests.rkt">run-tests.rkt</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-16 Fri 00:03</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

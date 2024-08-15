@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2024-08-15 Thu 16:56 -->
+<!-- 2024-08-16 Fri 00:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
-<meta name="author" content="noteness" />
+<title>PoPL 2024-Monsoon @ IIITH</title>
+<meta name="author" content="Venkatesh Choppella" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -191,16 +191,1092 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
+<script src="./themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="./themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css">
+<script src="https://tikzjax.com/v1/tikzjax.js"></script>
+<link rel="stylesheet" type="text/css" href="./themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="./themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="./themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="./themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="./themes/readtheorg/style/js/readtheorg.js"></script>
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+% \usepackage%
+% %[dvipsnames]
+% {xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
 </head>
 <body>
-<div id="content" class="content">
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="./index.html"> UP </a>
+ |
+ <a accesskey="H" href="./index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">PoPL 2024-Monsoon @ IIITH</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org5192603">1. Course Info</a></li>
+<li><a href="#org7062027">2. Course infrastructure</a></li>
+<li><a href="#org56553ba">3. Objectives, Prerequisites and  Syllabus</a></li>
+<li><a href="#org9066ebf">4. Texts and References</a>
+<ul>
+<li><a href="#orge8aa4e5">4.1. Main texts</a></li>
+<li><a href="#org50ffc8e">4.2. Related Texts</a></li>
+</ul>
+</li>
+<li><a href="#org62ca59e">5. Grading (tentative)</a></li>
+<li><a href="#orgb6878f1">6. Academic integrity</a>
+<ul>
+<li><a href="#org55ea587">6.1. Discussion and Collaboration</a></li>
+<li><a href="#orgfa17cde">6.2. Penalties</a></li>
+</ul>
+</li>
+<li><a href="#org46d097a">7. Lecture Plan</a></li>
+<li><a href="#orgbbb20a1">8. License</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org5192603" class="outline-2">
+<h2 id="org5192603"><span class="section-number-2">1.</span> Course Info</h2>
+<div class="outline-text-2" id="text-1">
+<dl class="org-dl">
+<dt>Number</dt><dd>CSC 415</dd>
+
+<dt>Name</dt><dd>Principles of Programming Languages  (PoPL)</dd>
+
+<dt>Lectures </dt><dd>Himalaya 101, Wed, Sat 10:05 am - 11:30 am (India Standard Time UTC+5:30)</dd>
+
+<dt>Instructor</dt><dd><ul class="org-ul">
+<li>Venkatesh Choppella  <code>&lt;venkatesh.choppella@iiit.ac.in&gt;</code></li>
+</ul></dd>
+
+<dt>Teaching Assistants</dt><dd><ul class="org-ul">
+<li>Muhammed Shamil K <code>&lt;muhammed.shamil@research.iiit.ac.in&gt;</code></li>
+<li>Bharat Sahlot <code>&lt;bharat.sahlot@research.iiit.ac.in&gt;</code></li>
+</ul></dd>
+
+<dt>Office Hours</dt><dd><ul class="org-ul">
+<li>Venkatesh: by appt.  (Please email Anushka Srikanth
+<code>anushkasrikanth@gmail.com</code> for appointments.)</li>
+</ul></dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org7062027" class="outline-2">
+<h2 id="org7062027"><span class="section-number-2">2.</span> Course infrastructure</h2>
+<div class="outline-text-2" id="text-2">
+<dl class="org-dl">
+<dt>Course web pages</dt><dd><a href="https://popl-m24.github.io">https://popl-m24.github.io</a></dd>
+
+<dt>Gitlab Classroom</dt><dd><a href="https://classroom.github.com/classrooms/177227830-popl-m24">https://classroom.github.com/classrooms/177227830-popl-m24</a>
+(Restricted access)</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>Source code</dt><dd>The Racket/Scheme source code for all the
+code in Essentials of Programming
+Languages 3rd Edition is available at
+<a href="https://github.com/mwand/eopl3">https://github.com/mwand/eopl3</a>.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org56553ba" class="outline-2">
+<h2 id="org56553ba"><span class="section-number-2">3.</span> Objectives, Prerequisites and  Syllabus</h2>
+<div class="outline-text-2" id="text-3">
 <p>
-#+
+Please see the <a href="./objective.html">course announcement page</a>.
 </p>
 </div>
+</div>
+
+<div id="outline-container-org9066ebf" class="outline-2">
+<h2 id="org9066ebf"><span class="section-number-2">4.</span> Texts and References</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-orge8aa4e5" class="outline-3">
+<h3 id="orge8aa4e5"><span class="section-number-3">4.1.</span> Main texts</h3>
+<div class="outline-text-3" id="text-4-1">
+<dl class="org-dl">
+<dt>EOPL</dt><dd><i>Essentials of Programming Languages</i> 3rd
+Edition.  Friedman and Wand.  This is the main
+text for the course.  Available on <a href="https://www.amazon.in/s?k=essentials+of+programming+languages+friedman&amp;ref=nb_sb_noss">Amazon.in</a>.</dd>
+
+<dt>HtDP</dt><dd><i>How to Design Programs</i>.  Felleisen et al.
+Available <a href="https://htdp.org/">online</a>.   Uses Racket exclusively.</dd>
+
+<dt>TRaAT</dt><dd><i>Term Rewriting and All That</i>.  Baader and
+Nipkow.  Chapters 1 and 2.  Chapter copies  on
+reserve in the library.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org50ffc8e" class="outline-3">
+<h3 id="org50ffc8e"><span class="section-number-3">4.2.</span> Related Texts</h3>
+<div class="outline-text-3" id="text-4-2">
+<dl class="org-dl">
+<dt>SICP</dt><dd><i>Structure and Interpretation of Programs</i>.
+Abelson and Sussman.  Available <a href="https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-4.html#%25_toc_start">online</a>.
+Accompanying video lectures also available
+<a href="http://groups.csail.mit.edu/mac/classes/6.001/abelson-sussman-lectures/">online</a>.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>PLAI</dt><dd><i>Programming Languages: Application and</i>
+<i>Interpretation</i> 2nd Edition.  Shriram Krishnamurti.
+Available <a href="http://cs.brown.edu/courses/cs173/2012/book/book.pdf">online</a>.</dd>
+
+<dt>SSICS</dt><dd><i>Simply Scheme: Introducing Computer Science</i>.
+Brian Harvey and Matthew Wright.  Available
+<a href="http://www.cs.berkeley.edu/~bh/ss-toc2.html">online</a>.</dd>
+
+<dt>RG</dt><dd><i>Racket Guide</i>. Available as part of <a href="http://www.racket-lang.org">Racket</a> language
+documentation.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org62ca59e" class="outline-2">
+<h2 id="org62ca59e"><span class="section-number-2">5.</span> Grading (tentative)</h2>
+<div class="outline-text-2" id="text-5">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-right">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Item</th>
+<th scope="col" class="org-left">unit marks</th>
+<th scope="col" class="org-left">no.</th>
+<th scope="col" class="org-right">total</th>
+<th scope="col" class="org-left">Remarks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">HW</td>
+<td class="org-left">TBA</td>
+<td class="org-left">TBA</td>
+<td class="org-right">15</td>
+<td class="org-left">Not all HWs may</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">have equal weight</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Quiz1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">7.5</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Quiz2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">7.5</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Mid</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">20</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Final</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">30</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">Proj</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">20</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left"><b>Total</b></td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-right">100</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgb6878f1" class="outline-2">
+<h2 id="orgb6878f1"><span class="section-number-2">6.</span> Academic integrity</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-org55ea587" class="outline-3">
+<h3 id="org55ea587"><span class="section-number-3">6.1.</span> Discussion and Collaboration</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+You are encouraged to discuss the course material and the
+homework and its solutions with your classmates.  After
+consulting with your friends, however, you are expected to
+implement the homework solutions on your own.  The TAs will
+be checking your commit history and examine your report for
+plagiarism or copying.
+</p>
+
+<p>
+When answering a quiz, you are expected to not rely on any
+dishonest means like discussing with classmates or referring
+to online material.
+</p>
+
+<p>
+When collaborating with your classmates in projects, please
+ensure that you properly credit your fellow contributors.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfa17cde" class="outline-3">
+<h3 id="orgfa17cde"><span class="section-number-3">6.2.</span> Penalties</h3>
+<div class="outline-text-3" id="text-6-2">
+<dl class="org-dl">
+<dt>Homeworks</dt><dd>If you are caught adopting unfair means in
+doing homeworks, you will receive a zero
+for that homework <i>and all previous
+homeworks</i>.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>Quizzes</dt><dd>If you are caught adopting unfair means in a
+quiz, you will receive a zero for that quiz
+<i>and all previous quizzes</i>.</dd>
+
+<dt>Project</dt><dd>If you adopt unfair means in your project, you
+will receive a zero for that project.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org46d097a" class="outline-2">
+<h2 id="org46d097a"><span class="section-number-2">7.</span> Lecture Plan</h2>
+<div class="outline-text-2" id="text-7">
+<table>
+
+
+<colgroup>
+<col  class="org-right">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Lec No.</th>
+<th scope="col" class="org-left">Date</th>
+<th scope="col" class="org-left">Topic</th>
+<th scope="col" class="org-left">Reading Assignments</th>
+<th scope="col" class="org-left">Estimated</th>
+</tr>
+
+<tr>
+<th scope="col" class="org-right">&#xa0;</th>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Functional Programming with Racket</td>
+<td class="org-left"><a href="./current-topics/racket-intro/index.html">Introduction to Racket</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><a href="https://docs.racket-lang.org/guide/">Racket Guide</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">2.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Higher-order functions,</td>
+<td class="org-left"><a href="./current-topics/fp/index.html">Functional Programming in Racket</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">pattern matching</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">3.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Transition Systems and Mapcode</td>
+<td class="org-left"><a href="./current-topics/mapcode/index.html">Notes on Mapcode</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">4.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Abstract Reduction Systems</td>
+<td class="org-left"><a href="./current-topics/abstract-reductions/index.html">Notes</a>, TRaat Sec 2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">5.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">ARS properties, Address spaces</td>
+<td class="org-left"><a href="./current-topics/abstract-reductions/index.html">Notes on Abstract Reductions</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">6.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Interactive Evaluation</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">7.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Well-founded induction, Local confluence</td>
+<td class="org-left"><a href="./current-topics/abstract-reductions/index.html">Notes on Abstract Reductions</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">8.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Operational Semantics: ADDITION &amp; IF+DIV</td>
+<td class="org-left"><a href="./current-topics/addition-lang/index.html">ADDITION</a>   <a href="./current-topics/if+div-lang/index.html">IF+DIV</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">9.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Quiz 1</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Class cancelled</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">10.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Evaluation Semantics</td>
+<td class="org-left"><a href="./current-topics/addition-lang/index.html">ADDITION</a>   <a href="./current-topics/if+div-lang/index.html">IF+DIV</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">11.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Lexical Scope,  Environments</td>
+<td class="org-left">EoPL Sec 3.1&#x2013;3.2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">12.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Makeup classes: Closures and</td>
+<td class="org-left">EoPL Sec 3.3</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">higher-order functions</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">13.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Closures (contd.)  Scope and Extent</td>
+<td class="org-left">EoPL Sec 3.3</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">14.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Recursion</td>
+<td class="org-left">EoPL Sec 3.4</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Holiday (Vinayaka Chaturthi)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">TBA</td>
+<td class="org-left">MIDSEM WEEK</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">15.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Recursion and the Y combinator</td>
+<td class="org-left"><a href="./current-topics/y-combinator/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">16.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Stores and Mutation</td>
+<td class="org-left">EoPL Sec 4.1-4.3</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">17.</td>
+<td class="org-left">TBA</td>
+<td class="org-left"><b>Makeup class</b>:</td>
+<td class="org-left"><a href="./current-topics/par-lang/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">PARLANG: a small parallel language</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">18.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">From closures to objects</td>
+<td class="org-left"><a href="./current-topics/objects/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">19.</td>
+<td class="org-left">TBA</td>
+<td class="org-left"><b>Makeup class</b>:</td>
+<td class="org-left"><a href="./current-topics/javascript/index.html">Javascript</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Embedding Javascript in Racket</td>
+<td class="org-left"><a href="./current-topics/javascript/safe-js.html">Safe programming in JS</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><a href="./current-topics/js-in-scheme/obj.html">JS objects in Racket</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><a href="./current-topics/js-in-scheme/index.html">embedding JS in Racket</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><a href="./current-topics/js-in-scheme/obj.html">Basic Obj model in Scheme revisited</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">20.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Lambda Calculus 1: Syntax and substitution</td>
+<td class="org-left"><a href="./current-topics/lambda-calculus-1/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">21.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Quiz 2</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">22.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Lambda Calculus 2:  Reduction, parallel</td>
+<td class="org-left"><a href="./current-topics/lambda-calculus-1/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">reduction and confluence</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">23.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Church Numerals</td>
+<td class="org-left"><a href="./current-topics/lambda-calculus-2/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">24.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Imperative Form and</td>
+<td class="org-left"><a href="./current-topics/imperative-form/index.html">Note on imperative form</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Continuation Passing Style</td>
+<td class="org-left">EoPL Sec 6.1</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">25.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Continuation Passing Interpreters</td>
+<td class="org-left">EoPL Sec 5.1 and 5.2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">TBA</td>
+<td class="org-left">No Class (Saturday Schedule)</td>
+<td class="org-left">EoPL Sec 5.1 and 5.2</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">26.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Project Review session</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">27.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Transformation of representations</td>
+<td class="org-left">EoPL Sec 5.3</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">of continuations: Factorial example</td>
+<td class="org-left"><a href="./current-topics/cont-reps/index.html">Notes</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">28.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Exceptions and Letcc</td>
+<td class="org-left">EoPL Sec 5.4</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left"><a href="./current-topics/cpi-exceptions/index.html">Notes on Exceptions and LETCC</a></td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">29.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Final Project Presentation</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">30.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Project Final report submission</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">(process to be announced)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">31.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Final Exam Paper showing</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">(Room to be announced)</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-right">32.</td>
+<td class="org-left">TBA</td>
+<td class="org-left">Grades submission to Academic Office</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-orgbbb20a1" class="outline-2">
+<h2 id="orgbbb20a1"><span class="section-number-2">8.</span> License</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Material in the POPL course pages is covered by the Creative
+Commons <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC-BY-NC-ND <b>Attribution-NonCommercial-NoDerivs</b></a>
+license.   You are free to use the material for non
+commercial purposes without changing it and after attribution.
+</p>
+</div>
+</div>
+</div>
 <div id="postamble" class="status">
-<p class="author">Author: noteness</p>
-<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-16 Fri 00:03</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

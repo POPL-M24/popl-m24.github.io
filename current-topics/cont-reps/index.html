@@ -4,7 +4,7 @@
 <!-- 2024-08-16 Fri 00:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
+<title>Representations of Continuations: An exploration using Factorial</title>
 <meta name="author" content="noteness" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -191,16 +191,22 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<script src="../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
-<link rel="stylesheet" type="text/css" href="../themes/math/style/css/math.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css">
-<script src="https://tikzjax.com/v1/tikzjax.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
 <div style="display: none"> \(
 % Latex Preamble definitions here (mostly usepackage)
-% \usepackage%
-% %[dvipsnames]
-% {xcolor}
+\usepackage%
+%[dvipsnames]
+{xcolor}
 % make sure this is before the loading font packages
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
@@ -493,8 +499,450 @@
 <div id="org-div-home-and-up">
  <a accesskey="h" href="../index.html"> UP </a>
  |
- <a accesskey="H" href="../index.html"> HOME </a>
+ <a accesskey="H" href="../../index.html"> HOME </a>
 </div><div id="content" class="content">
+<h1 class="title">Representations of Continuations: An exploration using Factorial</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org8ae34e5">1. Revision History</a></li>
+<li><a href="#org812a731">2. Introduction</a></li>
+<li><a href="#orgf894618">3. Direct Style</a></li>
+<li><a href="#org9f68468">4. CPS with continuations as procedures</a>
+<ul>
+<li><a href="#orgab56b52">4.1. Factorial in CPS</a></li>
+<li><a href="#orga8a1289">4.2. Top-level continuation</a></li>
+<li><a href="#orge3bf6f8">4.3. Factorial top-level interface</a></li>
+</ul>
+</li>
+<li><a href="#orge88f020">5. Representation independence</a>
+<ul>
+<li><a href="#orgafd601c">5.1. Continuation Constructors</a></li>
+<li><a href="#orge36a645">5.2. Applying the continuation</a></li>
+<li><a href="#org3fedb0e">5.3. Factorial <code>fact/k</code> with representation independence</a></li>
+<li><a href="#orgaaf2e0f">5.4. Top-level factorial interface</a></li>
+</ul>
+</li>
+<li><a href="#org77c8215">6. Record representation</a>
+<ul>
+<li><a href="#org17d4487">6.1. Continuation makers</a></li>
+<li><a href="#orgeadcfbd">6.2. Applying the continuation</a></li>
+<li><a href="#org50aae8c">6.3. <code>fact/k</code> and <code>fact</code></a></li>
+</ul>
+</li>
+<li><a href="#orgaa91ff4">7. Closure representation</a>
+<ul>
+<li><a href="#org59d31a6">7.1. Continuation are records that contain closures</a></li>
+<li><a href="#orgecd8e0f">7.2. Applying the continuations: <code>apply-k</code></a></li>
+<li><a href="#org4dc74b1">7.3. <code>fact/k</code></a></li>
+</ul>
+</li>
+<li><a href="#orgbbf0f03">8. Conclusion</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org8ae34e5" class="outline-2">
+<h2 id="org8ae34e5"><span class="section-number-2">1.</span> Revision History</h2>
+<div class="outline-text-2" id="text-1">
+<dl class="org-dl">
+<dt><span class="timestamp-wrapper"><span class="timestamp">[2022-11-05 Sat]</span></span></dt><dd>Created.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org812a731" class="outline-2">
+<h2 id="org812a731"><span class="section-number-2">2.</span> Introduction</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The purpose of this note is to explore different
+representations of continuations.  To illustrate the
+transformations, we use as an example, the factorial
+function.
+</p>
+
+<p>
+We start with the factorial written in direct style using
+recursion.  Then we transform it to CPS.  Then we abstract
+the representation and application of continuations.  They
+are still procedures but only <code>apply-k</code> and the continuation
+constructors know this.  Next, continuations are turned from
+procedures to data (records).  As an alternative,
+continuations are represented as records containing closures
+and other continuations.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf894618" class="outline-2">
+<h2 id="orgf894618"><span class="section-number-2">3.</span> Direct Style</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgf45d04a">;;; fact: nat? -&gt; nat?
+(define fact
+  (lambda (n)
+    (if (zero? n)
+        1
+        (* n (fact (sub1 n))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9f68468" class="outline-2">
+<h2 id="org9f68468"><span class="section-number-2">4.</span> CPS with continuations as procedures</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-orgab56b52" class="outline-3">
+<h3 id="orgab56b52"><span class="section-number-3">4.1.</span> Factorial in CPS</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+A value-continuation takes a expressible value (natural
+number here).  We write a continuation that receives a value
+of type T as <code>(k T)</code>.  Since continuations don't return a
+value, we can think of the type <code>(k T)</code> as the `return only
+to top-level function' <code>T-&gt;ans?</code> where <code>ans?</code> has the effect
+of printing a value on the screen and returning that value
+to the top level.  
+</p>
+
+<p>
+A more precise way to think about effects (like I/O to a
+stream) is using Monads, but we won't be doing that in this
+course.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org052ff54">;;; factorial with continuations:
+;;; fact/k : [nat? (k nat?)] -&gt; ans?
+(define fact/k
+  (lambda (n k)
+    (if
+      (zero? n)
+      (k 1)
+      (fact/k (sub1 n)
+        (lambda (v)
+          (k (* n v)))))))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga8a1289" class="outline-3">
+<h3 id="orga8a1289"><span class="section-number-3">4.2.</span> Top-level continuation</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+<code>top-k</code> simply prints the answer, but returns the value (at
+the top-level).  The return value is used only print the
+final value or feed it to a test case.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org50ddb6f">;;; top-k : (k nat?)
+(define top-k
+  (lambda (v)
+    (printf "CPS: ans=~a~n" v)
+    v))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge3bf6f8" class="outline-3">
+<h3 id="orge3bf6f8"><span class="section-number-3">4.3.</span> Factorial top-level interface</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+Interface to factorial.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org9c575b5">;;; nat? -&gt; nat?
+(define fact
+  (lambda (n)
+    (fact/k n top-k)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge88f020" class="outline-2">
+<h2 id="orge88f020"><span class="section-number-2">5.</span> Representation independence</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Note that <code>fact/k</code> assumes continuations are procedures.
+This version introduces explicit operations to construct and
+apply a continuation.  This isolates any assumptions about
+representation to these functions.
+</p>
+</div>
+
+<div id="outline-container-orgafd601c" class="outline-3">
+<h3 id="orgafd601c"><span class="section-number-3">5.1.</span> Continuation Constructors</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+From now on, we will use the notation <code>k?</code> to mean <code>(k
+nat?)</code>.  <code>top-k</code> constructs the top-level continuation.
+<code>fact1-k</code> takes a natural and a continuation and constructs
+a new continuation.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org1cc8603">
+;;; top-k: [] -&gt; k?
+(define top-k
+  (lambda ()
+    (lambda (v)
+      (printf "REP-IND: ans=~a~n" v)
+      v)))
+
+;;; fact1-k : [nat? k?] -&gt; k?
+(define fact1-k
+  (lambda (n k)
+    (lambda (v)
+      (apply-k k (* n v)))))
+</pre>
+</div>
+
+<p>
+Note that a continuation maker abstracts out as its formals,
+the free identifiers in the body of the continuation being
+constructed.  For instance, <code>fact1-k</code> has as its formals,
+<code>n</code> and <code>k</code>, which are the free identifiers in the body of
+the continuation being returned.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge36a645" class="outline-3">
+<h3 id="orge36a645"><span class="section-number-3">5.2.</span> Applying the continuation</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+Since a continuation is a function, <code>apply-k</code> simply applies
+its argument <code>k</code> to the value <code>v</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org9aa5fae">;;; continuation application
+;;; apply-k : [k?  nat?] -&gt; ans?
+(define apply-k
+  (lambda (k v)
+    (k v)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3fedb0e" class="outline-3">
+<h3 id="org3fedb0e"><span class="section-number-3">5.3.</span> Factorial <code>fact/k</code> with representation independence</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+Note the use of <code>apply-k</code> and <code>make-fact1-k</code>.  These
+functions help in abstracting the representation of
+continuations.  Looking at <code>fact/k</code>, there is no need to
+assume that <code>fact-k</code> relies on <code>k</code> being a procedure.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgef59403">;;; fact/k : [nat? k?] -&gt; ans?
+(define fact/k
+  (lambda (n k)
+    (if
+      (zero? n)
+      (apply-k k 1)
+      (fact/k (sub1 n)
+        (fact1-k n k)))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgaaf2e0f" class="outline-3">
+<h3 id="orgaaf2e0f"><span class="section-number-3">5.4.</span> Top-level factorial interface</h3>
+<div class="outline-text-3" id="text-5-4">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org981aa38">;;; fact : nat? -&gt; nat?
+(define fact
+  (lambda (n)
+    (fact/k n (top-k))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org77c8215" class="outline-2">
+<h2 id="org77c8215"><span class="section-number-2">6.</span> Record representation</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Continuations are now represented as data, or more
+accurately, records.  
+</p>
+</div>
+
+<div id="outline-container-org17d4487" class="outline-3">
+<h3 id="org17d4487"><span class="section-number-3">6.1.</span> Continuation makers</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+The continuation makers simply gather
+the free identifiers in a continuation and tag them.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org33aa4f3">(define-datatype k k?
+  [top-k]
+  [fact1-k (val nat?) (saved-k k?)])
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgeadcfbd" class="outline-3">
+<h3 id="orgeadcfbd"><span class="section-number-3">6.2.</span> Applying the continuation</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+<code>apply-k</code> does the heavy lifting by taking actions based on
+the continuation type.  Applying a continuation <code>k</code> of type
+<code>fact-1-k</code> to a value <code>v</code> entails the following: extract the
+saved continuation <code>saved-k</code> and a value <code>val</code> from <code>k</code> and
+then apply <code>saved-k</code> to <code>(* val v)</code>.  So the multiplications
+happen at the time of invoking <code>apply-k</code>.  Since <code>apply-k</code>
+(and in fact all the procedures) are invoked as tail calls,
+the second formal to <code>apply-k</code> effectively performs the role
+of an accumulator.  This becomes evident when we define
+a traceable version of <code>apply-k</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org0809968">(trace-define apply-k
+  (lambda (c v)
+    (cases k c
+      [top-k () 
+        (printf "DATA-REP: ans=~a~n" v) v]
+      [fact1-k (val saved-k)
+        (apply-k saved-k (* val v))])))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org50aae8c" class="outline-3">
+<h3 id="org50aae8c"><span class="section-number-3">6.3.</span> <code>fact/k</code> and <code>fact</code></h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+There are no changes to these functions.  We are cashing in
+on the investment into abstraction.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgaa91ff4" class="outline-2">
+<h2 id="orgaa91ff4"><span class="section-number-2">7.</span> Closure representation</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Each continuation (except the top one) is now seen as a
+record consisting of a closure followed by a continuation.
+</p>
+</div>
+
+<div id="outline-container-org59d31a6" class="outline-3">
+<h3 id="org59d31a6"><span class="section-number-3">7.1.</span> Continuation are records that contain closures</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+The <code>clo-k</code> constructor takes a closure and a continuation
+and returns a new continuation.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org6013bba">(define-datatype k k?
+  [top-k]
+  [clo-k (clo procedure?) (k k?)])
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgecd8e0f" class="outline-3">
+<h3 id="orgecd8e0f"><span class="section-number-3">7.2.</span> Applying the continuations: <code>apply-k</code></h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+The behaviour of <code>apply-k</code> is the same as earlier for
+<code>top-k</code>.  When holding a continuation of type <code>clo-k</code>, it
+extracts the closure into <code>clo</code> and the continuation into
+<code>k</code>.  Then <code>apply-k</code> simply runs the closure on <code>v</code> and
+tail-recursively invokes <code>apply-k</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org6ab122f">(define apply-k
+  (lambda (c v)
+    (cases k c
+      [top-k () 
+             (printf "CC: ans=~a~n" v) 
+             v]
+      [clo-k (clo k)
+             (apply-k k
+                      (clo v) ; this is a simple computation
+                      ; whose result is passed to the waiting
+                      ; continuation k
+                      )])))
+</pre>
+</div>
+
+<p>
+Note that <code>apply-k</code> is quite generic: all factorial specific
+computation is abstracted away into the the closure <code>clo</code>. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4dc74b1" class="outline-3">
+<h3 id="org4dc74b1"><span class="section-number-3">7.3.</span> <code>fact/k</code></h3>
+<div class="outline-text-3" id="text-7-3">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org32968d7">(define fact/k
+  (lambda (n k)
+    (if (zero? n)
+        (apply-k k 1) 
+        (fact/k (- n 1)
+                (clo-k
+                 (lambda (v) (* n v))
+                 k)))))
+</pre>
+</div>
+<p>
+Note that the continuation constructed by <code>clo-k</code> employs a
+closure whose operations are all simple. <code>clo-k</code> separates
+the `simple' closure from the waiting continuation <code>k</code>.
+Contrast this with the continuation in the CPS version:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(lambda (v)
+  (k (* n v)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-orgbbf0f03" class="outline-2">
+<h2 id="orgbbf0f03"><span class="section-number-2">8.</span> Conclusion</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+We have seen five different versions of the factorial
+program.  the first is direct style factorial.  The CPS
+style uses continuations as procedures.  This representation
+is abstrated next.  Finally continuations are turned into
+tagged data: as records containing primitive data (natural
+number), and alteratively as records containing closures.
+These closures encapsulate simple computations.
+</p>
+
+<p>
+Further transformations like transformation to imperative
+form, register-transformation and the stepper transformation
+may be done.  These are left as exercises.
+</p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: noteness</p>

@@ -4,8 +4,8 @@
 <!-- 2024-08-16 Fri 00:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
-<meta name="author" content="noteness" />
+<title>Higher-order Functions</title>
+<meta name="author" content="Venkatesh Choppella" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -191,16 +191,22 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<script src="../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
-<link rel="stylesheet" type="text/css" href="../themes/math/style/css/math.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css">
-<script src="https://tikzjax.com/v1/tikzjax.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
 <div style="display: none"> \(
 % Latex Preamble definitions here (mostly usepackage)
-% \usepackage%
-% %[dvipsnames]
-% {xcolor}
+\usepackage%
+%[dvipsnames]
+{xcolor}
 % make sure this is before the loading font packages
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
@@ -488,16 +494,361 @@
 \newcommand{\limplies}{\Rightarrow}
 \newcommand{\lxor}{\veebar}
 \)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="org-div-home-and-up">
  <a accesskey="h" href="../index.html"> UP </a>
  |
- <a accesskey="H" href="../index.html"> HOME </a>
+ <a accesskey="H" href="../../index.html"> HOME </a>
 </div><div id="content" class="content">
+<h1 class="title">Higher-order Functions</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org55dd5f6">1. Introduction</a></li>
+<li><a href="#orgf3feab1">2. Compose</a>
+<ul>
+<li><a href="#org061d213">2.1. Tracing the execution of <code>((o add1 *2) 3)</code></a></li>
+</ul>
+</li>
+<li><a href="#org2c420a4">3. Iteration</a>
+<ul>
+<li><a href="#org4fb894f">3.1. Definition</a></li>
+<li><a href="#orgbc4a292">3.2. Theorem relating <code>(iter f 2)</code>  and <code>(o f f)</code></a></li>
+</ul>
+</li>
+<li><a href="#org639337f">4. Derivative</a></li>
+<li><a href="#org5f806e2">5. Lists</a>
+<ul>
+<li><a href="#orge008211">5.1. Map</a></li>
+<li><a href="#org748d920">5.2. Digression into <code>let</code></a></li>
+<li><a href="#orgca94a2c">5.3. Filter</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org55dd5f6" class="outline-2">
+<h2 id="org55dd5f6"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+We illustrate programming with higher-order functions.   This is one
+of the main features of a functional programming language.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf3feab1" class="outline-2">
+<h2 id="orgf3feab1"><span class="section-number-2">2.</span> Compose</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The <code>compose</code> function <code>o</code> in mathematics takes two
+functions \(f:A\rightarrow B\) assumed to be of type and
+\(g:B\rightarrow C\) and returns a function of type
+\(A\rightarrow C\) that takes an argument \(x\) and returns \(g\)
+applied to the result $f to \(x\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; Signature
+;;; o: [A -&gt; B], [B -&gt; C] -&gt; [A -&gt; C]
+
+;;; usage
+;;; ((o add1 *2) 3) =&gt; 8
+(define o
+  (lambda (f g) ; f: [A -&gt; B]
+                ; g: [B -&gt; C]
+    (lambda (x) ; x: A
+      (g (f x)))))
+</pre>
+</div>
+
+<p>
+In Racket, we could also have written this definition as
+follows:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define ((o f g) x)
+   (g (f x)))
+</pre>
+</div>
+
+<p>
+Note that this corresponds to the definition \((f\circ g)(x)
+= g(f(x))\).
+</p>
+
+<p>
+To test this, consider the function <code>*2</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(define *2
+  (lambda (n)
+    (* n 2)))
+</pre>
+</div>
+
+<p>
+The expression <code>(o add1 *2)</code> returns a function, which may
+be applied to a number.  Thus, <code>((o add1 *2) 3)</code>.  
+</p>
+</div>
+
+
+<div id="outline-container-org061d213" class="outline-3">
+<h3 id="org061d213"><span class="section-number-3">2.1.</span> Tracing the execution of <code>((o add1 *2) 3)</code></h3>
+<div class="outline-text-3" id="text-2-1">
+<pre class="example" id="orgdc926cf">
+
+;; ((o add1 *2) 3) =&gt;
+
+;; ((lambda (x) (g (f x))) {f: add1, g: *2} 3)
+
+;; ((lambda (x) (*2 (add1 x))) 3) =&gt;
+
+;; (*2 (add1 x)) {x: 3} =&gt;
+
+;; (*2 (add1 3)) =&gt;
+
+;; (*2 4) =&gt;
+
+;; ((lambda (n) (* n 2)) 4) =&gt;
+
+;; (* n 2) {n: 4} =&gt;
+
+;; (* 4 2) =&gt;
+
+;; 8
+
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org2c420a4" class="outline-2">
+<h2 id="org2c420a4"><span class="section-number-2">3.</span> Iteration</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org4fb894f" class="outline-3">
+<h3 id="org4fb894f"><span class="section-number-3">3.1.</span> Definition</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="org-src-container">
+<pre class="src src-scheme">;;; (iter f n) returns the nth iterate of the function f.
+;;; iter : [A -&gt; A], nat? -&gt; [A -&gt; A]
+
+;;; (iter f n) = identity, if n=0
+;;; (iter f n) = (o f (iter f (sub1 n))), if n&gt;0
+
+;;; (iter f 0) = identity
+;;; (iter f 1) = f
+;;; (iter f 2) = (o f f)
+
+(define identity
+  (lambda (x)
+    x))
+
+(define iter
+  (lambda (f n) ; f: A -&gt; A
+                ; n: nat?
+    (if (= n 0)
+        identity
+        (o f (iter f (sub1 n))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbc4a292" class="outline-3">
+<h3 id="orgbc4a292"><span class="section-number-3">3.2.</span> Theorem relating <code>(iter f 2)</code>  and <code>(o f f)</code></h3>
+<div class="outline-text-3" id="text-3-2">
+<pre class="example" id="org93028ad">
+;;; Theorem:  (iter f 2) === (o f f)
+;;; Proof:
+
+(iter f 2) =&gt; beta
+
+(if (= n 0)
+    identity
+    (o f (iter f (sub1 n)))) {f: f, n: 2}  =&gt; subst
+
+(o f (iter f 1)) =&gt; beta 
+
+(o f (if (= n 0)
+       identity
+       (o f (iter f (sub1 n)))){f: f, n:1}) =&gt; subst
+
+(o f (o f (iter f 0))) =&gt; beta
+
+(o f (o f (if (= n 0)
+              identity
+              (o f (iter f (sub1 n)))){f:f, n:0})) =&gt; subst
+
+(o f (o f identity)) =&gt; ...
+
+(o f (lambda (x) (identity (f x)))) =&gt;
+(o f (lambda (x) ((lambda (x) x) (f x)))) =&gt;
+(o f (lambda (x) (f x))) =&gt; eta
+(o f f)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org639337f" class="outline-2">
+<h2 id="org639337f"><span class="section-number-2">4.</span> Derivative</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-scheme">;;; The Derivative operator
+
+;;;
+;;; ((D f) x) = (/ (- (f (+ x dx)) (f x)) dx)
+
+
+(define dx 0.01)
+
+;;; D : [num? -&gt; num?] -&gt; [num? -&gt; num?]
+(define D
+  (lambda (f)  ; f: num? -&gt; num?
+    (lambda (x) ; x: num?
+      (/ (- (f (+ x dx)) (f x))
+         dx))))
+
+
+
+;;; D2 : [num? -&gt; num?, num?] -&gt; num?
+(define D2
+  (lambda (f x)  ; f: num? -&gt; num?
+    (/ (- (f (+ x dx)) (f x))
+       dx)))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org5f806e2" class="outline-2">
+<h2 id="org5f806e2"><span class="section-number-2">5.</span> Lists</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orge008211" class="outline-3">
+<h3 id="orge008211"><span class="section-number-3">5.1.</span> Map</h3>
+<div class="outline-text-3" id="text-5-1">
+<div class="org-src-container">
+<pre class="src src-scheme">;;; map: [A -&gt; B, (list-of A)] -&gt; (list-of B)
+;;; usage:
+;;; (map add1 '(2 5 9)) =&gt; '(3 6 10)
+;;; (map add1 '()) =&gt; '()
+;;; (map f '()) =&gt; '()
+;;; (map f (cons x ls)) =&gt; (cons (f x) (map f ls))
+
+
+(define map
+  (lambda (f ls)   ; f: A -&gt; B
+    (if (null? ls) ; ls: (list-of A)
+        '()
+        (let ([x (first ls)]
+              [ls2 (rest ls)])
+          (cons (f x)
+                (map f ls2))))))
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org748d920" class="outline-3">
+<h3 id="org748d920"><span class="section-number-3">5.2.</span> Digression into <code>let</code></h3>
+<div class="outline-text-3" id="text-5-2">
+<pre class="example" id="org35cb343">
+(let ((x 3) (y 4)) (+ x y))
+</pre>
+<p>
+is syntactic shorthand for 
+</p>
+
+<pre class="example" id="org5a4cf57">
+((lambda (x y) (+ x y)) 3 4)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgca94a2c" class="outline-3">
+<h3 id="orgca94a2c"><span class="section-number-3">5.3.</span> Filter</h3>
+<div class="outline-text-3" id="text-5-3">
+<div class="org-src-container">
+<pre class="src src-scheme">
+
+;;; filter
+
+;;; (filter f ls) takes a predicate f and a list ls and returns a list
+;;; all of whose elements satisfy f.
+
+;;; Examples
+;;; -------
+
+;;; (filter number? '(a 3 8 "hello")) =&gt; '(3 8)
+
+;;; (filter even? '( 2 4 9)) =&gt; '(2 4)
+
+;;; (filter f? '()) =&gt; '()
+;;; (filter f? (cons x ls)) =
+;;;   = (filter f? ls),    if (f? x) is false
+;;;   = (cons x (filter f? ls)), if (f? x) is true
+
+
+(define filter
+  (lambda (f? ls)
+    (if (null? ls)
+        '()
+        (let ([x (first ls)]
+              [lsr (rest ls)])
+          (if (f? x)
+              (cons x (filter f? lsr))
+              (filter f? lsr))))))
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: noteness</p>
+<p class="author">Author: Venkatesh Choppella</p>
 <p class="date">Created: 2024-08-16 Fri 00:03</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

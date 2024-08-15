@@ -1,3 +1,8 @@
+tbody:nth-child(even) { 
+ background-color: Lightgreen; 
+ } 
+
+
 .table-my-responsive {
 	max-height: 800px;
 	max-width: 100%;
@@ -29,8 +34,6 @@ div.table-my-responsive tbody td{
 }
 
 
-
-
 div.table-my-responsive  tbody:nth-child(even) td{
 	background-color: #f3f6f6;
 	border-top:0px none;
@@ -50,6 +53,7 @@ div.table-my-responsive tbody td:nth-child(1){
 	background-color: #bbddcc;
 	font-weight: bold;
 }
+
 
 
 						  

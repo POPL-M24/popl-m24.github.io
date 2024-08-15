@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-16 Fri 00:03 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discrete Dynamical Systems and the mapcode approach to Algorithmic Problem Solving</title>
+<meta name="author" content="noteness" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'left',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    output: {
+      font: 'mathjax-euler',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Discrete Dynamical Systems and the mapcode approach to Algorithmic Problem Solving</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orge3df438">1. Introduction:</a>
+<ul>
+<li><a href="#org725e873">1.1. Discrete Dynamical System</a></li>
+<li><a href="#org19d4dae">1.2. Trajectory</a></li>
+<li><a href="#org2580473">1.3. Examples</a></li>
+<li><a href="#org99332b5">1.4. Reachability</a></li>
+<li><a href="#orga2b90e6">1.5. Fixed point</a></li>
+<li><a href="#orgb11088f">1.6. Invariant sets</a>
+<ul>
+<li><a href="#org36c8962">1.6.1. Examples</a></li>
+</ul>
+</li>
+<li><a href="#org7dbd052">1.7. Convergent set</a></li>
+<li><a href="#orgb002450">1.8. Final state</a></li>
+<li><a href="#org431c162">1.9. Limit map</a></li>
+</ul>
+</li>
+<li><a href="#org3ff7975">2. Algorithmic Problem Solving</a>
+<ul>
+<li><a href="#orgf8e33f5">2.1. Example:  The factorial problem</a></li>
+<li><a href="#org30f3f92">2.2. The mapcode approach to problem solving</a>
+<ul>
+<li><a href="#org64efe74">2.2.1. Problem</a></li>
+<li><a href="#org0933927">2.2.2. Solution</a></li>
+<li><a href="#orgcaff77d">2.2.3. Correctness</a></li>
+<li><a href="#org1ab2c72">2.2.4. Commutative Diagram</a></li>
+<li><a href="#org2c3e29f">2.2.5. Invariant</a></li>
+</ul>
+</li>
+<li><a href="#org0d830ae">2.3. Mapcode framework to algorithmically solve the factorial problem</a>
+<ul>
+<li><a href="#orgb84dc43">2.3.1. Sample Trajectories</a></li>
+<li><a href="#orgd463d5c">2.3.2. Proof of Correctness</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgca2d96f">3. Implementing the <code>mapcode</code> combinator</a></li>
+<li><a href="#org40ddf4c">4. Factorial using  <code>mapcode</code></a></li>
+<li><a href="#org857368c">5. Factorial using mapcode</a></li>
+<li><a href="#orga4a0aa7">6. Tangle&#xa0;&#xa0;&#xa0;<span class="tag"><span class="noexport">noexport</span></span></a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge3df438" class="outline-2">
+<h2 id="orge3df438"><span class="section-number-2">1.</span> Introduction:</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+We study discrete dynamical systems, which are then used as
+a framework for algorithmic problem solving.  Much of this
+material is from Chapters 1-2, "An introduction to
+Mathematical Computer Science, K Viswanath.  Orient
+Blackswan, India 2008."
+</p>
+</div>
+
+
+<div id="outline-container-org725e873" class="outline-3">
+<h3 id="org725e873"><span class="section-number-3">1.1.</span> Discrete Dynamical System</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+A <i>discrete dynamical system</i>, also called a <i>discrete
+flow</i>, or a <i>discrete process</i>, is a tuple \(\pair{X,F}\)
+where \(X\) is a set called the <i>state space</i> and \(F\) is a
+function from \(X\) to \(X\), called the <i>program map</i>.
+</p>
+
+<p>
+Here are simple examples of a dynamical system:
+</p>
+
+<ul class="org-ul">
+<li>\(\pair{\N,\id{incr}}\), where  \(\id{incr}(x) = x+1\).</li>
+<li>\(\pair{\set{t, f},\id{inv}}\), where \(\id{inv}(x) = \set{t\mapsto\ f, f\mapsto\ t}\).</li>
+
+<li>\(\pair{\Z, \id{dim}}\) where</li>
+</ul>
+
+\begin{align*}
+ \id{dim}(x) & = x,   & \mbox{if $x = 0$}\\
+      & = x-1,        & \mbox{if $x > 0$}\\
+      & = x+1,        & \mbox{if $x < 0$}
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-org19d4dae" class="outline-3">
+<h3 id="org19d4dae"><span class="section-number-3">1.2.</span> Trajectory</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Let \(x\in X\).  The <i>trajectory</i> of \(x\) wrt to the dynamical
+system \(\pair{X,F}\), written \(\id{tr}(x)\) is the infinite sequence
+</p>
+
+<p>
+\[ \id{tr}(x) = [x, F(x), F(F(x)), F^{3}(x), \ldots]\]
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2580473" class="outline-3">
+<h3 id="org2580473"><span class="section-number-3">1.3.</span> Examples</h3>
+<div class="outline-text-3" id="text-1-3">
+<ul class="org-ul">
+<li>Consider \(\pair{\N, \id{incr}}\).   Then</li>
+</ul>
+<p>
+\[\id{tr}(4) = [4, 5, 6, \ldots]\]
+</p>
+
+<ul class="org-ul">
+<li><p>
+Consider \(\pair{\Bool, \id{inv}}\).  Then
+</p>
+
+<p>
+\[ \id{tr}(t) = [t, f, t, \ldots]\]
+</p></li>
+</ul>
+
+
+<ul class="org-ul">
+<li>Consider \(\pair{\Z, \id{dim}}\).   Then</li>
+</ul>
+
+<p>
+\[ \id{tr}(4) = [4, 3, 2, 1, 0, 0, 0, \ldots]\]
+</p>
+
+<p>
+\[ \id{tr}(-4) = [-4, -3, -2, -1, 0, 0, 0, \ldots]\]
+</p>
+
+<p>
+\[ \id{tr}(0) = [0, 0, 0, \ldots]\]
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org99332b5" class="outline-3">
+<h3 id="org99332b5"><span class="section-number-3">1.4.</span> Reachability</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Let \(x,y\in X\).  We say \(y\) is <i>reachable from</i> \(x\), if
+\(y=F^{n}(x)\) for some \(n\in N\).   We also say that \(x\)
+<i>reaches</i> \(y\). 
+</p>
+
+
+<p>
+If \(x\) is an element of \(X\) and \(Y\) is a subset of \(X\), then
+we say that \(x\) <i>reaches</i> \(Y\) if \(x\) reaches some element of
+\(Y\).
+</p>
+</div>
+</div>
+<div id="outline-container-orga2b90e6" class="outline-3">
+<h3 id="orga2b90e6"><span class="section-number-3">1.5.</span> Fixed point</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+Let \(F:X\rightarrow X\).  An element \(x\in X\) is a <i>fixed
+point of</i> \(F\) if \(F(x) = x\).  Let \(\id{fix}(F)\) denote the
+subset of \(X\) containing all fixed points of \(F\).  Note that
+a function \(F\) may have 0, finite, or infinite number of
+fixed points.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgb11088f" class="outline-3">
+<h3 id="orgb11088f"><span class="section-number-3">1.6.</span> Invariant sets</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+A subset \(A\) of \(X\) is an <i>invariant set</i> for \(F\) if for all
+\(x\in X\): \(x\in A\) implies \(F(x)\in A\).  Another way of
+saying this is that \(F(A)\subseteq A\).    
+</p>
+</div>
+
+<div id="outline-container-org36c8962" class="outline-4">
+<h4 id="org36c8962"><span class="section-number-4">1.6.1.</span> Examples</h4>
+<div class="outline-text-4" id="text-1-6-1">
+<p>
+Consider the following system \(\pair{\N, x\mapsto x+2}\).
+Then both the subsets \(\id{evens} = \set{0, 2, 4, 6,
+\ldots}\) and \(\id{odds} = \set{1, 3, 5, 7, \ldots}\) are
+invariants for \(F\).
+</p>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org7dbd052" class="outline-3">
+<h3 id="org7dbd052"><span class="section-number-3">1.7.</span> Convergent set</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+\(\id{con}(F)\) denotes the set of all elements \(x\) such that
+\(x\) reaches \(\id{fix}(F)\).  We say that \(x\) is <i>converges</i>
+or terminates for \(F\) if \(x\in \id{con}(F)\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb002450" class="outline-3">
+<h3 id="orgb002450"><span class="section-number-3">1.8.</span> Final state</h3>
+<div class="outline-text-3" id="text-1-8">
+<p>
+Let \(x\) converge for \(F\).  Let \(n\) be the smallest natural
+such that \(F^{n}(x)\) is a fixed point.  Then, \(n\) is called
+the <i>runtime</i> of the <i>computation</i> starting with \(x\).
+\(F^n(x)\) is called the <i>final state</i> of the <i>initial</i> state
+\(x\).  
+</p>
+</div>
+</div>
+
+<div id="outline-container-org431c162" class="outline-3">
+<h3 id="org431c162"><span class="section-number-3">1.9.</span> Limit map</h3>
+<div class="outline-text-3" id="text-1-9">
+<p>
+The function \(F^{\infty}:\id{con}(F)\rightarrow \id{fix}(F)\)
+is called the <i>limit map</i> of \(F\).  If \(x\in \id{con}(F)\), we
+say that \(x\) <i>terminates at</i> \(F^\infty(x)\). 
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3ff7975" class="outline-2">
+<h2 id="org3ff7975"><span class="section-number-2">2.</span> Algorithmic Problem Solving</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Computers are useful for solving problems.  That said,
+however, algorithmic problem solving requires that we first
+identify the problem precisely.   Second, we mention the
+<i>primitive operations</i> that may be used by the algorithm to
+solve the problem.
+</p>
+
+<p>
+A <i>problem specification</i> consists of
+</p>
+
+<ul class="org-ul">
+<li>An input space \(A\)</li>
+<li>An output space \(B\)</li>
+<li>A function \(f:A\rightarrow B\)</li>
+</ul>
+
+<p>
+Note that this is the function for which we need to design
+an algorithm.  We know the function, but not an algorithm
+that computes it.
+</p>
+</div>
+
+<div id="outline-container-orgf8e33f5" class="outline-3">
+<h3 id="orgf8e33f5"><span class="section-number-3">2.1.</span> Example:  The factorial problem</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Consider the factorial function \(!:\N\rightarrow \N\).  Here
+the input and output spaces are both \(\N\).  We are required
+to compute the factorial of a number using the following primitive
+operations:
+</p>
+
+<ul class="org-ul">
+<li>decrement operator on natural numbers \(n\mapsto n-1\)</li>
+<li>multiplication operator on naturals</li>
+<li>comparison with the natural number 0</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org30f3f92" class="outline-3">
+<h3 id="org30f3f92"><span class="section-number-3">2.2.</span> The mapcode approach to problem solving</h3>
+<div class="outline-text-3" id="text-2-2">
+</div>
+<div id="outline-container-org64efe74" class="outline-4">
+<h4 id="org64efe74"><span class="section-number-4">2.2.1.</span> Problem</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+The mapcode approach to algorithmic problem solving starts
+with identifying a problem specification.  This includes an
+input space \(A\), an output space \(B\) and a function \(f\) from 
+the input to the output space.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0933927" class="outline-4">
+<h4 id="org0933927"><span class="section-number-4">2.2.2.</span> Solution</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+The next step is to construct a solution.  The solution is
+in two parts.  The first consists of defining three
+components:
+</p>
+
+<dl class="org-dl">
+<dt>A discrete dynamical system \(D=\pair{X,F}\)</dt><dd>The
+state space \(X\) of \(D\) may be thought of the input
+space \(A\) augmented with more variables.</dd>
+
+<dt>An <i>input map</i> \(\rho:A\rightarrow X\)</dt><dd>\(\rho\) maps the
+input space of the problem to the state space of \(D\).</dd>
+
+<dt>An <i>output map</i> \(\pi:X\rightarrow B\)</dt><dd>\(\pi\) maps the
+state space of \(D\) to the output space of the
+problem.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-orgcaff77d" class="outline-4">
+<h4 id="orgcaff77d"><span class="section-number-4">2.2.3.</span> Correctness</h4>
+<div class="outline-text-4" id="text-2-2-3">
+<p>
+The second part of the solution requires proving that the
+trip \(\pair{\rho, D, \pi}\) solve the problem \(f\).
+This requires verifying the following properties. 
+</p>
+
+<ul class="org-ul">
+<li>0. \(\rho\), \(F\) and \(\pi\) use only the primitive operators.</li>
+<li>1. \(\id{fix}(F)\) is non-empty.</li>
+<li>2. \(\id{con}(F)\) is non-empty.</li>
+<li>3. \(\id{codomain}(\rho) \subseteq \id{con}(F)\).  (Termination)</li>
+<li>4. \(\rho;F^\infty;\pi = f\)   (Commute property)</li>
+</ul>
+
+<p>
+The idea is that given an element \(a\) from \(A\), \(\rho\) maps
+\(a\) to \(\id{con}(F)\).  This means that \(x=\rho(a)\) reaches a
+fixed point, say \(x^\infty=F^\infty(x)\).  Then \(\pi\) maps
+\(x^\infty\) to an element in \(B\).  The result of this should
+be equivalent to computing \(f\).  That is, we expect, \(\rho;
+F^\infty; \pi = f\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1ab2c72" class="outline-4">
+<h4 id="org1ab2c72"><span class="section-number-4">2.2.4.</span> Commutative Diagram</h4>
+<div class="outline-text-4" id="text-2-2-4">
+<p>
+The following <i>commutative diagram</i> summarizes the <i>commute property</i>
+\(\rho;F^\infty;\pi=f\). 
+</p>
+
+\begin{array}{c}
+A & \ra{f} & B\\
+\da{\rho} & & \ua{\pi} \\
+X & \ra{F^\infty} & X
+\end{array}
+</div>
+</div>
+
+<div id="outline-container-org2c3e29f" class="outline-4">
+<h4 id="org2c3e29f"><span class="section-number-4">2.2.5.</span> Invariant</h4>
+<div class="outline-text-4" id="text-2-2-5">
+<p>
+The process of establishing the commutativity step usually
+requires designing an invariant.  The invariant is true for
+the trajectory starting with \(\rho(a)\).
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0d830ae" class="outline-3">
+<h3 id="org0d830ae"><span class="section-number-3">2.3.</span> Mapcode framework to algorithmically solve the factorial problem</h3>
+<div class="outline-text-3" id="text-2-3">
+<dl class="org-dl">
+<dt>Problem specification</dt><dd><ul class="org-ul">
+<li>Input space is \(A=\N\).</li>
+<li>Output space is  \(B=\N\).</li>
+<li>The function to be computed is \(!:\N\rightarrow \N\),
+the factorial function.</li>
+</ul></dd>
+
+<dt>Solution</dt><dd><ul class="org-ul">
+<li><p>
+Discrete Dynamical system \(D=\pair{X,F}\) where
+</p>
+
+<ul class="org-ul">
+<li>State space \(X\) is \(\N\times \N\).</li>
+
+<li>Program map is \(F:X\rightarrow X\) is defined as</li>
+</ul>
+
+\begin{align*}
+  F(0,a) &= (0,a)\\
+  F(i, a) &= (i-1, a*i) \qquad i>0
+\end{align*}</li>
+
+<li>\(\rho: A\rightarrow X\) defined where  \(\rho(n) = (n, 1)\).</li>
+
+<li>\(\pi: X\rightarrow B\) where \(\pi(i,a) = a\).</li>
+</ul></dd>
+</dl>
+</div>
+
+<div id="outline-container-orgb84dc43" class="outline-4">
+<h4 id="orgb84dc43"><span class="section-number-4">2.3.1.</span> Sample Trajectories</h4>
+<div class="outline-text-4" id="text-2-3-1">
+\begin{align*}
+\id{tr}(2, 3) &= [(2, 3), (1, 6), (0, 6), (0, 6), \ldots]\\
+\id{tr}(4, 2) &= [(4, 2), (3, 8), (2, 24), (1, 48), (0,  48), (0, 48), \ldots]\\
+\id{tr}(3, 1) &= [(3, 1), (2, 3), (1, 6), (0, 6), (0,  6), \ldots]\\
+
+\id{tr}(0, 1) &= [(0, 1), (0, 1), \ldots]
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-orgd463d5c" class="outline-4">
+<h4 id="orgd463d5c"><span class="section-number-4">2.3.2.</span> Proof of Correctness</h4>
+<div class="outline-text-4" id="text-2-3-2">
+<dl class="org-dl">
+<dt>\(\rho\), \(F\) and \(\pi\) use only the primitive operators</dt><dd>This
+is true by inspecting the definitions of each of
+these functions.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{fix}(F)\) is non-empty</dt><dd>Note that every fixed
+point of \(F\) is of the form \((0, a)\) for \(a\in \N\).
+In other words, \(\id{fix}(F)= \set{0}\times \N\),
+which is non-empty.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{con}(F)\) is non-empty</dt><dd>Note that every initial
+state \((i,a)\) reaches a final state \((i, a^\infty)\)
+after exactly \(i\) steps.  Hence \(\id{con}(F) =
+       \N\times \N\), the entire state space, which is
+non-empty.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{codomain}(\rho) \subseteq \id{con}(F)\) (Termination)</dt><dd>Note that
+\(\id{con}(F) = X\), so this is trivially true.  This
+implies termination, since an input \(n\in A\) is
+mapped to an element \((n,1)\) which converges after
+\(i\) steps.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>Invariant</dt><dd>Given \(n\in \N\), let \(P(n)= \set{(i,a)\ |\
+       a*i! = n!}\).  We show that \(P(n)\) is an invariant for
+\(F\).  Assume \((i,a)\in P(n)\).  We need to show that
+\(F(i,a)\in P(n)\).  Now, \(F(i,a)=(i-1, a*i)\).
+Clearly, \((a*i)*(i-1)! = a*i! = n!\).  The second
+equality is due to the assumption that \((i,a)\in
+       P(n)\).  Therefore \(F(i,a)\in P(n)\).</dd>
+</dl>
+<dl class="org-dl">
+<dt>\(\rho ; F^{\infty}; \pi = f\) (Commute Property)</dt><dd>Let \(n\in
+      A\).  Then \(\rho(n) = (n, 1)\).  Clearly, \((n,1)\in
+      P(n)\).  By induction on \(k\), \(F^{k}(n,1) \in P\).  We
+know that \((n,1)\) terminates at \((0, a)\) for some \(a\)
+after \(n\) steps.  Since \((0,a)\in P(n)\), it means that
+\(a*0! = n!\).  From this, it follows that \(a = n!\).
+Since \(\pi(0,a)=a\), this just proves that \((\rho;
+      F^{\infty};\pi)(n) = n!\).</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgca2d96f" class="outline-2">
+<h2 id="orgca2d96f"><span class="section-number-2">3.</span> Implementing the <code>mapcode</code> combinator</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-scheme">;;; fixed-point? : [F:[X -&gt; X], x:X] -&gt; boolean?
+(define fixed-point?
+  (lambda (F x)
+    (equal? (F x) x)))
+
+
+;;; mapcode : [init:[A -&gt; X], F:[X -&gt; X], done:[X -&gt; B]] -&gt; B
+(define mapcode
+  (lambda (init F done) ;; \rho, F, \pi
+    (lambda (a)
+      (letrec ([loop
+                (lambda (x)
+                  (if (fixed-point? F x)
+                      (done x)
+                      (loop (F x))))])
+        (loop (init a))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org40ddf4c" class="outline-2">
+<h2 id="org40ddf4c"><span class="section-number-2">4.</span> Factorial using  <code>mapcode</code></h2>
+</div>
+
+<div id="outline-container-org857368c" class="outline-2">
+<h2 id="org857368c"><span class="section-number-2">5.</span> Factorial using mapcode</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Here is factorial using mapcode
+</p>
+<div class="org-src-container">
+<pre class="src src-racket" id="org377ea86">;;; !: nat? -&gt; nat?
+(define !
+  (mapcode
+   ;; init
+   (lambda (n)
+     (list n 1))
+   ;; next
+   (lambda (x)
+     (match x
+       [(list 0 a) x]
+       [(list i a) (list (sub1 i) (* a i))]))
+   ;; done
+   second))
+
+;;; test cases
+(check-equal? (! 0) 1 "!0")
+(check-equal? (! 2) 2 "!2")
+(check-equal? (! 3) 6 "!3")
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga4a0aa7" class="outline-2">
+<h2 id="orga4a0aa7"><span class="section-number-2">6.</span> Tangle&#xa0;&#xa0;&#xa0;<span class="tag"><span class="noexport">noexport</span></span></h2>
+<div class="outline-text-2" id="text-6">
+<div class="org-src-container">
+<pre class="src src-racket">#lang racket
+(provide (all-defined-out))
+(require racket/list)
+(require racket/match)
+(require rackunit)
+(require rackunit/text-ui)
+(require "mapcode.rkt")
+;;; !: nat? -&gt; nat?
+(define !
+  (mapcode
+   ;; init
+   (lambda (n)
+     (list n 1))
+   ;; next
+   (lambda (x)
+     (match x
+       [(list 0 a) x]
+       [(list i a) (list (sub1 i) (* a i))]))
+   ;; done
+   second))
+
+;;; test cases
+(check-equal? (! 0) 1 "!0")
+(check-equal? (! 2) 2 "!2")
+(check-equal? (! 3) 6 "!3")
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: noteness</p>
+<p class="date">Created: 2024-08-16 Fri 00:03</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

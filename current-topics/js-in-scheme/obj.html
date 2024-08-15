@@ -4,7 +4,7 @@
 <!-- 2024-08-16 Fri 00:03 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
+<title>Basic object model in Scheme revisited</title>
 <meta name="author" content="noteness" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -191,16 +191,48 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<script src="../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
-<link rel="stylesheet" type="text/css" href="../themes/math/style/css/math.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css">
-<script src="https://tikzjax.com/v1/tikzjax.js"></script>
-<div style="display: none"> \(
-% Latex Preamble definitions here (mostly usepackage)
-% \usepackage%
-% %[dvipsnames]
-% {xcolor}
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Basic object model in Scheme revisited</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org07816a1">1. Introduction</a></li>
+<li><a href="#org3dd63d0">2. Immutable fields</a></li>
+<li><a href="#org1b1cb23">3. Identifying objects as procedures</a></li>
+<li><a href="#org54eb664">4. Error object</a></li>
+<li><a href="#orgecefe5c">5. Setters, Getters and Checkers</a></li>
+<li><a href="#orgd15c183">6. The <code>basic-make-obj</code> function</a></li>
+<li><a href="#orgd68577f">7. Constructing objects using <code>make-obj</code></a></li>
+<li><a href="#org22d2910">8. Method calls</a></li>
+<li><a href="#orge34c278">9. Literal objects</a></li>
+<li><a href="#org435e198">10. Unit tests</a></li>
+<li><a href="#org3e0afb1">11. Source code</a></li>
+</ul>
+</div>
+</div>
+<div class="org-src-container">
+<pre class="src src-latex-macros">% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
 % make sure this is before the loading font packages
 \newcommand\hmmax{0}
 \newcommand\bmmax{0}
@@ -248,9 +280,10 @@
 \usepackage{bussproofs}
 \usepackage{hyperref}
 %\usepackage{cleveref}
-\)</div>
-<div style="display: none"> \(
-%% Your math definitions here
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-latex-macros">%% Your math definitions here
 % \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
 \newcommand{\yields}{\Rightarrow}
 \newcommand{\derives}{\overset{*}{\yields}}
@@ -455,7 +488,7 @@
 
 
 
-\newcommand{\less}[1]{#1_{<}}
+\newcommand{\less}[1]{#1_{&lt;}}
 \newcommand{\pfn}{\rightharpoonup}
 \newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
 \newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
@@ -465,9 +498,9 @@
 % \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
 
 
-% \usepackage{amsfonts} %% <- also included by amssymb
+% \usepackage{amsfonts} %% &lt;- also included by amssymb
 % \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
-\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+\usepackage{mathpazo} %% &lt;- because the OP uses mathpazo, optional
 
 
 
@@ -487,14 +520,273 @@
 \newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
 \newcommand{\limplies}{\Rightarrow}
 \newcommand{\lxor}{\veebar}
-\)</div>
-</head>
-<body>
-<div id="org-div-home-and-up">
- <a accesskey="h" href="../index.html"> UP </a>
- |
- <a accesskey="H" href="../index.html"> HOME </a>
-</div><div id="content" class="content">
+</pre>
+</div>
+<div id="outline-container-org07816a1" class="outline-2">
+<h2 id="org07816a1"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+In anticipation of the Javascript model, we refine our basic model of
+objects in Scheme.    The main refinement  is the definition of a new
+primitive to define objects, called <code>make-basic-object</code> which provides
+a more flexible way of creating objects.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3dd63d0" class="outline-2">
+<h2 id="org3dd63d0"><span class="section-number-2">2.</span> Immutable fields</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+In the refined object model, certain fields are
+immutable.  The set of immutable fields is fixed. 
+</p>
+
+<p>
+<code>immutable-field?</code> determines which fields are immutable.  In the
+present implementation they are <code>owns?</code>, which determines whether a
+field is owned by an object, and <code>closure</code> which is a field in
+Javascript function objects.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket">;;; immutable-field? : symbol? -&gt; boolean?
+  (define  (immutable-field?  x)
+    (memq x '(owns? closure)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1b1cb23" class="outline-2">
+<h2 id="org1b1cb23"><span class="section-number-2">3.</span> Identifying objects as procedures</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Objects are represented as procedures. 
+</p>
+<div class="org-src-container">
+<pre class="src src-racket">(define obj? procedure?)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org54eb664" class="outline-2">
+<h2 id="org54eb664"><span class="section-number-2">4.</span> Error object</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<code>error-obj</code> raises an error in response to any message it receives.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket">(define error-obj 
+  (lambda (msg . args)
+    (error 'error-obj "no field ~a" msg)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgecefe5c" class="outline-2">
+<h2 id="orgecefe5c"><span class="section-number-2">5.</span> Setters, Getters and Checkers</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+The fundamental data structure underlying an object is a hashtable (or
+an environment whose entities are mutable).  
+</p>
+
+<p>
+The three functions below implement basic operations on a hash-table
+functions for a hash-table:
+</p>
+<div class="org-src-container">
+<pre class="src src-racket">(define (make-setter h)
+  (lambda (x v)
+    (hash-set! h x v)))
+
+(define (make-getter h parent)
+  (lambda (x)
+    (hash-ref h x  (lambda () (parent x)))))
+
+(define (make-checker h)
+  (lambda (x)
+    (hash-has-key? h x)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd15c183" class="outline-2">
+<h2 id="orgd15c183"><span class="section-number-2">6.</span> The <code>basic-make-obj</code> function</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Let <code>o</code> be an object.  The <i>parent of</i> <code>o</code> is an object <code>p</code> consulted
+during the lookup of a field <code>f</code> not owned by <code>o</code>.  
+</p>
+
+<p>
+The <code>basic-make-obj</code> function takes a parent, and hash table <code>binds</code>
+that holds bindings, and a thunk <code>init</code>.  It builds a simple object
+with a message interface, populates the object with an <code>owns?</code> method,
+and then further initialises the object with <code>init</code> before returning
+it.
+</p>
+
+<p>
+The main difference between the earlier <code>make-obj</code> and
+<code>basic-make-obj</code> is presence of a hash table as a parameter.  This is
+necessary so that certain updates on the hash table may happen from
+within, e.g., during the installation of the <code>closure</code> and <code>owns?</code>
+fields.  (See the implementations of <code>make-obj</code> based on
+<code>basic-make-obj</code> in the next section.)
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-racket">(define basic-make-obj
+  (lambda (parent binds init)
+    (let ([set (make-setter binds)]
+          [get (make-getter binds parent)]
+          [chk (make-checker binds)])
+      (let ([o 
+              (lambda msg
+                (match msg
+                  [(list (? symbol? x)) (get x)]
+                  [(list (? symbol? x) v)
+                   (if (immutable-field? x)
+                     (error 'make-obj "field not mutable ~a" x)
+                     (set x v))]
+                  [else (error 'make-obj  
+                         "invalid object lookup syntax ~a" msg)]))])
+        (let ([owns? (lambda (this x) (chk x))])
+          (set 'owns? owns?)
+          (init)
+          o)))))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd68577f" class="outline-2">
+<h2 id="orgd68577f"><span class="section-number-2">7.</span> Constructing objects using <code>make-obj</code></h2>
+<div class="outline-text-2" id="text-7">
+<p>
+<code>make-obj</code> creates an object with a parent.  The default parent is
+<code>error-obj</code>.  An object with <code>error-obj</code> as parent is called a
+<i>ground</i> object.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket">(define (select/default thing default)
+  (if (null? thing) 
+    default
+    (first thing)))
+
+(define make-obj
+  (lambda parent   ;; '() or a singleton list.
+    (let ([parent (select/default parent error-obj)])
+      (let ([binds (make-hash)])
+        (basic-make-obj parent binds void)))))
+</pre>
+</div>
+
+<p>
+Note that <code>void</code> is the Scheme function that takes nothing and returns
+nothing.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org22d2910" class="outline-2">
+<h2 id="org22d2910"><span class="section-number-2">8.</span> Method calls</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+We have learned earlier that a <i>method</i> is a function that takes an
+object and additional arguments.  A method may be installed as a field
+of an object.  A <i>method call</i> with name <code>method-name</code> <i>in the context
+of</i> an object <code>a</code> first locates <code>method</code> against <code>method-name</code> in <code>a</code>.
+Then it invokes <code>method</code> with <code>a</code> and any additional arguments <code>args</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket">(define call
+  (lambda (a method-name . args)
+    (let ([method (a method-name)])
+      (apply method (cons a args)))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge34c278" class="outline-2">
+<h2 id="orge34c278"><span class="section-number-2">9.</span> Literal objects</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+<code>obj</code> takes a list of bindings and builds a ground object:
+</p>
+<div class="org-src-container">
+<pre class="src src-racket">(define obj
+  (lambda binds
+    (let ([a (make-obj)])
+      (for-each (lambda (bind)
+                  (a (first bind) (second bind)))
+        binds)
+      a)))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org435e198" class="outline-2">
+<h2 id="org435e198"><span class="section-number-2">10.</span> Unit tests</h2>
+<div class="outline-text-2" id="text-10">
+<div class="org-src-container">
+<pre class="src src-racket">(require rackunit)
+(require rackunit/text-ui)
+
+(define (check-err thunk)
+  (check-exn exn:fail? thunk))
+
+(define check-eq check-eq?)
+
+(define literal-tc
+  (test-case 
+   "literals and owns?"
+   (let ()
+     (define a (obj '(x 3)))
+     (define b (make-obj a))
+     (check-eq       (a 'x) 3)
+     (check-err      (lambda () (a 'y)))
+     (check-true     (call a 'owns? 'x))
+     (check-false    (call a 'owns? 'y))
+     (b 'y 5)
+     (check-eq       (b 'y) 5)
+     (check-eq       (b 'x) 3)
+     (check-false    (call b 'owns? 'x))
+
+     ;;; error trying to set owns? field
+
+     (check-err (lambda () (b 'owns? 9)))
+     (check-err (lambda () (b 'closure 0)))
+     )))
+</pre>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+<div id="outline-container-org3e0afb1" class="outline-2">
+<h2 id="org3e0afb1"><span class="section-number-2">11.</span> Source code</h2>
+<div class="outline-text-2" id="text-11">
+<dl class="org-dl">
+<dt><a href="./obj.rkt">./obj.rkt</a></dt><dd>Implementation of Scheme objects using the
+<code>basic-make-obj</code> mechanism.</dd>
+</dl>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: noteness</p>

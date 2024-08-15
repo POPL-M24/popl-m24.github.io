@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-16 Fri 00:03 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lecture notes on Lambda Calculus Part 2:  Church Numerals and Computability</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'left',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    output: {
+      font: 'mathjax-euler',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Lecture notes on Lambda Calculus Part 2:  Church Numerals and Computability</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgacf5067">1. Introduction</a>
+<ul>
+<li><a href="#org46e648d">1.1. Syntax</a></li>
+</ul>
+</li>
+<li><a href="#org86d54ff">2. Lambda Calculus Syntax</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orgc191168">2.0.1. Notation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgee939de">3. An embedding of  $&lambda;$-calculus in Scheme</a></li>
+<li><a href="#orgb978c9d">4. Currying</a></li>
+<li><a href="#org386d818">5. Modeling data in \(\lambda\) calculus</a></li>
+<li><a href="#orgd5a9ab7">6. Booleans and Conditional</a>
+<ul>
+<li><a href="#orge0056ed">6.1. True and False</a></li>
+<li><a href="#orgacd1a43">6.2. If-then-else</a></li>
+<li><a href="#org80e4597">6.3. Other boolean operators</a></li>
+</ul>
+</li>
+<li><a href="#org3cf1711">7. Church Numerals</a>
+<ul>
+<li><a href="#org319edd4">7.1. Zero</a></li>
+<li><a href="#org6fc4bdd">7.2. Successor</a></li>
+<li><a href="#orgbd5e12e">7.3. <code>zero?</code></a></li>
+<li><a href="#orge36961b">7.4. Addition</a></li>
+<li><a href="#org5558aef">7.5. Multiplication</a></li>
+</ul>
+</li>
+<li><a href="#orga0a43fb">8. Pairs</a></li>
+<li><a href="#org5d157c8">9. Predecessor and Saturated Subtraction</a>
+<ul>
+<li><a href="#orgabefc9a">9.1. next</a></li>
+<li><a href="#org89e6d03">9.2. Predecessor</a></li>
+<li><a href="#orgfb4c586">9.3. Saturated subtraction</a></li>
+<li><a href="#orge67a587">9.4. Relational operators on numbers</a></li>
+</ul>
+</li>
+<li><a href="#org854f935">10. Universality of lambda calculus</a></li>
+<li><a href="#org301cd27">11. References and online resources</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgacf5067" class="outline-2">
+<h2 id="orgacf5067"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The \(\lambda\) calculus, is a minimalist programming language
+of great theoretical as well as practical importance.  While
+Turing machines may be thought of inspiring models of
+computer hardware, the \(\lambda\) calculus is model for
+software, or programs.  By the Church-Turing thesis of
+effective computability, both \(\lambda\) calculus and Turing
+machines are canonical models of effective computation.  The
+\(\lambda\) calculus is also the basis for the design of many
+modern day programming languages.
+</p>
+</div>
+
+<div id="outline-container-org46e648d" class="outline-3">
+<h3 id="org46e648d"><span class="section-number-3">1.1.</span> Syntax</h3>
+</div>
+</div>
+
+<div id="outline-container-org86d54ff" class="outline-2">
+<h2 id="org86d54ff"><span class="section-number-2">2.</span> Lambda Calculus Syntax</h2>
+<div class="outline-text-2" id="text-2">
+\begin{align*}
+e ::= &                                        &  \scriptstyle{EXP}       &    \qquad \mbox{Expression}\\
+      &   x                                    &  \scriptstyle{Id}        &    \qquad \mbox{Identifier}\\
+      &   ({\texttt {lambda}}\ (x)\ e)  &  \scriptstyle{ABS}        &    \qquad \mbox{Abstraction}\\
+      &   (e\ e)     &  \scriptstyle{APP}        &    \qquad \mbox{Application}
+\end{align*}
+
+
+
+<p>
+At a syntactic level, \(\lambda\) calculus is a system of
+manipulating <i>expressions</i>.  Reduction is a relation on
+expressions.  
+</p>
+
+<p>
+At the semantic level, however, the purpose of studying
+\(\lambda\) expressions is to build a theory of functions to
+<i>encode</i> both data and computation.
+</p>
+
+<p>
+Note that we are dealing with a hierarchy of three different
+domains.  At the top, we have the domain of expressions in
+the <code>lambda</code> calculus.  The meaning of these expressions is
+given by mathematical <i>functions</i>.  These functions in turn,
+are used are used to encode data, like numbers, booleans.
+</p>
+
+<p>
+Functions may be viewed as black boxes.  Thus the function
+\(x\mapsto x+1\) may be seen as a black box.  If you input \(5\)
+as an argument to it will return \(6\).
+</p>
+</div>
+
+<div id="outline-container-orgc191168" class="outline-4">
+<h4 id="orgc191168"><span class="section-number-4">2.0.1.</span> Notation</h4>
+<div class="outline-text-4" id="text-2-0-1">
+<p>
+We use <code>tt font</code> when we write <code>lambda</code> expressions.  We use
+mathematical italicized font when referring to the meaning
+of <code>lambda</code> expressions as black box functions.  Finally,
+the data encoded by these black boxes will also be written
+in the italicized font.
+</p>
+
+<p>
+For example, the <code>lambda</code> expression <code>(lambda (x) (lambda
+(y) x))</code> denotes the black box function \(\lambda\ x.\
+\lambda y.\ x\).  This function, in turn, encodes the data
+element \(\id{true}\), a member of the set \(\id{BOOLEAN}\).
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgee939de" class="outline-2">
+<h2 id="orgee939de"><span class="section-number-2">3.</span> An embedding of  $&lambda;$-calculus in Scheme</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+It is this view that we will exploit simulate \(\lambda\)
+calculus in Scheme.  So (closed) \(\lambda\) expressions will
+evaluate to <i>closures</i>, which <i>are</i> black boxes.
+</p>
+
+<p>
+Note that $&lambda;$-calculus is already built into Scheme!
+However, \(\lambda\) calculus is quite a bit more frugal:
+functions take exactly one formal parameter, and
+correspondingly, applications take a single argument.  But
+we know how to create multiple argument functions from
+functions that take a single argument: currying.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb978c9d" class="outline-2">
+<h2 id="orgb978c9d"><span class="section-number-2">4.</span> Currying</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-scheme">(define :
+  (lambda (f x . xs)
+    (cond
+      [(null? xs) (f x)]
+      [else (apply : (f x) xs)])))
+
+(define-syntax lambda:
+  (syntax-rules () 
+    [(lambda: (x) body) (lambda (x) body)]
+    [(lambda: (x y ...) body)
+     (lambda (x) (lambda: (y ...) body))]))
+(define-syntax define:
+  (syntax-rules ()
+    [(define: (f x y ...) body) (define f (lambda: (x y ...) body))]))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org386d818" class="outline-2">
+<h2 id="org386d818"><span class="section-number-2">5.</span> Modeling data in \(\lambda\) calculus</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Computation involves programs manipulating data.  If we wish
+to model computation in the $&lambda;$-calculus, we would
+need to model, from scratch, things we take for granted in a
+high level programming languages: numbers, booleans, pairs
+for data, and conditionals, selectors, function abstraction
+and application, recursion, etc. .
+</p>
+
+<p>
+In order to distinguish the language which we are studying
+and the meanings of expressions in that language that exist
+in a ``value'' domain, we will use different fonts to
+represent expressions and their meanings. 
+</p>
+
+<p>
+For example, the expression <code>(lambda (x) x)</code> denotes the
+function \(\lambda x.\ x\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd5a9ab7" class="outline-2">
+<h2 id="orgd5a9ab7"><span class="section-number-2">6.</span> Booleans and Conditional</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-orge0056ed" class="outline-3">
+<h3 id="orge0056ed"><span class="section-number-3">6.1.</span> True and False</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+The primordial data elements <code>true</code> and <code>false</code> are defined
+as the following \(\lambda\) expressions.  
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (true x y) x)
+(define: (false x y) y)
+
+(check-equal? (: true 2 5) 2)
+(check-equal? (: false 2 5) 5)
+(check-equal? (: true 'love-me 'love-me-not) 'love-me)
+
+(define (show-bool b)
+  (: b #t #f))
+</pre>
+</div>
+
+<p>
+Notice that <code>true</code> is short hand for <code>(lambda: (x y) x)</code>
+which itself is a short hand for <code>(lambda (x) (lambda (y)
+x))</code>.  (You may want to appreciate the mileage we are
+deriving from the compact <code>define:</code> notation.)  The
+<i>meaning</i> of <code>true</code>, however, is the function (a black box)
+\(\id{TRUE}\) that takes an argument \(x\) and returns a
+function (another black box) that takes an argument \(y\) and
+returns \(x\).
+</p>
+
+<p>
+One way of thinking about \(\id{TRUE}\) and \(\id{FALSE}\) is that they
+are selectors:  the former selects its first argument, while
+the latter selects the second argument, whatever those
+arguments are:
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgacd1a43" class="outline-3">
+<h3 id="orgacd1a43"><span class="section-number-3">6.2.</span> If-then-else</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+A conditional takes three arguments (curried of course!).
+The first is a boolean (either true or false).  The result
+is applying the first argument, a boolean, to the other two.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define:  (ifte x y z) (: x y z))
+(check-equal? (: ifte true 2 5) 2)
+(check-equal? (: ifte false 2 5) 5)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org80e4597" class="outline-3">
+<h3 id="org80e4597"><span class="section-number-3">6.3.</span> Other boolean operators</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+<code>and</code>, <code>or</code>, <code>not</code> and <code>xor</code> may follow easily:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (not a)
+  (: ifte a false true))
+(define: (and a b)
+  (: ifte a b false))
+(define: (or a b)
+  (: ifte a true b))
+(define: (xor a b)
+  (: ifte a (not b) b))
+
+
+(check-equal? (: (not true) 3 5) 5)
+(check-equal? (: (: and true false) 3 5) 5)
+(check-equal? (: (: or true false) 3 5) 3)
+(check-equal? (: (: or false false) 3 5) 5)
+(check-equal? (: (: xor false true) 3 5) 3)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3cf1711" class="outline-2">
+<h2 id="org3cf1711"><span class="section-number-2">7.</span> Church Numerals</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+We next consider an encoding of natural numbers via black
+boxes: 
+</p>
+</div>
+<div id="outline-container-org319edd4" class="outline-3">
+<h3 id="org319edd4"><span class="section-number-3">7.1.</span> Zero</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+<code>z</code> encodes the number \(0\).  
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (z f x)  x)
+</pre>
+</div>
+
+<p>
+One way thinking about it that \(\id{ZERO}\) is that when
+supplied arguments \(f\) and \(x\) \(\id{ZERO}\) computes the
+value \(f^0(x)\).
+</p>
+
+<p>
+This suggests that the number \(n\) may be encoded as the
+blackbox function \(n\) which is \(\lambda\ f.\
+\lambda\ x. f^{n}(x)\)
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6fc4bdd" class="outline-3">
+<h3 id="org6fc4bdd"><span class="section-number-3">7.2.</span> Successor</h3>
+<div class="outline-text-3" id="text-7-2">
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (s n f x) 
+  (f (: n f x)))
+
+(define zero z)
+(define one (s zero))
+(define two (s one))
+(define three (s two))
+
+(define (show-nat n)
+  (: n add1 0))
+(check-equal? (show-nat zero) 0)
+(check-equal? (show-nat one) 1)
+(check-equal? (show-nat two) 2)
+
+(check-equal? (: zero add1 5) 5)
+(check-equal? (: one add1 5) 6)
+(check-equal? (: two add1 5) 7)
+(check-equal? (: three add1 5) 8)
+(check-equal? (: ifte true (: two add1 5) (: zero add1 5)) 7)
+(check-equal? (: ifte true two zero add1 5) 7)
+(check-equal? (: ifte false two zero add1 5) 5)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbd5e12e" class="outline-3">
+<h3 id="orgbd5e12e"><span class="section-number-3">7.3.</span> <code>zero?</code></h3>
+<div class="outline-text-3" id="text-7-3">
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (z? n)
+  (: n (lambda (x) false) true))
+
+
+</pre>
+</div>
+
+<p>
+Note that this denotes the application \(f^n(\id{true})\)
+where \(f\) is the function \(\lambda\ x.\ \id{false}\).  When
+\(n\) is \(0\), then the result is $\id{true}, otherwise, it
+is \(\id{false}\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge36961b" class="outline-3">
+<h3 id="orge36961b"><span class="section-number-3">7.4.</span> Addition</h3>
+<div class="outline-text-3" id="text-7-4">
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (add m n f x)
+  (: m f (: n f x)))
+(check-equal? (: add one two add1 5) 8)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5558aef" class="outline-3">
+<h3 id="org5558aef"><span class="section-number-3">7.5.</span> Multiplication</h3>
+<div class="outline-text-3" id="text-7-5">
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (mul m n f)
+  (m (n f)))
+
+(check-equal? (: mul two three add1 5) 11)
+(check-equal? (: mul zero three add1 5) 5)
+(check-equal? (: mul one three add1 5) 8)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orga0a43fb" class="outline-2">
+<h2 id="orga0a43fb"><span class="section-number-2">8.</span> Pairs</h2>
+<div class="outline-text-2" id="text-8">
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (pair a b sel)
+  (: sel a b))
+
+(define: (fst p)
+  (p true))
+
+(define: (snd p)
+  (p false))
+
+(check-true (eq? (fst (: pair one two)) one))
+(check-true (eq? (snd (: pair one two)) two))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5d157c8" class="outline-2">
+<h2 id="org5d157c8"><span class="section-number-2">9.</span> Predecessor and Saturated Subtraction</h2>
+<div class="outline-text-2" id="text-9">
+</div>
+<div id="outline-container-orgabefc9a" class="outline-3">
+<h3 id="orgabefc9a"><span class="section-number-3">9.1.</span> next</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+<code>p</code> is a pair of numbers.
+<code>(next (: pair a b))</code> returns <code>(: pair (s a) a)</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(define:  (next p)
+  (: pair (s (fst p)) (fst p)))
+
+(check-equal? (: fst (: next (: pair z z)) add1 4) 5)
+(check-equal? (: snd (: next (: pair z z)) add1 4) 4)
+(check-equal? (: fst (: next (: pair one two)) add1 4) 6)
+(check-equal? (: snd (: next (: pair one two)) add1 4) 5)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org89e6d03" class="outline-3">
+<h3 id="org89e6d03"><span class="section-number-3">9.2.</span> Predecessor</h3>
+<div class="outline-text-3" id="text-9-2">
+<p>
+<code>(: pred zero)</code> is defined to be <code>zero</code>.  Recall that if <code>n</code>
+denotes the Church numeral \(n\), and <code>f</code> an arbitrary
+function \(f\) then <code>(: n f)</code> denotes the function \(f^n\).
+Also note that \(\id{next}^{n}\pair{0,0}\) denotes the
+function \(\id{next}^f\pair{0,0}\), which yields \(\pair{n,
+n-1}\). \(\id{pred}(n) = \id{snd}\pair{n, n-1}\), which equals
+\(\id{snd}(\id{next}^n\pair{0,0})\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (pred n)
+  (snd (: n next (: pair z z))))
+(check-equal? (: pred one add1 5) 5)
+(check-equal? (: pred zero add1 5) 5)
+(check-equal? (: pred three add1 5) 7)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfb4c586" class="outline-3">
+<h3 id="orgfb4c586"><span class="section-number-3">9.3.</span> Saturated subtraction</h3>
+<div class="outline-text-3" id="text-9-3">
+<p>
+Subtracting \(n\) from \(m\) is just taking the predecessor
+of \(m\) \(n\) times:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (sub m n)
+  (: n pred m))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge67a587" class="outline-3">
+<h3 id="orge67a587"><span class="section-number-3">9.4.</span> Relational operators on numbers</h3>
+<div class="outline-text-3" id="text-9-4">
+<div class="org-src-container">
+<pre class="src src-scheme">(define: (leq m n) ; m &lt;= n
+  (: z? (: sub m n)))
+
+(define: (geq m n) ; m &gt;= n
+  (: z? (: sub n m)))
+
+(define: (gt m n) ; m &gt; n
+  (: not (: leq m n)))
+
+(define: (lt m n) ; m &lt; n
+  (: not (: geq m n)))
+
+(define: (eq m n) ; m = n
+  (: and (leq m n) (leq n m)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org854f935" class="outline-2">
+<h2 id="org854f935"><span class="section-number-2">10.</span> Universality of lambda calculus</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+Once we have recursion and the basic datatypes, it is not
+hard to see that we can take a Turing machine, and implement
+it.  A Turing machine has a tape (with a finite segment
+containing symbols), a head (which is a finite state
+machine) and a tape counter (the position of the head on the
+tape).  
+</p>
+</div>
+</div>
+
+<div id="outline-container-org301cd27" class="outline-2">
+<h2 id="org301cd27"><span class="section-number-2">11.</span> References and online resources</h2>
+<div class="outline-text-2" id="text-11">
+<dl class="org-dl">
+<dt><a href="https://crypto.stanford.edu/~blynn/lambda/">Benjamin Lynn's notes on lambda calculus</a></dt><dd>Provides excellent notes motivating lambda calculus and
+presents a one-line universal machine (but without proof
+of its universality) in the lambda calculus.</dd>
+
+<dt><a href="https://www21.in.tum.de/~eberlm//lambda_paper.pdf">Manuel Eberl's notes on Untyped Lambda Calculus</a></dt><dd>Systematically develops data types in the lambda
+calculus.</dd>
+
+<dt><a href="http://tromp.github.io/cl/LC.pdf">Functional Bits: Lambda Calculus based Algorithmic Information Theory</a></dt><dd>by
+John Tromp.  A theory of the binary lambda calculus.
+Shows how to build a universal machine in lambda calculus
+and combinatory theory.  You may also want to see <a href="https://tromp.github.io/cl/cl.html">John
+Tromp's page on Binary Lambda Calculus</a>.</dd>
+
+<dt><a href="https://www.cs.virginia.edu/~evans/cs150/classes/class39/lecture39.pdf">David Evans's slides on the Lambda calculus</a></dt><dd>Shows how one
+might convert a Turing Machine into a Lambda calculus
+machine.</dd>
+
+<dt><a href="http://www.cs.cornell.edu/courses/cs3110/2008fa/recitations/rec26.html">Cornell CS 312 Recitation on Lambda Calculus</a></dt><dd>A short
+tutorial introduction to Lambda calculus.</dd>
+
+<dt><a href="https://www.cse.iitb.ac.in/~rkj/lambda.pdf">CS329 IIT Bombay: Notes on Lambda Calculus</a></dt><dd>Notes by
+Rushikesh Joshi.</dd>
+
+<dt><a href="https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2013_tenbo/lambda_en.pdf">Garrigue's notes on Computability and Lambda Calculus</a></dt><dd>Demonstrates the simulation of a Turing machine by a
+Lambda Calculus term and vice versa.</dd>
+
+<dt><a href="https://www.cs.cmu.edu/~rwh/talks/cs50talk.pdf">Lambda calculus: The other Turing Machine</a> </dt><dd>Harvard CS50
+talk by Guy Blelloch and Robert Harper</dd>
+</dl>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-16 Fri 00:03</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
