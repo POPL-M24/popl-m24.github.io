@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>m0-basic: Basic Evaluator in monadic form</title>
+<meta name="author" content="noteness" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">m0-basic: Basic Evaluator in monadic form</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org91fb1ab">1. Introduction</a></li>
+<li><a href="#org428ba5e">2. Boilerplate</a></li>
+<li><a href="#org60e1bb7">3. Identifying the value and computation data types</a></li>
+<li><a href="#orgac375eb">4. Injecting a value into a computation</a></li>
+<li><a href="#orgf840500">5. Dissecting the basic evaluator to locate the injections</a></li>
+<li><a href="#orgdd1df43">6. Sequentializing the interpreter</a></li>
+<li><a href="#org07a4b02">7. Turning the let into an application</a></li>
+<li><a href="#org4b4c941">8. Abstracting the applications as composition</a></li>
+<li><a href="#org1e86bc4">9. Currying the sequential composition operator</a></li>
+<li><a href="#orgc9dbeee">10. Source code</a></li>
+<li><a href="#org0d7aaf5">11. Next</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org91fb1ab" class="outline-2">
+<h2 id="org91fb1ab"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This is the monadic version of the basic interpreter
+<a href="../v0-basic/index.html">v0-basic</a>.  The monadic version of an interpreter is obtained
+by identifying the unit and composition operators for each
+interpreter. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org428ba5e" class="outline-2">
+<h2 id="org428ba5e"><span class="section-number-2">2.</span> Boilerplate</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+First some boilerplate code that will be repeated for each
+interpreter.  
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">#lang racket
+(provide (all-defined-out))
+</pre>
+</div>
+
+<p>
+The definition of the <code>term</code> data type remains
+the same.  
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(require eopl/eopl)
+
+(define-datatype term term?
+  [con (int integer?)]
+  [div (num term?) (den term?)])
+
+;;; : : [['a -&gt; ['b -&gt; 'c]] 'a 'b] -&gt; 'c
+(define :
+  (lambda (f v1 v2)
+    ((f v1) v2)))
+
+</pre>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org60e1bb7" class="outline-2">
+<h2 id="org60e1bb7"><span class="section-number-2">3.</span> Identifying the value and computation data types</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The values are integers and computations are values as
+before.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define value? integer?)
+(define computation? value?)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgac375eb" class="outline-2">
+<h2 id="orgac375eb"><span class="section-number-2">4.</span> Injecting a value into a computation</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The operation of injecting a value into a computation in monad
+parlance is called <code>unit</code>.  (Racket scheme also has something called
+<i>units</i>, and then, of course, there are <i>unit tests</i> that we write to
+test our code, but these are unrelated to monads.)  Since values and
+computations are identical for this interpreter, the definition of
+<code>unit</code> is trivial:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; unit : value? -&gt; computation?
+(define unit
+  (lambda (v)
+    v))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf840500" class="outline-2">
+<h2 id="orgf840500"><span class="section-number-2">5.</span> Dissecting the basic evaluator to locate the injections</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+We will arrive at the new, monadic evaluator after
+refactoring the <a href="../v0-basic-interpreter/index.html">interpreter</a>.  The <code>eval-term</code> of the
+direct-style basic evaluator is reproduced below along with its
+signature: 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; eval-term : term? -&gt; computation?
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) int]
+      [div (num den)
+        (let ([n (eval-term num)]
+              [d (eval-term den)])
+          (quotient n d))])))
+</pre>
+</div>
+
+<p>
+The interpreter's structure may be understood by "factoring"
+it into stubs (marked below) and a skeleton: 
+</p>
+
+<pre class="example" id="org18a87ed">
+;;; eval-term : term? -&gt; computation?
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) &lt;stub1&gt;]
+      [div (num den)
+        (let ([n (eval-term num)]
+              [d (eval-term den)])
+             &lt;stub2&gt;)])))
+</pre>
+
+<p>
+The two stubs determine the specifics of the interpreter.  The
+skeletal structure might be thought of as the "wiring" necessary to
+get the stubs to do their job, whatever that may be.
+</p>
+
+<p>
+For the basic evaluator, the two stubs are merely injections
+of values into computations.  Thus we may replace these
+stubs by applications of the <code>unit</code> function to the
+appropriate arguments, yielding
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; eval-term : term? -&gt; (monad value?)
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) (unit int)]
+      [div (num den)
+        (let ([n (eval-term num)]
+              [d (eval-term den)])
+          (unit (quotient n d)))])))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdd1df43" class="outline-2">
+<h2 id="orgdd1df43"><span class="section-number-2">6.</span> Sequentializing the interpreter</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Note that the order of evaluation of the two
+sub-computations in the two clauses of the <code>let</code> expression
+in the code above is unspecified.  This is consistent with
+the observation that the order of the sub-computations does
+not matter vis a vis the final answer.  In general, however,
+computation is <i>effectful</i>, which means that the order in
+which the computations occur <i>does</i> matter and therefore can
+not be ignored.  Keeping in mind this more general
+possibility, we sequentialize the sub-computations. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; eval-term : term? -&gt; computation?
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) (unit int)]
+      [div (num den)
+        (let ([n (eval-term num)])
+          (let([d (eval-term den)])
+            (unit (quotient n d))))])))
+</pre>
+</div>
+
+<p>
+Note that the specific nesting above forces the numerator
+subterm to be evaluated first.  We could have, instead
+chosen to evaluate the denominator first.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-org07a4b02" class="outline-2">
+<h2 id="org07a4b02"><span class="section-number-2">7.</span> Turning the let into an application</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+A <code>let</code> expression is an abbreviation for application.  At
+the risk of obfuscating <code>eval-term</code>, let's turn the two 
+<code>lets</code> to applications:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; eval-term : term? -&gt; computation?
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) (unit int)]
+      [div (num den)
+        ((lambda (n)
+           ((lambda (d)
+              (unit (quotient n d)))
+            (eval-term den)))
+         (eval-term num))])))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4b4c941" class="outline-2">
+<h2 id="org4b4c941"><span class="section-number-2">8.</span> Abstracting the applications as composition</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Each of the application expressions above have two parts: a
+function expression built from the body of a <code>let</code>
+expression, and the argument expression.  The function
+expression denotes a <i>receiver</i>.  The argument sub-expression
+denotes a subcomputation.
+</p>
+
+<p>
+To clean things up a bit, we define a new function <code>o</code>, that
+takes the subcomputation and a receiver and applies the
+receiver to the value extracted from the sub-computation.
+The notation <code>o</code> corresponds to <code>*</code> in Wadler's paper.  The
+order of parameters to <code>o</code> lets us think of <code>o</code> as
+sequential composition: the sub-computation, the first
+argument, 'is done" first.  Then, the receiver consumes the
+value extracted from the sub-computation and does further
+computation.
+</p>
+
+<p>
+What is the signature of <code>o</code>?  We use <code>o</code> to remind us that
+it is a special kind of composition.  It composes a
+(sub-)computation <code>m</code> with a receiver <code>k</code>.  The receiver <code>k</code>
+consumes the value extracted from the computation and does
+further computation.  Hence, the receiver maps values to
+computations.  The receiver is like a continuation; it
+continues the computation.  Compare this with the role of
+<code>unit</code>, which also takes a value to a computation.  Thus the
+receiver <code>k</code> and <code>unit</code> have the same type signature.
+</p>
+
+<p>
+The signature of <code>o</code> is now clear: it takes a computation
+and a receiver and returns a computation.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; type receiver? = value? -&gt; computation?
+(define receiver? (value? . -&gt; . computation?))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; o : [computation? receiver?] -&gt; computation?
+(define o 
+  (lambda (m k)
+    (k m)))
+
+;;; eval-term : term? -&gt; computation?
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) (unit int)]
+      [div (num den)
+        (o (eval-term num)
+           (lambda (n)
+             (o (eval-term den)  
+               (lambda (d) 
+                 (unit (quotient n d))))))])))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1e86bc4" class="outline-2">
+<h2 id="org1e86bc4"><span class="section-number-2">9.</span> Currying the sequential composition operator</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+One last thing: if you notice in Wadler's paper, the
+combinator <code>o</code> is curried.  So, we make <code>o</code> a curried
+function and accommodate this change in <code>eval-term</code>.
+</p>
+
+<p>
+Notice the new signature of <code>o</code> in the code below.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; o : computation? -&gt; [receiver? -&gt; computation?]
+(define o 
+  (lambda (m)
+    (lambda (k)
+      (k m))))
+
+;;; eval-term : term? -&gt; computation?
+(define eval-term
+  (lambda (t)
+    (cases term t
+      [con (int) (unit int)]
+      [div (num den)
+        (: o (eval-term num)
+           (lambda (n)
+             (: o (eval-term den)  
+                (lambda (d) 
+                  (unit (quotient n d))))))])))
+</pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; Testing
+;;; Racket's unit testing framework
+(require rackunit)
+
+(check-equal? (eval-term (con 5)) 5 "eval-term: 5 test")
+(check-equal? (eval-term (div (con 5) (con 3))) 1 "eval-term: 5 test")
+(check-exn exn? (lambda () (eval-term (div (con 5) (con 0)))) "divide by zero exception")
+</pre>
+</div>
+
+<p>
+Note that the behaviour of these two versions is identical.
+All we seem to have done is come up with a more abstract
+version of the basic evaluator.  This extra effort will
+pay-off, as we shall see, when we consider variants of the
+evaluator to accommodate  various other kinds of
+computations.  All we will do then is vary the definitions
+of <code>(monad value?)</code>, <code>unit</code> and <code>o</code>, and redo the stubs in
+the evaluator. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc9dbeee" class="outline-2">
+<h2 id="orgc9dbeee"><span class="section-number-2">10.</span> Source code</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+<a href="m0-basic.rkt">m0-basic.rkt</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0d7aaf5" class="outline-2">
+<h2 id="org0d7aaf5"><span class="section-number-2">11.</span> Next</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+From here, you can go to 
+</p>
+
+<dl class="org-dl">
+<dt><a href="../m1-exceptions/index.html">m1-exceptions</a></dt><dd>A monadic version of the
+evaluator with exceptions.</dd>
+</dl>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: noteness</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

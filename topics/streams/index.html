@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Infinite Data Types: Streams</title>
+<meta name="author" content="Venkatesh Choppella Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'left',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    output: {
+      font: 'mathjax-euler',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Infinite Data Types: Streams</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgb737016">1. Introduction</a></li>
+<li><a href="#org091ac57">2. Deconstructing a stream : <code>hd</code> and <code>tl</code></a></li>
+<li><a href="#org042d0d5">3. Unrolling a stream: <code>s-take</code> and <code>s-drop</code></a></li>
+<li><a href="#orgbf04cd3">4. Streams as traces of autonomous systems</a>
+<ul>
+<li><a href="#org9d69156">4.1. Trace</a></li>
+</ul>
+</li>
+<li><a href="#orgf69873e">5. The empty stream</a></li>
+<li><a href="#orga4fad9a">6. Converting lists to streams</a></li>
+<li><a href="#org543e87a">7. Stream zip and  map</a>
+<ul>
+<li><a href="#orge76dd16">7.1. Stream zip and map</a></li>
+</ul>
+</li>
+<li><a href="#org697672b">8. Streams as traces of non-autonomous state transition systems</a></li>
+<li><a href="#org56617a7">9. Other Progressions</a>
+<ul>
+<li><a href="#org747c1cc">9.1. Arithmetic Progression</a></li>
+<li><a href="#org3299adc">9.2. Geometric Progression</a></li>
+<li><a href="#org045f969">9.3. Factorial as a progression</a></li>
+<li><a href="#orgc8e10e4">9.4. Fibonacci</a></li>
+<li><a href="#org2c08ef6">9.5. Partial Sums</a></li>
+</ul>
+</li>
+<li><a href="#org859c26e">10. Power Series</a>
+<ul>
+<li><a href="#org6b4b798">10.1. Integration</a></li>
+<li><a href="#org9de9d0d">10.2. Exponential</a></li>
+</ul>
+</li>
+<li><a href="#orgdb30b76">11. Convolution</a></li>
+<li><a href="#orgb888f9d">12. Bibliographic notes</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgb737016" class="outline-2">
+<h2 id="orgb737016"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+So far, we have studied lists, which are inductively defined
+and finite sequences.  Infinite sequences, or <i>streams</i>,
+however, are also very useful.  They appear in a variety of
+applications as traces, progressions, power series, and
+signals in signal processing, to name a few.  
+</p>
+
+<p>
+Here are examples of streams:
+</p>
+
+<dl class="org-dl">
+<dt>\(\id{ones}\)</dt><dd><code>[1 1 1 ...]</code>, the constant stream of 1's.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{nats}\)</dt><dd><code>[0 1 2 3 ...]</code>, the stream of naturals.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{harmonics}\)</dt><dd><code>[1 1/2 1/3 1/4 1/5 ...]</code>, the stream
+of harmonic numbers.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{facts}\)</dt><dd><code>[1 1 2 6 24 ...]</code>, the stream of
+factorials</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{primes}\)</dt><dd><code>[2 3 5 7 11 ...]</code>, the stream of prime numbers.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{evens}\)</dt><dd><code>[0 2 4 6 ...]</code>, the stream of evens</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt>\(\id{trace}(f,a)\)</dt><dd>\([a\quad f(a)\quad f^{2}(a)\quad
+     \ldots ]\), the trace generated by a function \(f\) on a
+value \(a\).</dd>
+</dl>
+
+<p>
+There are several ways to model a stream, and we will
+explore many of them in this chapter.  A stream may be
+thought of as a function from naturals to elements of a
+domain.  But there is another way to think of them: as
+infinite sequences.  Like a list, a stream is a pair built
+using <code>cons</code>, except that the 2nd element (<code>cdr</code>) of the
+pair is also a stream, so a stream never ends.  Since
+streams are like lists, one would expect to have recursive
+programs work on lists.  But with streams there is no base
+case!  "How will the recursion ever terminate if you try to
+compute with them?", you might ask.  It won't, if you try to
+compute all the elements of the stream, because the number
+of elements in a stream is infinite.  However, the stream
+can 'reveal' itself one element at a time.  You can <i>take</i>
+the first few elements of a stream and put them in a list,
+or you could <i>drop</i> the first few elements of a stream and
+end up with the remaining stream.  But you can never get to
+the last element, because there is none.
+</p>
+
+<p>
+Instead, streams satisfy recurrence equations.  Consider
+<code>ones</code>, the stream of 1's: \([1\quad  1\quad  \ldots]\).  It
+satisfies the equation. 
+</p>
+
+<p>
+\[ ones = [1\quad  \textbf{.}\quad  ones]\]
+</p>
+
+<p>
+Here, '.' represents the pairing of a value and a stream
+using the elementary pairing operator <code>cons</code>.  Equations
+such as the one above, where there is no base case involved,
+are called <i>co-recursive</i> equations.
+</p>
+
+<p>
+Directly translating the co-recursive definition into
+Racket, however, does not work:
+</p>
+
+<pre class="example" id="org4a60835">
+(define ones (cons 1 ones))
+;  ones: undefined;
+;  cannot reference undefined identifier
+</pre>
+
+<p>
+<code>cons</code> is a function and it tries to evaluate its arguments,
+but <code>ones</code> isn't bound yet.
+</p>
+
+<p>
+The solution to this problem is another illustration of how
+functions (closures) may be used to represent data:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define ones
+  (lambda ()
+    (cons 1 ones)))
+</pre>
+</div>
+
+<p>
+The earlier error now disappears, because the occurrences of
+<code>ones</code> in the body is protected from evaluation via the
+closure.
+</p>
+
+<p>
+Thus a stream is simply a thunk, i.e., a closure of no
+arguments.  Invoking the closure results in a value and a
+stream.  
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(check-pred pair? (ones) "ones-1")
+(check-eq? (car (ones)) 1 "ones-2")
+(check-eq? (cdr (ones)) ones "ones-3")
+</pre>
+</div>
+
+<p>
+The process of creating a thunk can be abstracted away at
+the cost of introducing a new keyword <code>scons</code> which creates
+the stream thunk.
+</p>
+
+<p>
+(Exercise: explain why <code>scons</code> needs to be a keyword and not
+a function.)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define-syntax scons
+  (syntax-rules ()
+    [(scons v s) (lambda () (cons v s))]))
+</pre>
+</div>
+
+<p>
+The stream of 1's could now be defined in terms of
+<code>scons</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define 1s (scons 1 1s))
+</pre>
+</div>
+
+<p>
+Notice how this definition closely mirrors the co-recursive
+definition of \(\id{ones}\) presented above. 
+</p>
+
+<p>
+In the rest of this section, we explore co-recursive
+definition of different streams. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org091ac57" class="outline-2">
+<h2 id="org091ac57"><span class="section-number-2">2.</span> Deconstructing a stream : <code>hd</code> and <code>tl</code></h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Mathematically, a stream is a pair of two elements, the
+first being anything, the second a stream.
+</p>
+
+<p>
+Programmatically, a stream is represented as a thunk that
+when evaluated returns a pair with a head and a tail, which
+is a stream.  For a stream \(s\), we will write \(s_0\) for the
+head (the zeroth index) and \(s'\) for the tail.  In Scheme,
+we define <code>hd</code> and <code>tl</code> as the two selectors.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; hd: (streamof A) -&gt; A      A denotes a type variable
+(define hd 
+  (lambda (s)
+    (car (s))))
+
+;;; tl: (streamof A) -&gt; (streamof A) 
+(define tl
+  (lambda (s)
+    (cdr (s))))
+
+(define (unpair s)
+  (values (hd s) (tl s)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org042d0d5" class="outline-2">
+<h2 id="org042d0d5"><span class="section-number-2">3.</span> Unrolling a stream: <code>s-take</code> and <code>s-drop</code></h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-scheme">
+;;; sref stands for stream-reference
+;;; sref nat? -&gt; (streamof A) -&gt; A
+(define sref
+  (lambda: (n s)
+    (: (nat-reduce (lambda (s n) (tl s)) hd) s n)))
+
+(define s0 (sref 0))
+(define s1 (sref 1))
+(define s2 (sref 2))
+(define s3 (sref 3))
+
+;;; unrolls the a list of the first i elements of a stream and passes
+;;; the resultant list and the remaining stream to a continuation k.
+
+;;; unroll: [nat?  (streamof A) [(listof A) (streamof A) -&gt; any/c]] -&gt; any/c
+(define unroll ;; first order
+  (lambda (i s k)
+      (letrec ([loop (lambda (i ls s)
+                       (cond
+                        [(= i 0) (k ls s)]
+                        [else (loop (sub1 i) (cons (hd s) ls) (tl s))]))])
+        (loop i '() s))))
+
+
+;;; s-take: nat? -&gt; (streamof A) -&gt; (listof A)
+(define s-take
+  (lambda:  (n s)
+    (unroll n s (lambda (ls s) (reverse ls)))))
+
+(check-equal? (: s-take 0 ones) '() "s-take 0 ones")
+(check-equal? (: s-take 5 ones) '(1 1 1 1 1) "s-take 5 ones")
+
+;;; Given a natural n and a stream s (curried),  returns (tl^n s).
+;;; nat? -&gt; (streamof A) -&gt; (streamof A)
+(define s-drop
+  (lambda: (n s)
+    (unroll n s (lambda (ls s) s))))
+
+(define d0 (s-drop 0))
+(define d1 (s-drop 1))
+(define d2 (s-drop 2))
+(define d3 (s-drop 3))
+
+(define der s-drop)  ;; stream derivative
+
+(define der1 (s-drop 1))
+(define der2 (s-drop 2))
+
+(check-eq? (: s-drop 0 ones) ones "s-drop 0 ones")
+(check-equal? (hd (: s-drop 1 ones))  1 "hd of s-drop 0 ones")
+
+
+;;; A higher-order version of unroll.  The state is a pair consisting
+;;; of alist of values encountered so far and a stream.
+
+(define unroll-ho
+  (lambda (n s k)
+    (: (nat-reduce
+        (lambda (lss n)  ;; lss is a list consisting of list of values and a stream.
+          (match-let ([(list ls s) lss])
+            (list (cons (hd s) ls) (tl s))))
+        (lambda (lss) (apply k lss)))
+        (list '() s) n)))
+
+;;; s-take: nat? -&gt; (streamof A) -&gt; (listof A)
+(define s-take-ho
+  (lambda:  (n s)
+    (unroll-ho n s (lambda (ls s) (reverse ls)))))
+
+(check-equal? (: s-take-ho 0 ones) '() "s-take-ho 0 ones")
+(check-equal? (: s-take-ho 2 ones) '(1 1) "s-take-ho 2 ones")
+
+;;; Given a natural n and a stream s (curried),  returns (tl^n s).
+;;; nat? -&gt; (streamof A) -&gt; (streamof A)
+(define s-drop-ho
+  (lambda: (n s)
+    (unroll-ho n s (lambda (ls s) s))))
+
+(check-eq? (: s-drop-ho 0 ones) ones "s-drop-ho 0 ones")
+(check-equal? (hd (: s-drop-ho 1 ones))  1 "hd of s-drop-ho 0 ones")
+
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgbf04cd3" class="outline-2">
+<h2 id="orgbf04cd3"><span class="section-number-2">4.</span> Streams as traces of autonomous systems</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The output trace of an autonomous state transition system 
+</p>
+
+<p>
+\[\pair{X, Y, f:X\rightarrow X, h:X\rightarrow Y}\]
+</p>
+
+<p>
+starting at state \(x_0\) is the stream:
+</p>
+
+<p>
+\[ [x_0\quad h(f(x_0))\quad h(f^{2}(x_0))\ldots ]\]
+</p>
+
+<p>
+This fact may be exploited to define streams as traces of
+particular autonomous state transition systems.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; stream-generate: [f: X-&gt;X  h: X-&gt;Y  x0: X] -&gt; (stream-of Y)
+(define stream-generate
+  (lambda (f h x0)
+    (letrec ([stream-from
+              (lambda (x)
+                (scons (h x) (stream-from (f x))))])
+      (stream-from x0))))
+
+
+;;; nat-stream-generate: [nat? -&gt; Y] -&gt; (stream-of Y)
+(define nat-stream-generate
+  (lambda (h)
+    (stream-generate add1 h 0)))
+
+;;; nats = [0  1  2  3  ...]
+;;; nats: (stream-of nat?)
+(define nats (nat-stream-generate id))
+
+;;; +ves = [1  2  3  4  ...]
+;;; +ves: (stream-of positive?)
+(define +ves (nat-stream-generate add1))
+
+;;; harmonics = [1  1/2  1/3  1/4  ...]
+;;; harmonics: (stream-of rational?)
+(define harmonics (stream-generate add1 (lambda (n) (/ 1 n)) 1))
+
+;;; evens = [0  2  4  6  ...]
+;;; evens: (stream-of nat?)
+(define evens (nat-stream-generate (lambda (n) (* 2 n))))
+
+;;; odds = [1  3  5  7  ...]
+;;; odds: (stream-of nat?)
+(define odds (nat-stream-generate (lambda (n) (add1 (* 2 n)))))
+
+
+;;; (cs v) = [v  v  v  ...]
+(define cs
+  (lambda (v)
+    (nat-stream-generate (lambda (n) v))))
+
+(define zeroes (cs 0))
+(define trues (cs #t))
+(define falses (cs #f))
+(define voids (cs (void)))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org9d69156" class="outline-3">
+<h3 id="org9d69156"><span class="section-number-3">4.1.</span> Trace</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+<code>strace</code> (stream trace) takes an element \(a:A\) and a
+function \(f:A\rightarrow A\) and computes the stream
+\([a\quad  f(a)\quad  f^{2}(a)\quad  \ldots]\).  
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">  (define (strace f a)
+    (stream-generate f id a))
+
+  (check-equal? (: s-take 3 (strace (lambda (x) (cons 'a x)) '()))
+               '(() (a) (a a)) "iterate cons-a nil")
+
+;;; (trace add1 0) is  nats
+  (check-equal? (: s-take 5 (strace add1 0)) 
+                '(0 1 2 3 4) "iterate add1 0")
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf69873e" class="outline-2">
+<h2 id="orgf69873e"><span class="section-number-2">5.</span> The empty stream</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+The empty stream raises an error if any attempt is made to
+access its components.  
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">  (define empty-stream
+    (lambda ()
+      (error 'empty-stream "attempt to deconstruct an empty-stream")))
+
+(define empty-stream?
+  (lambda (thing)
+    (eq? thing empty-stream)))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga4fad9a" class="outline-2">
+<h2 id="orga4fad9a"><span class="section-number-2">6.</span> Converting lists to streams</h2>
+<div class="outline-text-2" id="text-6">
+<div class="org-src-container">
+<pre class="src src-scheme">;;; finite-stream : any/c -&gt; (listof A) -&gt; (streamof A)
+(define finite-stream
+  (lambda (ls)
+    (letrec ([loop (lambda (ls s)
+                     (cond
+                       [(null? ls) s]
+                       [#t (loop (rest ls) (scons (first ls) s))]))])
+      (loop (reverse ls) empty-stream))))
+
+  (check-equal? 
+   '(a b c) 
+   (: s-take 3 (finite-stream '(a b c)))
+   "s-take 3 stream '(a b c) ")
+
+  (check-exn
+   exn:fail?
+   (lambda ()
+     (: s-take 4 (finite-stream '(a b c)))
+     "s-take 4 stream '(a b c)"))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org543e87a" class="outline-2">
+<h2 id="org543e87a"><span class="section-number-2">7.</span> Stream zip and  map</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Most of the stream programming can be captured by a few operators and
+those derived from them.
+</p>
+</div>
+
+<div id="outline-container-orge76dd16" class="outline-3">
+<h3 id="orge76dd16"><span class="section-number-3">7.1.</span> Stream zip and map</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+We start with stream zip <code>szip</code>, which takes a stream of
+functions and streams of arguments, and applies the
+functions to the arguments index-wise.  Stream map <code>smap</code> is
+obtained as a special case by promoting a function to a
+constant stream of that function.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">    ;;; [f0 f1 f2 ...]
+    ;;; [a0 a1 a2 ...]
+    ;;; [b0 b1 b2 ...]
+    ;;; [(f0 a0 b0) (f1 a1 b1) ...]
+
+;;; (s@ fs as ...)
+;;; (s@: fs s)
+
+    ;;; szip: (streamof [A ... -&gt;B])  -&gt; [(streamof A) ...] -&gt; (streamof B)
+    (define (szip fs)
+      (lambda ss
+        (scons (apply (hd fs) (map hd ss))
+               (apply (szip (tl fs)) (map tl ss)))))
+
+  ;;; smap: [A ...   -&gt; B] -&gt; [(streamof A) ...] -&gt; (streamof B)
+    (define (smap f)
+      (szip (cs f)))
+
+    ;;; s+ : (streamof number?) ... -&gt; (streamof number?)
+    (define s+ (smap +))
+    ;;; s* : (streamof number?) ... -&gt; (streamof number?)
+    (define s* (smap *))
+
+(check-equal? (: s-take 0 (s+ nats nats)) '() "s+ nats nats s-take 0")
+(check-equal? (: s-take 5 (s+ nats nats)) '(0 2 4 6 8) "s+ nats nats s-take 5")
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org697672b" class="outline-2">
+<h2 id="org697672b"><span class="section-number-2">8.</span> Streams as traces of non-autonomous state transition systems</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+A general (non-autonomous) state transition system has a
+state transition function \(f\) that maps inputs (\(U\)) and
+states (\(X\)) to states. 
+</p>
+
+<p>
+\[S = \pair{X, U, f:[U,\ X]\rightarrow X, Y, h:X\rightarrow
+Y}\]
+</p>
+
+<p>
+The state trace of such a system starting in state \(x0\)
+subjected to the input stream \(u\) may be defined via the
+recursive equation
+</p>
+
+<p>
+\[ t = [t_0\quad .\quad  \id{smap}(f)(u,t)] \]
+</p>
+
+<p>
+The output trace is simply  \(\id{smap}(h)(t)\). 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; 
+;;; t0 = e
+;;; t1 = (f u0 t0)                      ; t0--u0--&gt; t1
+;;; t2 = (f u1 t1) = (f u1 (f u0 t0))   ; t0--u0--&gt;t1--u1--&gt;t2
+;;; t3 = (f u2 t2) = (f u2 (f u1 (f u0 t0)))
+
+;;; (t (1+ n)) = (f (s n) (t n))
+
+;;; [t0 t1 t2 t3 ...]
+;;; [u0 u1 u2 u3 ...]
+;;; [f  f  f  f  f ...]
+;;; [t1 t2 t3 t4 ...]
+
+;;; [t0 t1 t2 t3 ...] = [t0 (f u0 t0) (f u1 t1) ...]
+
+;;; stream-trace : [f: [U X] -&gt; X -&gt; (stream-of U) -&gt; X -&gt; (stream-of X)]
+
+(define stream-trace
+  (lambda: (f h u x)
+    (letrec ([t (scons x ((smap f) u t))])
+      (: smap h t))))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; sum the preceding elements of a stream.
+(define (ssum s)  (: stream-trace + id s 0))
+
+;;; multiply the preceding elements of a stream.
+;;; Equivalent to factorial.
+(define (sprod s) (: stream-trace * id s 1))
+
+(check-equal? (: s-take 3 (ssum ones)) '(0 1 2) "ssums-1")
+(check-equal? (: s-take 4 (sprod ones)) '(1 1 1 1) "sprod-1")
+(check-equal? (: s-take 5 (sprod +ves)) '(1 1 2 6 24) "sprod-2")
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org56617a7" class="outline-2">
+<h2 id="org56617a7"><span class="section-number-2">9.</span> Other Progressions</h2>
+<div class="outline-text-2" id="text-9">
+</div>
+<div id="outline-container-org747c1cc" class="outline-3">
+<h3 id="org747c1cc"><span class="section-number-3">9.1.</span> Arithmetic Progression</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+The arithmetic progression of \(x\) is the stream \([0\quad
+x\quad 2x\quad 3x\quad \ldots]\).  It satisfies the
+recurrence \(p = [0\ \textbf{.}\ \overline{x} + p]\).  This
+co-recursive equation translates directly to a program:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">;;; ap : number? -&gt; (streamof number?)
+
+(define (ap x)
+  (let ([cx (cs x)])
+    (rec p (scons 0 (s+ cx p)))))
+
+</pre>
+</div>
+
+<p>
+Note the use of the keyword <code>rec</code>.   <code>(rec p e)</code> is short
+for <code>(letrec ([p e]) p)</code>. 
+</p>
+
+<p>
+We could also have defined it using  <code>stream-trace</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define (ap-ho x)
+  (let ([cx (cs x)])
+    (: stream-trace + id cx 0)))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org3299adc" class="outline-3">
+<h3 id="org3299adc"><span class="section-number-3">9.2.</span> Geometric Progression</h3>
+<div class="outline-text-3" id="text-9-2">
+<p>
+The geometric progression of \(x\) is the stream \([1\quad  x\quad 
+x^2\quad  x^3\quad  \ldots]\).  It satisfies the recurrence \(p = [1\
+\bf{.}\ \overline{x} * p]\).  Again, the translation to Scheme is easy:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">
+;;; gp : number? -&gt; (streamof number?)
+;;; the sequence [1   x   x^2   x^3   ...]
+
+;;;    p =        [1   x    x2    x3 ...]
+;;;   xs =        [x   x    x     x ...]
+;;;  (s* xs p) =  [x   x2   x3    x4 ...]
+;;;  p = (cons 1 (s* xs p))
+
+(define gp
+  (lambda (x)
+    (let ([sx (cs x)])
+      ;;; p = [1 . sx * p]
+      (rec p (scons 1 (s* sx p))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org045f969" class="outline-3">
+<h3 id="org045f969"><span class="section-number-3">9.3.</span> Factorial as a progression</h3>
+<div class="outline-text-3" id="text-9-3">
+<p>
+The progression \([0!\quad 1!\quad 2!\quad \ldots]\) describes
+the progression of factorials.  The recurrence it satisfies
+and the program to which immediately translates are given
+below:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme"> ;;; facs   =             [0!   1!   2!   3! ...]
+ ;;; +ves   =             [1    2    3    4  ...]
+ ;;; (s* +ves facs) =     [1!   2!   3!   4! ...]
+
+ ;;; facs   =  [1 . (s* +ves facs)]
+
+;;; facs : (stream-of nat?)
+(define facs
+  (scons 1 (s* +ves facs)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc8e10e4" class="outline-3">
+<h3 id="orgc8e10e4"><span class="section-number-3">9.4.</span> Fibonacci</h3>
+<div class="outline-text-3" id="text-9-4">
+<p>
+The Hemachandra-Fibonacci series \(F(n) = F(n-1) + F(n-2),
+n\geq 2\) can be easily modeled using streams.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; fib    = [0   1   1   2   3   5   8   ...]
+;;; fib'   = [1   1   2   3   5   8   13  ...]
+;;; fib''  = [1   2   3   5   8   13  21  ...]
+
+;;; fib    = [0 . fib']
+;;; fib'   = [1 . fib'']
+;;; fib''  = fib + fib'
+(define fibs
+  (letrec ([fib  (scons 0 fib1)]
+           [fib1 (scons 1 fib2)]
+           [fib2 (s+ fib fib1)])
+    fib))
+
+(check-equal? (: s-take 6 fibs) '(0 1 1 2 3 5) "fibs-1")
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2c08ef6" class="outline-3">
+<h3 id="org2c08ef6"><span class="section-number-3">9.5.</span> Partial Sums</h3>
+<div class="outline-text-3" id="text-9-5">
+<p>
+Given a numerical series \(s = [a_0\quad  a_1\quad  a_2\quad  \ldots]\),
+the series \(p\) of <i>partial sums of</i> \(s\) is
+</p>
+
+<p>
+\[[0\quad  a_0\quad  a_0+a_1\quad  a_0+a_1+a_2\quad  \ldots]\]
+</p>
+
+<pre class="example" id="org52546fc">
+s       =        [a0    a1        a2           a3 ...]
+p       =        [0     a0     a0+a1     a0+a1+a2        ...]
+p+s     =        [a0    a0+a1  a0+a1+a2  ... ] 
+[0 . p+s] =      [0     a0    a0+a1     a0+a1+a2        ...]
+p = [0 . p+s]
+</pre>
+
+<p>
+The series \(p\) satisfies the recurrence \[p = [0\ .\ p+s]\]
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">
+;;; psums : (streamof number?) -&gt; (streamof number?)
+(define (psums s)
+  (rec p (scons 0 (s+ p s))))
+
+(check-equal? (: s-take 6 (psums nats)) '(0 0 1 3 6 10) "psums-1")
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org859c26e" class="outline-2">
+<h2 id="org859c26e"><span class="section-number-2">10.</span> Power Series</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+A <i>power series</i> is an infinite monomial of the form
+</p>
+
+<p>
+\[ a_0\ +\ a_1x\ +\ a_2x^2\ + \ldots\]
+</p>
+
+<p>
+The coefficients of a power series form a stream.
+</p>
+
+<p>
+\[ a_0\quad   \ a_1\quad \ a_2\quad  \ldots\]
+</p>
+</div>
+
+<div id="outline-container-org6b4b798" class="outline-3">
+<h3 id="org6b4b798"><span class="section-number-3">10.1.</span> Integration</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+Note that the power series \(a_0\ +\ a_1x\ +\ a_2x^2\ +
+\ldots\), when integrated, yields the power series \(c + a_0x\
++\ a_1x/2\ +\ a_2x^2/3\ + \ldots\), where \(c\) is an
+integration constant.  This is encoded as the stream
+\([c\quad a_0\quad a_1/2\quad a_2/3\quad \ldots]\), or
+equivalently \([c\quad \textbf{.}\quad h * p]\), where \(p\) is
+the original power series, and \(h\) is the harmonic series.
+A "proof" and the implementation of the integral is given
+below.  Note that the function <code>p-integral</code> computes the
+indefinite integral modulo the constant \(c\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">
+;;; p         = [a_0    a_1      a_2      a_3   ...]
+;;; h         = [1/1    1/2      1/3   ...] 
+;;; p*h       = [a_0/1  a_1/2    a_2/3 ...]
+;;; [c . p*h] = [c      a_0/1    a_1/2    a_2/3 ...]
+
+;;; p              = [a_0    a_1      a_2      a_3   ...]
+;;; integral p     = [c      a_0/1    a_1/2    a_2/3 ...]
+
+
+;;; p-integral of a power series returns the indefinite
+;;; integral modulo the integration constant
+
+;;; p-integral : power-series? -&gt; (streamof number?)
+  (define (p-integral  p)
+    (s* harmonics p))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9de9d0d" class="outline-3">
+<h3 id="org9de9d0d"><span class="section-number-3">10.2.</span> Exponential</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+The exponential \(e^{x}\) is the power series
+</p>
+
+<p>
+\[x^{0}/0!\ +\ x^{1}/1!\ +\ x^2/2!\ + \ldots\]
+</p>
+
+<p>
+The integral of \(e^{x}\) is \(e^{x} + c\).  Choosing \(x=0\) allows us to
+infer \(c=1\) and we have \(e^{x} = 1 + \int e^{x}dx\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">  ;;; power series
+  ;;;
+  ;;; e^{x} =  1 + x + x^{2}/2! + x^{3}/3! + ....
+
+
+;;; power series
+;;;
+;;; e^{x}  =       1 + x     + x^2/2! + x^3/3! + ....
+;;; int e^{x} =   c + x + x^2/2 + x^3/3! +  ...
+;;;        =       c + x     + x^2/2! + x^3/3! + ...
+;;; taking x = 0 yields c = 1.
+
+;;; e         = [1/0! 1/1! 1/2! 1/3! ...]
+;;; h         = [1/1  1/2  1/3  1/4  ...]
+;;; e*h       = [1/1! 1/2! 1/3! 1/4! ...]
+;;; [1. e*h]  = [1/0! 1/1! 1/2! 1/3! 1/4! ...]
+
+;;; pe is the power series of e = [1/0! 1/1! 1/2! 1/3! ...]
+;;; pe : power-series? 
+  (define (pe)
+    (cons 1 (p-integral pe)))
+</pre>
+</div>
+
+<p>
+From now, we consider number streams and their properties.   
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdb30b76" class="outline-2">
+<h2 id="orgdb30b76"><span class="section-number-2">11.</span> Convolution</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+Convolution is a common operation found in signal
+processing, statistics, and linear systems. 
+</p>
+
+<p>
+Consider two two-way infinite streams \(x\) and \(h\).  The
+convolution \(x*\!*h\) is a two-way infinite stream \(y\) such that
+</p>
+
+<p>
+\[y(n) = \sum_{m=-\infty}^{+\infty}h(n-m) * x(m)\]
+</p>
+
+
+<p>
+To understand convolution, consider all pairs of indices \(j,k\) such
+that \(j+k=i\).   Then \(y(i) = \sum\{h(j)x(k) | j+k=i\}\).   
+</p>
+
+<p>
+For one-way finite streams, i.e., lists, assuming \(x\) and \(h\) are of
+length \(M\) and \(N\), respectively, the convolution is a list of length
+\(N+M\).  The convolution may be computed in time \(O(N*M)\) time using
+the identity \(y(j+k) = \sum\{h(j)* x(k)\ |\ j: dom(h), k:dom(x)\}\)
+</p>
+
+
+<p>
+For one-way streams, the computation of convolution may be stated
+co-recursively as follows:
+</p>
+
+<p>
+x = [0 1 2 3 4 5 &#x2026;]
+</p>
+
+<p>
+h = [0 1 2 3 4 5 &#x2026;]
+</p>
+
+<p>
+y = [(00) (01 10) (02 11 20)  (03 12 21 30) (04 13 22 31 40) &#x2026;]
+</p>
+
+<p>
+[s0 s1 s2 s3 &#x2026;] ** [t0 t1 t2 t3 &#x2026;])  may be computed by observing
+</p>
+
+
+<pre class="example" id="orgb9d6ba9">
+
+
+s0t''   =     [          s0t2   s0t3          s0t4 ...]
+
+s'**t'  =     [          s1t1 (s1t2 + s2t1) (s1t3 + s2t2 + s3t1) ...]
+
+s''t0   =     [          s2t0   s3t0          s3t0 ...]
+
+-----------------------------------------------------------------------
+
+s**t = [s0t0  s0t1+s1t0   (s0t2+s1t1+s2t0)  (s0t3+s1t2+s2t1+s3t0) ...]
+
+     = [s0t0 . s0t1+s1t0 . s0t''+ s'**t' + s''t0]
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; +: B ... -&gt; C
+;;; *: A A -&gt; B
+;;; (convolute + *): (stream-of A) (stream-of A) -&gt; (stream-of C)
+(define (convolute + *)
+  (rec p (lambda (s t)
+             (let* ([s0 (hd s)] [t0 (hd t)]
+                    [ds (tl s)] [dt (tl t)]
+                    [s1 (hd ds)] [t1 (hd dt)]
+                    [dds (tl ds)] [ddt (tl dt)])
+               (scons
+                (+ (* s0 t0))
+                (scons
+                 (+ (* s0 t1) (* s1 t0))
+                 ((smap +)
+                  (: smap (lambda (x) (* s0 x)) ddt)
+                  (p ds dt)
+                  (: smap (lambda (x) (* x t0)) dds))))))))
+</pre>
+</div>
+
+<p>
+Some useful convolutions are:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define ** (convolute + *))
+(define power-product (convolute list cons))
+
+(check-equal? (: s-take 5 (power-product nats nats))
+ '(((0 . 0))
+   ((0 . 1) (1 . 0))
+   ((0 . 2) ((1 . 1)) (2 . 0))
+   ((0 . 3) ((1 . 2) (2 . 1)) (3 . 0))
+   ((0 . 4) ((1 . 3) ((2 . 2)) (3 . 1)) (4 . 0)))
+ "power-product nats nats")
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgb888f9d" class="outline-2">
+<h2 id="orgb888f9d"><span class="section-number-2">12.</span> Bibliographic notes</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+Streams form the basis of what we call Reactive Programming
+today.  Abelson and Sussman's SICP book\cite{sicp-1984} in
+<a href="https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-24.html#%_sec_3.5">Section 3.5</a> of the book.  Streams are a natural data
+structure in lazy functional languages like Haskell and
+Clean.  Racket also supports streams.  From a mathematical
+point of view, streams are best studied as co-algebras with
+stream bisimulation as the fundamental reasoning principle.
+Papers by Niqui and Rutten\cite{niqui-rutten-2013} and
+Hinze\cite{Hin10Rea} offer a more advanced and modern
+treatment on streams.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

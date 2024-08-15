@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fixed Points, Self Application and  the  Y Combinator</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'left',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'left',
+      displayIndent: '5em'
+    },
+    output: {
+      font: 'mathjax-euler',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Fixed Points, Self Application and  the  Y Combinator</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orge9fa8e7">1. Self Reference, a mechanism for defining recursive functions</a>
+<ul>
+<li><a href="#orgb5199a9">1.1. Abstracting the function being defined</a></li>
+<li><a href="#orga2a29a6">1.2. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#orgf32d0ac">2. Recursion via self-application</a>
+<ul>
+<li><a href="#org6aa04ab">2.1. Self-application for factorial</a></li>
+<li><a href="#org7df8101">2.2. Exercise</a></li>
+<li><a href="#orgaa26e5a">2.3. Using <code>H</code></a></li>
+<li><a href="#orgd6f70de">2.4. Playing with <code>p</code></a></li>
+<li><a href="#orgc708231">2.5. Testing <code>p</code> some more</a></li>
+<li><a href="#org92ae763">2.6. Generating  self-application</a></li>
+</ul>
+</li>
+<li><a href="#org83c6bc6">3. The fixed point combinator Y</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orgb39468b">3.0.1. Non-termination</a></li>
+</ul>
+</li>
+<li><a href="#org2aeea13">3.1. Applicative order fixed point combinator Z</a></li>
+<li><a href="#orgb01561d">3.2. Ya</a></li>
+</ul>
+</li>
+<li><a href="#org764734a">4. Other fixed point combinators</a>
+<ul>
+<li><a href="#org6447257">4.1. The X combinator</a></li>
+<li><a href="#orge9c0beb">4.2. Turing's fixed point combinator</a></li>
+</ul>
+</li>
+<li><a href="#orgb438bd3">5. References</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge9fa8e7" class="outline-2">
+<h2 id="orge9fa8e7"><span class="section-number-2">1.</span> Self Reference, a mechanism for defining recursive functions</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Up until now, we have assumed that recursion needs
+<i>self-reference</i>.  A recursive definition refers
+to itself in its body.  More precisely, a recursive definition
+requires that the identifier being bound to the function appear
+free in the body of the function.
+</p>
+
+<p>
+Let's begin with the familiar factorial example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="org18249ef">(define fac 
+  (lambda (n)
+    (if (= n 0) 
+        1
+        (* n (fac (sub1 n))))))
+</pre>
+</div>
+
+<p>
+Notice how <code>fac</code> occurs free in the lambda abstraction that forms
+the function being defined. 
+</p>
+</div>
+
+<div id="outline-container-orgb5199a9" class="outline-3">
+<h3 id="orgb5199a9"><span class="section-number-3">1.1.</span> Abstracting the function being defined</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+In the rest of these notes we work with curried versions of
+application (<code>:</code>), \(\lambda\) (<code>lambda:</code>) and <code>define</code>
+(<code>define:</code>). 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket" id="orgfaf31bf">(define :
+  (lambda (f x . xs)
+    (cond
+      [(null? xs) (f x)]
+      [else (apply : (f x) xs)])))
+
+(define-syntax lambda:
+  (syntax-rules () 
+    [(lambda: (x) body) (lambda (x) body)]
+    [(lambda: (x y ...) body)
+     (lambda (x) (lambda: (y ...) body))]))
+
+(define-syntax define:
+  (syntax-rules ()
+    [(define: (f x y ...) body) (define f (lambda: (x y ...) body))]))
+</pre>
+</div>
+
+<p>
+Now consider the function <code>G</code> defined below.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org3fac1a4">(define: (G f n)
+  (if (= 0 n)
+      1
+      (* n (f (sub1 n)))))
+</pre>
+</div>
+<p>
+<code>G</code> is obtained by abstracting over the free occurrence of the
+identifier denoting the recursive function (we have switched to
+<code>f</code> instead of <code>fac</code>).  <code>G</code> takes a function <code>f</code> as its argument
+and return a function that takes <code>n</code>. Note that <code>G</code>'s definition
+is not recursive, and <code>f</code> could be any function, including
+<code>fac</code>. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga2a29a6" class="outline-3">
+<h3 id="orga2a29a6"><span class="section-number-3">1.2.</span> Exercise</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Compute the following: 
+</p>
+
+<ul class="org-ul">
+<li><code>(: G add1 5)</code>.</li>
+
+<li><code>(: G (lambda (x) (* x x)) 2)</code></li>
+
+<li><code>(: G fac 3)</code></li>
+
+<li><code>(: G fac n)</code> for various values of <code>n</code>.   What do you observe?</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf32d0ac" class="outline-2">
+<h2 id="orgf32d0ac"><span class="section-number-2">2.</span> Recursion via self-application</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Self-application means that a function may be an argument to
+itself, as in the following example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define I (lambda (x) x))
+(I I)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org6aa04ab" class="outline-3">
+<h3 id="org6aa04ab"><span class="section-number-3">2.1.</span> Self-application for factorial</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Now, consider the definition below of <code>H</code> (hacktorial?), which
+as you can see is non-recursive.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org46862b3">(define: (H f n)
+  (if (= n 0)
+      1 
+      (* n (: f f (sub1 n)))))
+</pre>
+</div>
+
+<p>
+<code>H</code> is identical to <code>G</code>, except for the  self-application <code>(f f)</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7df8101" class="outline-3">
+<h3 id="org7df8101"><span class="section-number-3">2.2.</span> Exercise</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Compute
+</p>
+<ul class="org-ul">
+<li><code>(: H I 3)</code>  (<code>I</code> is the identity function)</li>
+
+<li><code>(: H add1 5)</code>: do you see a problem?</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgaa26e5a" class="outline-3">
+<h3 id="orgaa26e5a"><span class="section-number-3">2.3.</span> Using <code>H</code></h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+<code>H</code> is rather choosy about what you can pass to it.  It takes a
+function that takes a function that &#x2026; and returns a number.
+If the type of <code>H</code> is the function type <code>T</code>, then <code>T</code> satisfies
+the equation
+</p>
+<pre class="example" id="org5d97515">
+T = T -&gt; N
+</pre>
+
+<p>
+The type <code>T</code> is recursive!  We will leave aside the question of
+which mathematical domains satisfy such recursive equations
+That's for a more a more advanced course on types.  Instead, we
+will explore the consequences of applying <code>H</code> to itself.  <code>(H
+H)</code> returns a function on numbers.  Let's call this function on
+numbers <code>p</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org53fdaca">(define p (H H))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd6f70de" class="outline-3">
+<h3 id="orgd6f70de"><span class="section-number-3">2.4.</span> Playing with <code>p</code></h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Let's evaluate <code>(p 0)</code>.  All we need to do is expand <code>p</code> and
+simplify using beta reduction.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">;;; (p 0) simplifies to
+(if (= 0 0) 1
+    (* 1 (: H H (sub1 0))))
+</pre>
+</div>
+<p>
+which yields <code>1</code>.  Notice, that if this were an extension of
+lambda calculus, we could end up reducing this whole expression
+by reducing <code>(* 1 (: H H (sub1 0)))</code>.  But we are in
+Scheme world, not lambda calculus.  Scheme's order of evaluating
+strategy insists on evaluating the test subexpression first,
+evaluating the then part if the test is true, and leave aside
+the then part.  So <code>(p 0)</code> simplifies to 1.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc708231" class="outline-3">
+<h3 id="orgc708231"><span class="section-number-3">2.5.</span> Testing <code>p</code> some more</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+<code>(p 1)</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(if (= 0 1) 1
+    (* 1 (: H H (sub1 1))))
+</pre>
+</div>
+<p>
+Simplifying <code>(p 1)</code> yields
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(* 1 (p 0))
+</pre>
+</div>
+<p>
+But <code>(p 0)</code> is already <code>1</code>, so <code>(p 1)</code> is equal to <code>1</code>.  Going
+further, let's simplify <code>(p 2)</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme">(if (= 0 2)
+    1
+    (* 2 (: H H (sub1 2))))
+</pre>
+</div>
+<p>
+This yields
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(* 2 (p 1))
+</pre>
+</div>
+<p>
+which is <code>2</code>.
+</p>
+
+<p>
+We are now beginning to suspect that <code>p</code> is nothing but
+factorial itself!
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgf466ccb">
+(define !/H (H H))   ; factorial using hacktorial
+</pre>
+</div>
+
+<p>
+So we have a definition of factorial that is based on
+self-application.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org92ae763" class="outline-3">
+<h3 id="org92ae763"><span class="section-number-3">2.6.</span> Generating  self-application</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+We wish to explore the relation between <code>H</code> and <code>G</code>.  Notice
+that <code>H</code> could have been defined as follows:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org9a365be">;;; H using G
+(define: (H/G f n) (: G (f f) n))
+</pre>
+</div>
+
+<p>
+If you're not convinced, simply unroll the definition of <code>G</code> and
+reduce the right hand; you will get back <code>H</code> as defined
+earlier.   
+</p>
+
+<p>
+Furthermore, <code>(: H/G H/G n)</code> is <code>(: G (H/G H/G) n)</code>.  If we
+inverse $&eta;$-reduce both sides, we have
+</p>
+
+<pre class="example" id="org1507e8e">
+(H/G H/G) = (G (H/G H/G))
+</pre>
+
+<p>
+This means that <code>(H/G H/G)</code> is a fixed point of <code>G</code>.  Fixed
+points, recursion and self-application seem to have a strange
+intertwined relationship!.  We also have stumbled across a
+general way to arrive at the fixed point of a function:
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org83c6bc6" class="outline-2">
+<h2 id="org83c6bc6"><span class="section-number-2">3.</span> The fixed point combinator Y</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Consider the lambda-calculus term <code>Y</code> that takes <code>g</code> and returns
+<code>(s s)</code>.  Here, <code>s</code> is an abstraction that takes a formal <code>x</code>
+and simply passes the self-application <code>(x x)</code> to <code>g</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org0531548">(define (Y g)
+  (let ([s (lambda (x) (g (x x)))])
+    (s s)))
+</pre>
+</div>
+
+<p>
+Again, neither <code>s</code> nor <code>Y</code> are defined recursively.  Instead,
+both rely on self-application.
+</p>
+
+<p>
+<code>(s s)</code> simplifies to <code>(g (s s))</code>.  So, <code>(s s)</code> is a fixed point
+of <code>g</code>.  So <code>(Y g)</code> returns a fixed point of <code>g</code>.  Here is the
+derivation:
+</p>
+
+<pre class="example" id="org8895930">
+(Y g)
+-&gt; (s s)
+= ((lambda (x) (g (x x))) (lambda (x) (g (x x))))
+-&gt;  (g ((lambda (x) (g (x x))) (lambda (x) (g (x x)))))
+= (g (s s))
+= (g (Y g))
+</pre>
+
+<p>
+We have just concluded that <code>Y</code> takes any expression <code>g</code> and
+constructs its fixed point.  
+</p>
+
+<p>
+Let us exploit the above observation use <code>(Y G)</code> to compute
+factorial:
+</p>
+
+<pre class="example" id="org9f89d4c">
+(: Y G 2)
+= (: s s 2)  where s = (lambda (x) (G (x x)))
+= ((s s) 2)
+= ((G (s s)) 2)
+= (: G (s s) 2)
+= (if (= 0 2) 1
+      (* 2 (: s s 1)))
+= (* 2 (: G (s s) 1))
+= (* 2 (if (= 0 1) 1
+           (* 1 (: s s 0))))
+= (* 2 (* 1 (if (= 0 0) 1
+                (* 0 (: G (s s) (sub1 0))))))
+= (* 2  1 1)
+= 2
+</pre>
+</div>
+
+
+<div id="outline-container-orgb39468b" class="outline-4">
+<h4 id="orgb39468b"><span class="section-number-4">3.0.1.</span> Non-termination</h4>
+<div class="outline-text-4" id="text-3-0-1">
+<p>
+However, there is a catch.  All the above says is that it is
+possible to transform <code>(Y g)</code> to <code>(g (Y g))</code>.  It says nothing
+about whether either of them reach a normal form!
+</p>
+
+<p>
+Let's take the simplest of examples: <code>(Y I)</code>.  Note that <code>I</code> is
+a fixed point of <code>I</code> since <code>(I I)</code> reduces to <code>I</code>.  But <code>(Y I)</code>
+will not even terminate, let alone  returning a fixed point.
+</p>
+<pre class="example" id="org279c027">
+(Y I) 
+ =  (I (Y I))     ; after  a series of beta reductions
+</pre>
+<p>
+At this point, if we simplify the subterm <code>(Y I)</code>, then <code>(I (Y
+I))</code> simplifies to <code>(I (I (Y I)))</code> and this goes on forever.  On
+the other hand, if we beta-reduce the top-level application in
+<code>(I (Y I))</code> we get <code>(Y I)</code>, so <code>(Y I)</code> simplifies to itself.  In
+either case we have a non-terminating sequence of reductions and
+the expression <code>(Y I)</code> never returns.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2aeea13" class="outline-3">
+<h3 id="org2aeea13"><span class="section-number-3">3.1.</span> Applicative order fixed point combinator Z</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+However, <code>(: Y G 3)</code>  in Scheme will not terminate!  Why is this
+the case?
+</p>
+
+<p>
+One problem above is the reduction <code>(: G (s s) n)</code>.   Scheme
+employs the following reduction strategy:
+</p>
+
+<dl class="org-dl">
+<dt>1. Weak reduction </dt><dd>abstraction terms are normal forms and
+no reduction is done <i>inside</i> an abstraction.</dd>
+
+<dt>2. Applicative order</dt><dd>Reduction is left-most innermost and
+as a result, argument terms are reduced before function
+application.</dd>
+</dl>
+
+<p>
+In Scheme, trying to evaluate <code>(: Y G 2)</code> leads to the following
+non-terminating sequence
+</p>
+<pre class="example" id="org25b9ba6">
+(: Y G 2)
+= (: G (s s) 2))
+= (: G (: G (s s)) 2)
+= (: G (: G (: G (s s) 2)))
+</pre>
+
+
+<p>
+In order to remedy this problem and get a fixed point combinator
+to work in the applicative order regime, we consider the fixed
+point combinator <code>Z</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org44df871">(define (Z g)
+  (let ([s (lambda (x)
+             (g (lambda (n) (: x x n))))])
+    (s s)))
+</pre>
+</div>
+<p>
+Note that the definition of <code>Z</code> assumes that <code>g</code>'s argument is
+always an abstraction.
+</p>
+<pre class="example" id="org558422b">
+(Z g)
+= (s s)
+= (g (lambda (n) (: s s n)))
+</pre>
+<p>
+Notice now how the evaluation of the argument to <code>g</code> is an
+abstraction. 
+</p>
+
+<p>
+Here is how we can use <code>Z</code> with <code>G</code>:
+</p>
+<pre class="example" id="org54bca56">
+(: Z G 2)
+= (: G (s s) 2)
+= (: G (lambda (n) (: s s n)) 2)
+= (if (= 0 2) 1
+      (* 2 (: s s 1)))
+= (* 2 (: s s 1))
+= (* 2 (: G (s s) 1))
+= (* 2 (if (= 0 1) 1 (* 1 (: s s 0))))
+= (* 2 (* 1 (: s s 0)))
+= (* 2 (* 1 (: G s s 0)))
+= (* 2 (* 1 (if (= 0 0) 1 ...)))
+= (* 2 (* 1 1))
+= 2
+</pre>
+
+<p>
+Using <code>Z</code>, we can define factorial
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org946d919">(define !/Z (Z G))
+(check-equal? (!/Z 3) 6)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb01561d" class="outline-3">
+<h3 id="orgb01561d"><span class="section-number-3">3.2.</span> Ya</h3>
+<div class="outline-text-3" id="text-3-2">
+<pre class="example" id="org644d029">
+(define s 
+  (lambda: (x n)
+    (: g (x x) n)))
+</pre>
+<p>
+Note that this expression is \(\eta\) equivalent to <code>(lambda (x)
+(g (x x))</code>.  However <code>(s s)</code> evaluates to <code>(lambda (n) (: g (s
+s) n))</code>.  In languages employing weak reduction strategies,
+i.e., in which abstraction expressions are no longer reduced,
+<code>(s s)</code> yields an abstraction, which is a normal form.  
+</p>
+
+<p>
+Examples of languages employing weak reduction are Scheme and
+Racket.  Furthermore, Scheme uses applicative order reduction:
+the left-most innermost redex is applied first.  This means that
+arguments of an application are always evaluated before a
+function application.
+</p>
+
+<p>
+Packaging this back we get a different fixed point combinator
+<code>Ya</code> (for applicative):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgba5273b">(define Ya
+  (lambda (g)
+    (let ([s (lambda: (x n)
+               (: g (x x) n))])
+      (s s))))
+</pre>
+</div>
+<p>
+Let's quickly verify that <code>Ya</code> is indeed a fixed point combinator
+</p>
+<pre class="example" id="org1d37f74">
+(Ya g)
+= (s s)
+= (lambda (n) (: g (s s) n))
+= (g (s s))   ; inverse eta reduction
+= (g (Ya g)) 
+</pre>
+
+<p>
+Let <code>gI</code> be <code>(lambda (x) I)</code>.  Then
+</p>
+<pre class="example" id="orgb4cd1e1">
+(: Ya gI)
+= (s s)                         
+where s = (lambda: (x n) (: gI (x x) n))
+
+and 
+(s s)
+=  (lambda (n) 
+     (: gI (s s) n))
+</pre>
+<p>
+So <code>(: Ya gI 3)</code> simplifies to
+</p>
+<pre class="example" id="org35813b3">
+(: Ya gI 3)
+= ((lambda (n) (: gI (s s) n)) 3)
+= (: gI (s s) 3)
+= (: (lambda:  (x n) n) (s s) 3)
+= (: (lambda: (x n) n) (lambda (n) (: gI (s s) n)) 3)
+= 3
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org94b7479">(define !/Ya (Ya G))
+(check-equal? (!/Ya 3) 6)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org764734a" class="outline-2">
+<h2 id="org764734a"><span class="section-number-2">4.</span> Other fixed point combinators</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Here are some more fixed point combinators:
+</p>
+</div>
+<div id="outline-container-org6447257" class="outline-3">
+<h3 id="org6447257"><span class="section-number-3">4.1.</span> The X combinator</h3>
+<div class="outline-text-3" id="text-4-1">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org6a018b3">(define (X g)
+  (let ([omega (lambda (x) (x x))]
+        [f (lambda (x) (g (x x)))])
+    (omega f)))
+</pre>
+</div>
+
+
+<pre class="example" id="orgb6aedd3">
+(X g)
+= (omega f)
+= (f f)=
+= (g (f f))=
+= (g (omega f))=
+= (g (X g))
+</pre>
+</div>
+</div>
+<div id="outline-container-orge9c0beb" class="outline-3">
+<h3 id="orge9c0beb"><span class="section-number-3">4.2.</span> Turing's fixed point combinator</h3>
+<div class="outline-text-3" id="text-4-2">
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgd4b815f">(define T
+  (let ([s (lambda: (x y)
+             (y (: x x y)))])
+    (s s)))
+</pre>
+</div>
+
+<pre class="example" id="org3a96c9f">
+(: T y)
+= (: s s y)
+-&gt; (y (T y))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb438bd3" class="outline-2">
+<h2 id="orgb438bd3"><span class="section-number-2">5.</span> References</h2>
+<div class="outline-text-2" id="text-5">
+<dl class="org-dl">
+<dt><a href="https://en.wikipedia.org/wiki/Fixed-point_combinator">Wikipedia article on Fixed point combinators</a></dt><dd>Reasonably
+good description of the Y combinator and other fixed point
+combinators.</dd>
+
+<dt><a href="https://www.cs.cornell.edu/courses/cs6110/2017sp/lectures/lec05.pdf">Cornell Univ. Lec. Notes on Recursion</a></dt><dd></dd>
+</dl>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

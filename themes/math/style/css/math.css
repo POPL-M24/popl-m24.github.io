@@ -1,0 +1,27 @@
+.proof:before {
+content: "Proof. ";
+font-style: italic;
+}
+.abstract:before {
+content: "Abstract ";
+font-weight: bold;
+font-style: normal;
+}
+.theorem {
+display: block;
+font-style: italic;
+}
+.theorem[text]:before {
+content: attr(text);
+font-weight: bold;
+font-style: normal;
+}
+.lemma {
+display: block;
+font-style: italic;
+}
+.lemma[text]:before {
+content: attr(text);
+font-weight: bold;
+font-style: normal;
+}

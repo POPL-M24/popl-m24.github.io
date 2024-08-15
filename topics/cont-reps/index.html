@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Representations of Continuations: An exploration using Factorial</title>
+<meta name="author" content="noteness" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Representations of Continuations: An exploration using Factorial</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org9f6c116">1. Revision History</a></li>
+<li><a href="#org63d3f6a">2. Introduction</a></li>
+<li><a href="#org5ae2adb">3. Direct Style</a></li>
+<li><a href="#org436f3da">4. CPS with continuations as procedures</a>
+<ul>
+<li><a href="#org13de0d0">4.1. Factorial in CPS</a></li>
+<li><a href="#orgf0ce768">4.2. Top-level continuation</a></li>
+<li><a href="#orgd0d571b">4.3. Factorial top-level interface</a></li>
+</ul>
+</li>
+<li><a href="#org3b329b6">5. Representation independence</a>
+<ul>
+<li><a href="#orgcee27a4">5.1. Continuation Constructors</a></li>
+<li><a href="#org40baf84">5.2. Applying the continuation</a></li>
+<li><a href="#orge52c2f2">5.3. Factorial <code>fact/k</code> with representation independence</a></li>
+<li><a href="#orgd417334">5.4. Top-level factorial interface</a></li>
+</ul>
+</li>
+<li><a href="#orgfd2adee">6. Record representation</a>
+<ul>
+<li><a href="#org65a7c79">6.1. Continuation makers</a></li>
+<li><a href="#orgc044584">6.2. Applying the continuation</a></li>
+<li><a href="#orgbe2e15d">6.3. <code>fact/k</code> and <code>fact</code></a></li>
+</ul>
+</li>
+<li><a href="#org6413158">7. Closure representation</a>
+<ul>
+<li><a href="#org91ae57c">7.1. Continuation are records that contain closures</a></li>
+<li><a href="#org5d39d91">7.2. Applying the continuations: <code>apply-k</code></a></li>
+<li><a href="#orgaa7984a">7.3. <code>fact/k</code></a></li>
+</ul>
+</li>
+<li><a href="#org25dc9db">8. Conclusion</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org9f6c116" class="outline-2">
+<h2 id="org9f6c116"><span class="section-number-2">1.</span> Revision History</h2>
+<div class="outline-text-2" id="text-1">
+<dl class="org-dl">
+<dt><span class="timestamp-wrapper"><span class="timestamp">[2022-11-05 Sat]</span></span></dt><dd>Created.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org63d3f6a" class="outline-2">
+<h2 id="org63d3f6a"><span class="section-number-2">2.</span> Introduction</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The purpose of this note is to explore different
+representations of continuations.  To illustrate the
+transformations, we use as an example, the factorial
+function.
+</p>
+
+<p>
+We start with the factorial written in direct style using
+recursion.  Then we transform it to CPS.  Then we abstract
+the representation and application of continuations.  They
+are still procedures but only <code>apply-k</code> and the continuation
+constructors know this.  Next, continuations are turned from
+procedures to data (records).  As an alternative,
+continuations are represented as records containing closures
+and other continuations.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5ae2adb" class="outline-2">
+<h2 id="org5ae2adb"><span class="section-number-2">3.</span> Direct Style</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org5f53268">;;; fact: nat? -&gt; nat?
+(define fact
+  (lambda (n)
+    (if (zero? n)
+        1
+        (* n (fact (sub1 n))))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org436f3da" class="outline-2">
+<h2 id="org436f3da"><span class="section-number-2">4.</span> CPS with continuations as procedures</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org13de0d0" class="outline-3">
+<h3 id="org13de0d0"><span class="section-number-3">4.1.</span> Factorial in CPS</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+A value-continuation takes a expressible value (natural
+number here).  We write a continuation that receives a value
+of type T as <code>(k T)</code>.  Since continuations don't return a
+value, we can think of the type <code>(k T)</code> as the `return only
+to top-level function' <code>T-&gt;ans?</code> where <code>ans?</code> has the effect
+of printing a value on the screen and returning that value
+to the top level.  
+</p>
+
+<p>
+A more precise way to think about effects (like I/O to a
+stream) is using Monads, but we won't be doing that in this
+course.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org4f3c9aa">;;; factorial with continuations:
+;;; fact/k : [nat? (k nat?)] -&gt; ans?
+(define fact/k
+  (lambda (n k)
+    (if
+      (zero? n)
+      (k 1)
+      (fact/k (sub1 n)
+        (lambda (v)
+          (k (* n v)))))))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf0ce768" class="outline-3">
+<h3 id="orgf0ce768"><span class="section-number-3">4.2.</span> Top-level continuation</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+<code>top-k</code> simply prints the answer, but returns the value (at
+the top-level).  The return value is used only print the
+final value or feed it to a test case.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org8180f73">;;; top-k : (k nat?)
+(define top-k
+  (lambda (v)
+    (printf "CPS: ans=~a~n" v)
+    v))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd0d571b" class="outline-3">
+<h3 id="orgd0d571b"><span class="section-number-3">4.3.</span> Factorial top-level interface</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+Interface to factorial.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org3a1e3ec">;;; nat? -&gt; nat?
+(define fact
+  (lambda (n)
+    (fact/k n top-k)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3b329b6" class="outline-2">
+<h2 id="org3b329b6"><span class="section-number-2">5.</span> Representation independence</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Note that <code>fact/k</code> assumes continuations are procedures.
+This version introduces explicit operations to construct and
+apply a continuation.  This isolates any assumptions about
+representation to these functions.
+</p>
+</div>
+
+<div id="outline-container-orgcee27a4" class="outline-3">
+<h3 id="orgcee27a4"><span class="section-number-3">5.1.</span> Continuation Constructors</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+From now on, we will use the notation <code>k?</code> to mean <code>(k
+nat?)</code>.  <code>top-k</code> constructs the top-level continuation.
+<code>fact1-k</code> takes a natural and a continuation and constructs
+a new continuation.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="org992fe4f">
+;;; top-k: [] -&gt; k?
+(define top-k
+  (lambda ()
+    (lambda (v)
+      (printf "REP-IND: ans=~a~n" v)
+      v)))
+
+;;; fact1-k : [nat? k?] -&gt; k?
+(define fact1-k
+  (lambda (n k)
+    (lambda (v)
+      (apply-k k (* n v)))))
+</pre>
+</div>
+
+<p>
+Note that a continuation maker abstracts out as its formals,
+the free identifiers in the body of the continuation being
+constructed.  For instance, <code>fact1-k</code> has as its formals,
+<code>n</code> and <code>k</code>, which are the free identifiers in the body of
+the continuation being returned.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org40baf84" class="outline-3">
+<h3 id="org40baf84"><span class="section-number-3">5.2.</span> Applying the continuation</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+Since a continuation is a function, <code>apply-k</code> simply applies
+its argument <code>k</code> to the value <code>v</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org275a566">;;; continuation application
+;;; apply-k : [k?  nat?] -&gt; ans?
+(define apply-k
+  (lambda (k v)
+    (k v)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge52c2f2" class="outline-3">
+<h3 id="orge52c2f2"><span class="section-number-3">5.3.</span> Factorial <code>fact/k</code> with representation independence</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+Note the use of <code>apply-k</code> and <code>make-fact1-k</code>.  These
+functions help in abstracting the representation of
+continuations.  Looking at <code>fact/k</code>, there is no need to
+assume that <code>fact-k</code> relies on <code>k</code> being a procedure.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org812aa70">;;; fact/k : [nat? k?] -&gt; ans?
+(define fact/k
+  (lambda (n k)
+    (if
+      (zero? n)
+      (apply-k k 1)
+      (fact/k (sub1 n)
+        (fact1-k n k)))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd417334" class="outline-3">
+<h3 id="orgd417334"><span class="section-number-3">5.4.</span> Top-level factorial interface</h3>
+<div class="outline-text-3" id="text-5-4">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org189fef0">;;; fact : nat? -&gt; nat?
+(define fact
+  (lambda (n)
+    (fact/k n (top-k))))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfd2adee" class="outline-2">
+<h2 id="orgfd2adee"><span class="section-number-2">6.</span> Record representation</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Continuations are now represented as data, or more
+accurately, records.  
+</p>
+</div>
+
+<div id="outline-container-org65a7c79" class="outline-3">
+<h3 id="org65a7c79"><span class="section-number-3">6.1.</span> Continuation makers</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+The continuation makers simply gather
+the free identifiers in a continuation and tag them.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgf5e3bd4">(define-datatype k k?
+  [top-k]
+  [fact1-k (val nat?) (saved-k k?)])
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc044584" class="outline-3">
+<h3 id="orgc044584"><span class="section-number-3">6.2.</span> Applying the continuation</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+<code>apply-k</code> does the heavy lifting by taking actions based on
+the continuation type.  Applying a continuation <code>k</code> of type
+<code>fact-1-k</code> to a value <code>v</code> entails the following: extract the
+saved continuation <code>saved-k</code> and a value <code>val</code> from <code>k</code> and
+then apply <code>saved-k</code> to <code>(* val v)</code>.  So the multiplications
+happen at the time of invoking <code>apply-k</code>.  Since <code>apply-k</code>
+(and in fact all the procedures) are invoked as tail calls,
+the second formal to <code>apply-k</code> effectively performs the role
+of an accumulator.  This becomes evident when we define
+a traceable version of <code>apply-k</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org6eaab4a">(trace-define apply-k
+  (lambda (c v)
+    (cases k c
+      [top-k () 
+        (printf "DATA-REP: ans=~a~n" v) v]
+      [fact1-k (val saved-k)
+        (apply-k saved-k (* val v))])))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbe2e15d" class="outline-3">
+<h3 id="orgbe2e15d"><span class="section-number-3">6.3.</span> <code>fact/k</code> and <code>fact</code></h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+There are no changes to these functions.  We are cashing in
+on the investment into abstraction.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6413158" class="outline-2">
+<h2 id="org6413158"><span class="section-number-2">7.</span> Closure representation</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Each continuation (except the top one) is now seen as a
+record consisting of a closure followed by a continuation.
+</p>
+</div>
+
+<div id="outline-container-org91ae57c" class="outline-3">
+<h3 id="org91ae57c"><span class="section-number-3">7.1.</span> Continuation are records that contain closures</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+The <code>clo-k</code> constructor takes a closure and a continuation
+and returns a new continuation.
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme" id="org4a0711b">(define-datatype k k?
+  [top-k]
+  [clo-k (clo procedure?) (k k?)])
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5d39d91" class="outline-3">
+<h3 id="org5d39d91"><span class="section-number-3">7.2.</span> Applying the continuations: <code>apply-k</code></h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+The behaviour of <code>apply-k</code> is the same as earlier for
+<code>top-k</code>.  When holding a continuation of type <code>clo-k</code>, it
+extracts the closure into <code>clo</code> and the continuation into
+<code>k</code>.  Then <code>apply-k</code> simply runs the closure on <code>v</code> and
+tail-recursively invokes <code>apply-k</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme" id="orgca85963">(define apply-k
+  (lambda (c v)
+    (cases k c
+      [top-k () 
+             (printf "CC: ans=~a~n" v) 
+             v]
+      [clo-k (clo k)
+             (apply-k k
+                      (clo v) ; this is a simple computation
+                      ; whose result is passed to the waiting
+                      ; continuation k
+                      )])))
+</pre>
+</div>
+
+<p>
+Note that <code>apply-k</code> is quite generic: all factorial specific
+computation is abstracted away into the the closure <code>clo</code>. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaa7984a" class="outline-3">
+<h3 id="orgaa7984a"><span class="section-number-3">7.3.</span> <code>fact/k</code></h3>
+<div class="outline-text-3" id="text-7-3">
+<div class="org-src-container">
+<pre class="src src-scheme" id="org5c5c921">(define fact/k
+  (lambda (n k)
+    (if (zero? n)
+        (apply-k k 1) 
+        (fact/k (- n 1)
+                (clo-k
+                 (lambda (v) (* n v))
+                 k)))))
+</pre>
+</div>
+<p>
+Note that the continuation constructed by <code>clo-k</code> employs a
+closure whose operations are all simple. <code>clo-k</code> separates
+the `simple' closure from the waiting continuation <code>k</code>.
+Contrast this with the continuation in the CPS version:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(lambda (v)
+  (k (* n v)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org25dc9db" class="outline-2">
+<h2 id="org25dc9db"><span class="section-number-2">8.</span> Conclusion</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+We have seen five different versions of the factorial
+program.  the first is direct style factorial.  The CPS
+style uses continuations as procedures.  This representation
+is abstrated next.  Finally continuations are turned into
+tagged data: as records containing primitive data (natural
+number), and alteratively as records containing closures.
+These closures encapsulate simple computations.
+</p>
+
+<p>
+Further transformations like transformation to imperative
+form, register-transformation and the stepper transformation
+may be done.  These are left as exercises.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: noteness</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

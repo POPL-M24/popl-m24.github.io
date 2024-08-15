@@ -1,0 +1,44 @@
+.plan {
+	width: 80vw;
+	min-width: 500px;
+}
+
+span.padded {
+	display: inline-block;
+	margin-right: 2em;
+}
+
+
+
+
+.box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.box p {
+    border: 2px solid Grey;
+    padding: 10px;
+	font-size: 110%;
+	color: DarkRed;
+}
+
+	
+
+/* ----------------------
+   Citation to sources 
+----------------------- */
+div.cit  {
+	margin-top: 400px;
+	display: flex;
+	flex: column;
+	justify-content: flex-end;
+}
+
+div.cit p {
+	font-size: 90%;
+	color: DarkRed;
+}
+

@@ -1,0 +1,14 @@
+(eval (quote datum)) = datum
+
+eval (unquote <datum>) = error
+eval (unquote-splicing <datum>) = error
+
+eval (quasiquote atom) = atom
+
+eval (quasiquote (unquote exp)) = eval exp
+
+eval (quasiquote (cons (unquote-splicing exp) tail)) = append (eval exp) (eval (quasiquote tail))
+
+eval (quasiquote (cons exp tail)) = cons (eval (quasiquote exp)) (eval (quasiquote tail))
+
+eval (quasiquote (vector e1 ...)) = vector (eval (quasiquote e1) ...)

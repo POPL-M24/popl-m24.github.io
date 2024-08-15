@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>POPL Lecture notes:  Embedding  Javascript objects  in Scheme</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="icon" type="image/png" href="../../themes/popl/style/img/favicon/popl.png" />
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<link rel="alternate stylesheet" type="text/css" href="code.css" />
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">POPL Lecture notes:  Embedding  Javascript objects  in Scheme</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org38303af">1. Introduction</a></li>
+<li><a href="#org384aade">2. Javascript Embedded in Scheme: Syntax</a></li>
+<li><a href="#orgab36f3b">3. Javascript Semantics Recap</a>
+<ul>
+<li><a href="#orga5f35eb">3.1. Function objects and Regular objects</a></li>
+<li><a href="#org9d8973b">3.2. Every object is constructed from a unique function object</a></li>
+<li><a href="#orgd7bf7b4">3.3. <code>Function</code> is the primordial fo</a></li>
+<li><a href="#orgee984e2">3.4. <code>function</code> creates function objects</a></li>
+<li><a href="#org7647b99">3.5. Every function object  owns the field <code>prototype</code></a></li>
+<li><a href="#org7540771">3.6. <code>Object</code> is a fo</a></li>
+<li><a href="#org4f50f35">3.7. <code>new</code> constructs objects</a></li>
+<li><a href="#orgd31e769">3.8. Recap of the Javacsript Ontology graph</a></li>
+</ul>
+</li>
+<li><a href="#org69a69df">4. Javascript Embedded in Scheme: Implementation</a>
+<ul>
+<li><a href="#orgb416e70">4.1. Creating function objects</a></li>
+<li><a href="#org109beb0">4.2. Prototype of <code>*js-obj*</code></a></li>
+<li><a href="#org6839302">4.3. Prototype of the function object</a></li>
+<li><a href="#orga4c7eca">4.4. Creating  <code>*js-fn*</code></a></li>
+<li><a href="#orge60a36d">4.5. Creating  <code>*js-obj*</code></a></li>
+<li><a href="#org7e6de83">4.6. Implementing <code>function</code></a></li>
+<li><a href="#orgfef439e">4.7. Implementing <code>new</code></a></li>
+<li><a href="#org702a378">4.8. Implementing Literal  objects</a></li>
+</ul>
+</li>
+<li><a href="#orgf473374">5. Unit testing</a></li>
+<li><a href="#org6b27f58">6. Comparing Javascript with its Scheme embedding</a>
+<ul>
+<li><a href="#org0f773fc">6.1. Differences</a></li>
+<li><a href="#orge497cd6">6.2. Other observations</a></li>
+</ul>
+</li>
+<li><a href="#orgf150890">7. Testing the implementation</a></li>
+<li><a href="#org6f6de2a">8. Sources</a></li>
+<li><a href="#org42e7035">9. Conclusion</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org38303af" class="outline-2">
+<h2 id="org38303af"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The goal of this section is to build a Scheme model of how
+Javascript's object system works.
+</p>
+
+<p>
+Until now, we have approached the problem of modelling a language by
+defining an abstract syntax for the language and then building an
+interpreter that evaluates expressions in that abstract syntax.
+</p>
+
+<p>
+Sometimes, however, it is easier to <i>embed</i> the language to be
+modelled (the object language) into another (host) language by
+implementing the main features of the object language (here,
+Javascript) as a <i>library</i>, i.e., a set of functions in the host
+language (here, Scheme).  By embedding the object language into the
+host language, we have at our disposal the entire host language and
+the simulated object language via the library.  However, there are
+disadvantages as well.  Sometimes, the embedding approach doesn't give
+us complete flexibility in simulating the language and things turn out
+slightly different in the embedding than the original language.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org384aade" class="outline-2">
+<h2 id="org384aade"><span class="section-number-2">2.</span> Javascript Embedded in Scheme: Syntax</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The abstract syntax for Javascript constructs and entities and their
+mapping to Scheme is given below:
+</p>
+<pre class="example" id="org736f9fc">
+Javascript                         =&gt; Scheme
+{x: 4, y: 3}                       =&gt; (js-obj '(x 4) '(y 3))
+a.x                                =&gt; (a 'x)
+a.x = exp                          =&gt; (a 'x exp)
+a.m(arg ...)                       =&gt; (call a 'm arg ...) 
+
+function (formal ...) {            =&gt; (js-fn (lambda (formal ...)
+     body                                body))
+}                                    
+new exp(arg ...)                   =&gt; (js-new exp arg ...)
+Function                           =&gt; *js-fn*
+Object                             =&gt; *js-obj*
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgab36f3b" class="outline-2">
+<h2 id="orgab36f3b"><span class="section-number-2">3.</span> Javascript Semantics Recap</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The latest authoritative document on Javascript is the
+  <a href="https://262.ecma-international.org/14.0/">Ecma-262 Language
+  Specification, 14th Edition, 2023</a>.  Here, we briefly recall
+  the key ideas behind the Javascript Object model as we
+  understand it.  Note that the terminology we use differs from
+  that used in the official specification.  For example, what we
+  call parent, the official spec calls prototype.
+</p>
+</div>
+
+<div id="outline-container-orga5f35eb" class="outline-3">
+<h3 id="orga5f35eb"><span class="section-number-3">3.1.</span> Function objects and Regular objects</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+There are two kinds of objects: function objects (fo, pronounced like
+"foe") and regular objects (ro, pronounced like "row").  Function
+objects have in them a closure, regular objects do not.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9d8973b" class="outline-3">
+<h3 id="org9d8973b"><span class="section-number-3">3.2.</span> Every object is constructed from a unique function object</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Every object is constructed from a unique function object, which is
+referred to as the former object's <i>constructor</i>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd7bf7b4" class="outline-3">
+<h3 id="orgd7bf7b4"><span class="section-number-3">3.3.</span> <code>Function</code> is the primordial fo</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<code>Function</code> is the constructor of itself.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgee984e2" class="outline-3">
+<h3 id="orgee984e2"><span class="section-number-3">3.4.</span> <code>function</code> creates function objects</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+The invocation <code>function(p ...){body}</code> constructs a fo.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7647b99" class="outline-3">
+<h3 id="org7647b99"><span class="section-number-3">3.5.</span> Every function object  owns the field <code>prototype</code></h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+This field is initially bound to a ro, but there are two exceptions.
+The <code>prototype</code> field of <code>Function</code> is a fo.  The <code>prototype</code> field
+of <code>Function.prototype</code> is non-existent.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7540771" class="outline-3">
+<h3 id="org7540771"><span class="section-number-3">3.6.</span> <code>Object</code> is a fo</h3>
+<div class="outline-text-3" id="text-3-6">
+<p>
+<code>Object</code> is a distinguished function object constructed <code>Function</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4f50f35" class="outline-3">
+<h3 id="org4f50f35"><span class="section-number-3">3.7.</span> <code>new</code> constructs objects</h3>
+<div class="outline-text-3" id="text-3-7">
+<p>
+<code>new &lt;e&gt; (&lt;e'&gt; ...)</code> constructs a new object.  The assumption is that
+<code>&lt;e&gt;</code> evaluates to a fo <code>f</code>.  First, an object <code>o</code> is constructed from
+<code>f</code>.  The list <code>(&lt;e'&gt; ...)</code> is evaluated to a list of values <code>(&lt;v&gt;
+...)</code>.  Then the closure of <code>f</code> is applied to the list <code>(o &lt;v&gt; ...)</code>.
+The object <code>o</code> is returned.
+</p>
+
+<p>
+Two things to note: 
+</p>
+
+<ul class="org-ul">
+<li>1. If <code>&lt;e&gt;</code> evaluates <code>Function</code>, then the new  object is a fo,
+otherwise it is a ro.</li>
+
+<li>2. If <code>&lt;e&gt;</code> evaluates to the initial value of <code>Function.prototype</code>,
+then it is an error.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgd31e769" class="outline-3">
+<h3 id="orgd31e769"><span class="section-number-3">3.8.</span> Recap of the Javacsript Ontology graph</h3>
+<div class="outline-text-3" id="text-3-8">
+
+<div id="org26a27f9" class="figure">
+<p><img src="../javascript/diagrams/javascript.png" alt="javascript.png">
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org69a69df" class="outline-2">
+<h2 id="org69a69df"><span class="section-number-2">4.</span> Javascript Embedded in Scheme: Implementation</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The Javascript object model is implemented as a module <code>js.rkt</code> that
+publishes the following bindings:
+</p>
+
+<pre class="example" id="org3044e03">
+js-fn, js-new, js-obj, *js-fn* and *js-obj*.
+</pre>
+</div>
+
+
+<div id="outline-container-orgb416e70" class="outline-3">
+<h3 id="orgb416e70"><span class="section-number-3">4.1.</span> Creating function objects</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+In the embedding we implement an object is <i>defined</i> to be a
+Javascript function object (fo) if it has a field called <code>closure</code>.
+The predicate <code>js-fn?</code> tests if its argument is a fo.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(require "obj.rkt")
+
+(define js-fn?
+  (lambda (o)
+    (call o 'owns? 'closure)))
+</pre>
+</div>
+
+<p>
+The Scheme function <code>make-fo</code> is the internal mechanism to create a
+javascript function object.  <code>(make-fo c parent proto)</code> creates a
+function object with closure <code>c</code>, <code>parent</code> and prototype <code>proto</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define (make-fo c parent proto)
+  (let ([binds (make-hash)])
+    (let ([set (make-setter binds)])
+      (let ([fo 
+              (basic-make-obj
+                parent binds
+                (lambda ()                     (set 'closure c)))])
+        (when (obj? proto) ;; proto is  obj? instead of #f
+          (begin
+            (set 'prototype proto)
+            (proto 'constructor fo)))
+        fo))))
+</pre>
+</div>
+
+<p>
+Notice that the process of creating a function object <code>fo</code> involves
+creating an object with <code>basic-make-obj</code> and setting its <code>closure</code> and
+<code>prototype</code> fields (if a  prototype was specified to <code>make-fo</code>).  In
+the latter case, the prototype's <code>constructor</code> field is set to <code>fo</code>.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org109beb0" class="outline-3">
+<h3 id="org109beb0"><span class="section-number-3">4.2.</span> Prototype of <code>*js-obj*</code></h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+With <code>make-obj</code> and <code>make-fo</code> available, we have all the mechanisms to
+create objects, but we haven't created any Javascript objects yet. 
+</p>
+
+<p>
+Now we are ready to do so.  We set up the initial Javascript runtime
+by systematically reconstructing the <a href="../current-topics/javascript/diagrams/javascript.png">Javascript Ontology diagram</a> (keep
+this handy in another window).
+</p>
+
+<p>
+The first object created is the ground object <code>js-obj-proto</code> destined
+to be the prototype of the yet to be constructed <code>*js-obj*</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">(define js-obj-proto (make-obj))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6839302" class="outline-3">
+<h3 id="org6839302"><span class="section-number-3">4.3.</span> Prototype of the function object</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+The second object created is the function object <code>js-fn-proto</code>
+destined to be the prototype of the yet to be defined <code>*js-fn*</code>
+object.  <code>js-fn-proto</code> has a <code>void</code> closure, a parent that is
+<code>js-obj-proto</code> and no <code>prototype</code> field.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; js-fn-proto : fo?
+(define js-fn-proto
+  (make-fo
+    void          ; closure
+    js-obj-proto  ; parent
+    #f            ; no prototype
+    ))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga4c7eca" class="outline-3">
+<h3 id="orga4c7eca"><span class="section-number-3">4.4.</span> Creating  <code>*js-fn*</code></h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+The top-level <code>*js-fn*</code> function object corresponds to <code>Function</code> in
+Javascript.  It is created using <code>make-fo</code>.  <code>js-fn-proto</code> is both the
+parent and prototype of <code>*js-fn*</code>.  The constructor of <code>*js-fn*</code> is
+itself.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; *js-fn* : fo?
+(define *js-fn*
+  (let ([f (make-fo
+             void         ; closure
+             js-fn-proto  ; parent
+             js-fn-proto  ; prototype
+             )])
+    (f 'constructor f)
+    f))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge60a36d" class="outline-3">
+<h3 id="orge60a36d"><span class="section-number-3">4.5.</span> Creating  <code>*js-obj*</code></h3>
+<div class="outline-text-3" id="text-4-5">
+<p>
+The function object <code>*js-obj*</code> corresponds to <code>Object</code> in Javascript.
+It is a function object built with a closure that is <code>void</code>, a parent
+that is <code>js-fn-proto</code> and a prototype that is <code>js-obj-proto</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; *js-obj* : fo?
+(define *js-obj*
+  (make-fo
+    void           ; closure
+    js-fn-proto    ; parent
+    js-obj-proto   ; prototype
+    ))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7e6de83" class="outline-3">
+<h3 id="org7e6de83"><span class="section-number-3">4.6.</span> Implementing <code>function</code></h3>
+<div class="outline-text-3" id="text-4-6">
+<p>
+The <code>function</code> keyword takes a list of formal parameters and a body
+and returns a function object.  The Scheme implementation of
+<code>function</code> is the function <code>js-fn</code> that takes a closure and returns a
+function object.
+</p>
+
+<pre class="example" id="org3310255">
+;;; function (&lt;arg&gt; ...) { &lt;body&gt; } 
+;;;   ===&gt; (fn (lambda (arg ...)) &lt;body&gt;)
+</pre>
+
+<p>
+<code>js-fn</code> is <code>make-fo</code> invoked with a closure, <code>js-fn-proto</code> as the
+parent, a brand new object as the prototype.   The prototype's parent
+is <code>js-obj-proto</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; js-fn : closure? -&gt; fo?
+(define js-fn
+  (lambda (c)
+    (make-fo
+      c                       ; closure
+      js-fn-proto             ; parent
+      (make-obj js-obj-proto) ; prototype
+      )))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfef439e" class="outline-3">
+<h3 id="orgfef439e"><span class="section-number-3">4.7.</span> Implementing <code>new</code></h3>
+<div class="outline-text-3" id="text-4-7">
+<p>
+The javascript constructor <code>new &lt;fo&gt; &lt;args&gt;</code> is implemented using
+function <code>js-new</code>.  <code>js-new</code> takes a function object <code>fo</code> and a
+(possibly empty) list <code>args</code> and returns an object.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; js-new : (fo?  . (listof any/c)) -&gt; obj?
+(define js-new
+  (lambda (fo . args)
+    (let* ([a (make-obj (fo 'prototype))]
+           [c (fo 'closure)]
+           [ignore (apply c (cons a args))])
+      a)))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org702a378" class="outline-3">
+<h3 id="org702a378"><span class="section-number-3">4.8.</span> Implementing Literal  objects</h3>
+<div class="outline-text-3" id="text-4-8">
+<p>
+A literal object is constructed from <code>*js-obj*</code> and populated with a
+set of bindings <code>bind</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-scheme">;;; js-obj : (listof (list symbol? any/c)) -&gt; obj?
+(define js-obj
+  (lambda binds
+    (let ([a (js-new *js-obj*)])
+      (for-each (lambda (bind)
+                  (a (first bind) (second bind)))
+        binds)
+      a)))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf473374" class="outline-2">
+<h2 id="orgf473374"><span class="section-number-2">5.</span> Unit testing</h2>
+<div class="outline-text-2" id="text-5">
+<div class="org-src-container">
+<pre class="src src-scheme">(require rackunit)
+(require rackunit/text-ui)
+
+(define (check-err thunk)
+  (check-exn exn:fail? thunk))
+
+(define check-eq check-eq?)
+
+(define check-owns
+  (lambda (o x)
+    (check-true (call o 'owns? x))))
+
+(define check-not-owns
+  (lambda (o x)
+    (check-false (call o 'owns? x))))
+
+(define literal-ts
+  (test-case
+    "object tests"
+    (let ()
+
+      ;;; *js-fn* tests
+      (check-true (obj? *js-fn*))
+      (check-true (js-fn? *js-fn*))
+
+      (check-owns  *js-fn* 'prototype)
+
+      ;;; js-fn-proto 
+      (define js-fn-proto (*js-fn* 'prototype))
+      (check-true (js-fn? js-fn-proto))
+      (check-not-owns  js-fn-proto 'prototype)
+
+
+      ;;; *js-obj*
+      (check-true (obj? *js-obj*))
+      (check-true (js-fn? *js-obj*))
+      (check-owns *js-obj* 'prototype)
+
+      ;;; js-obj-proto
+      (define js-obj-proto (*js-obj* 'prototype))
+      (check-false (js-fn? js-obj-proto))
+      (check-not-owns js-obj-proto  'prototype)
+
+
+      (define a (js-obj '(x 3)))
+      (check-eq (a 'x) 3)
+      (check-owns a 'x)
+      (check-not-owns  a  'y)
+      (check-err (lambda () (a 'y)))
+
+      (define Point (js-fn (lambda (this y)
+                             (this 'y y))))
+
+      (check-true (js-fn? Point))
+      (check-eq (Point 'constructor) *js-fn*)
+      (check-owns  Point  'closure)
+      (check-eq (: Point 'constructor 'prototype) js-fn-proto)
+
+      (define p (js-new Point 5))
+
+      (check-eq (p 'constructor) Point)
+
+      (check-owns p 'y)
+      (check-eq (p 'y) 5)
+
+      ;; set a field in Point's prototype.  It should be inherited by p
+
+      ((Point 'prototype) 'z 2)
+      (check-eq (p 'z) 2)
+
+
+      ;; set a field in js-obj-proto.   All other objects should inherit this.
+
+      (js-obj-proto 'w 10)
+
+      (check-eq (*js-fn* 'w) 10)
+      (check-eq (*js-obj* 'w) 10)
+      (check-eq (Point 'w) 10)
+      (check-eq (p 'w) 10)
+      (check-eq (a 'w) 10))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6b27f58" class="outline-2">
+<h2 id="org6b27f58"><span class="section-number-2">6.</span> Comparing Javascript with its Scheme embedding</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-org0f773fc" class="outline-3">
+<h3 id="org0f773fc"><span class="section-number-3">6.1.</span> Differences</h3>
+<div class="outline-text-3" id="text-6-1">
+<dl class="org-dl">
+<dt>closure </dt><dd>In Javascript, a function's closure is itself an
+object.  In the Scheme embedding that we have
+designed, the closure is not an object but a method.
+In Javascript, the function object does not have a
+field called <code>closure</code>; in our implementation of
+Javascript objects, the closure is available through
+the <code>closure</code> field.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><code>apply</code></dt><dd>In Javascript, the <code>apply</code> method on a function
+object allows the object's closure to be applied to
+an arbitrary object and additional arguments.  In the
+embedding, <code>apply</code> is not available.  Instead, the
+closure is directly available as a method.  The
+effect of <code>apply</code> is instead achieved in the
+implementation using the already  available
+<i>apply</i> function of Scheme.</dd>
+</dl>
+
+
+<dl class="org-dl">
+<dt><code>hasOwnProperty</code></dt><dd>This method allows one to query an object to
+find out if a particular field is owned by that object.  In
+Javascript, this field is typically inherited.  In our
+embedding every javascript object has its own field called
+<code>owns?</code>.</dd>
+
+<dt><code>undefined</code> behaviour for missing fields</dt><dd>Javascript returns
+undefined if a field is not found during lookup.  The scheme
+embedding raises an error.  The <code>error-obj</code> in the Scheme
+implementation can be easily changed to return <code>undefined</code>.
+But raising an error seems the more sensible thing to do.  The
+<code>undefined</code> primitive data is not implemented. 
+
+<dl class="org-dl">
+<dt><code>typeof</code></dt><dd>Javascript has a primitive function called <code>tyypeof</code>
+that returns the type of its argument.  In the
+embedding no such function is provided.  However,
+the function <code>js-fn?</code> is available for use to query
+if an object is a function object.</dd>
+</dl></dd>
+</dl>
+</div>
+</div>
+
+
+<div id="outline-container-orge497cd6" class="outline-3">
+<h3 id="orge497cd6"><span class="section-number-3">6.2.</span> Other observations</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+The nice thing about this embedding is that there is no difference in
+the interface between javascript objects and objects created using
+<code>make-obj</code>.  This is because javascript objects and scheme objects are
+created from the same primitive <code>basic-make-obj</code>.  This allows us to
+mix javascript, the simple Scheme object model and the rest of Scheme,
+all in the same program.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf150890" class="outline-2">
+<h2 id="orgf150890"><span class="section-number-2">7.</span> Testing the implementation</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+:CUSTOM<sub>ID</sub>: comparison
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-js"><span class="linenr"> 1: </span>// Javascript Node.js
+<span class="linenr"> 2: </span>// $ node --version
+<span class="linenr"> 3: </span>// v0.10.19
+<span class="linenr"> 4: </span>
+<span class="linenr"> 5: </span>// Function
+<span class="linenr"> 6: </span>&gt; typeof(Function)
+<span class="linenr"> 7: </span>'function'
+<span class="linenr"> 8: </span>&gt; Function.hasOwnProperty("prototype")
+<span class="linenr"> 9: </span>true
+<span class="linenr">10: </span>&gt; var FunctionProto = Function.prototype
+<span class="linenr">11: </span>undefined
+<span class="linenr">12: </span>&gt; typeof(FunctionProto)
+<span class="linenr">13: </span>'function'
+<span class="linenr">14: </span>&gt; FunctionProto.hasOwnProperty("prototype")
+<span class="linenr">15: </span>false
+<span class="linenr">16: </span>
+<span class="linenr">17: </span>// Object
+<span class="linenr">18: </span>&gt; typeof(Object)
+<span class="linenr">19: </span>'function'
+<span class="linenr">20: </span>&gt; Object.hasOwnProperty("prototype")
+<span class="linenr">21: </span>true
+<span class="linenr">22: </span>
+<span class="linenr">23: </span>// ObjProto
+<span class="linenr">24: </span>&gt; var ObjProto = Object.prototype;
+<span class="linenr">25: </span>undefined
+<span class="linenr">26: </span>&gt; typeof(ObjProto)
+<span class="linenr">27: </span>'object'
+<span class="linenr">28: </span>&gt; ObjProto.hasOwnProperty("prototype")
+<span class="linenr">29: </span>false
+<span class="linenr">30: </span>
+<span class="linenr">31: </span>&gt; var a = {x:3};
+<span class="linenr">32: </span>undefined
+<span class="linenr">33: </span>&gt; a.x
+<span class="linenr">34: </span>3
+<span class="linenr">35: </span>&gt; a.hasOwnProperty("prototype")
+<span class="linenr">36: </span>false
+<span class="linenr">37: </span>&gt; a.hasOwnProperty("x");
+<span class="linenr">38: </span>true
+<span class="linenr">39: </span>&gt; a.hasOwnProperty("y");
+<span class="linenr">40: </span>false
+<span class="linenr">41: </span>&gt; a.y
+<span class="linenr">42: </span>undefined
+<span class="linenr">43: </span>
+<span class="linenr">44: </span>&gt; var Point = function(y) {this.y = y;};
+<span class="linenr">45: </span>undefined
+<span class="linenr">46: </span>
+<span class="linenr">47: </span>
+<span class="linenr">48: </span>&gt; typeof(Point)
+<span class="linenr">49: </span>'function'
+<span class="linenr">50: </span>&gt; Point.constructor === Function
+<span class="linenr">51: </span>true
+<span class="linenr">52: </span>&gt; Point.constructor.prototype === FunctionProto
+<span class="linenr">53: </span>true
+<span class="linenr">54: </span>&gt; var p = new Point(5)
+<span class="linenr">55: </span>undefined
+<span class="linenr">56: </span>&gt; p.constructor === Point
+<span class="linenr">57: </span>true
+<span class="linenr">58: </span>&gt; p.hasOwnProperty("y")
+<span class="linenr">59: </span>true
+<span class="linenr">60: </span>&gt; p.y
+<span class="linenr">61: </span>5
+<span class="linenr">62: </span>
+<span class="linenr">63: </span>// set a field in Point's prototype.
+<span class="linenr">64: </span>// It should be inherited by p
+<span class="linenr">65: </span>
+<span class="linenr">66: </span>&gt; Point.prototype.z = 2
+<span class="linenr">67: </span>2
+<span class="linenr">68: </span>&gt; p.z
+<span class="linenr">69: </span>2
+<span class="linenr">70: </span>
+<span class="linenr">71: </span>//  set a field in ObjProto
+<span class="linenr">72: </span>// All other objects should inherit this.
+<span class="linenr">73: </span>&gt; ObjProto.w = 10
+<span class="linenr">74: </span>10
+<span class="linenr">75: </span>&gt; Function.w
+<span class="linenr">76: </span>10
+<span class="linenr">77: </span>&gt; Object.w
+<span class="linenr">78: </span>10
+<span class="linenr">79: </span>&gt; Point.w
+<span class="linenr">80: </span>10
+<span class="linenr">81: </span>&gt; p.w
+<span class="linenr">82: </span>10
+<span class="linenr">83: </span>&gt; a.w
+<span class="linenr">84: </span>10
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-scheme"><span class="linenr"> 1: </span>Welcome to Racket v5.1.3.
+<span class="linenr"> 2: </span>&gt; (require "js.rkt")
+<span class="linenr"> 3: </span>&gt; (obj? *js-fn*)
+<span class="linenr"> 4: </span>#t
+<span class="linenr"> 5: </span>;; Function tests
+<span class="linenr"> 6: </span>&gt; (js-fn? *js-fn*)
+<span class="linenr"> 7: </span>#t
+<span class="linenr"> 8: </span>&gt; (call *js-fn* 'owns? 'prototype)
+<span class="linenr"> 9: </span>#t
+<span class="linenr">10: </span>&gt; (define js-fn-proto (*js-fn* 'prototype))
+<span class="linenr">11: </span>
+<span class="linenr">12: </span>&gt; (js-fn? js-fn-proto)
+<span class="linenr">13: </span>#t
+<span class="linenr">14: </span>&gt; (call js-fn-proto 'owns? 'prototype)
+<span class="linenr">15: </span>#f
+<span class="linenr">16: </span>
+<span class="linenr">17: </span>;; *js-obj*
+<span class="linenr">18: </span>&gt; (js-fn? *js-obj*)
+<span class="linenr">19: </span>#t
+<span class="linenr">20: </span>&gt; (call *js-obj* 'owns? 'prototype)
+<span class="linenr">21: </span>#t
+<span class="linenr">22: </span>
+<span class="linenr">23: </span>;; js-obj-proto
+<span class="linenr">24: </span>&gt; (define js-obj-proto (*js-obj* 'prototype))
+<span class="linenr">25: </span>
+<span class="linenr">26: </span>&gt; (js-fn? js-obj-proto)
+<span class="linenr">27: </span>#f
+<span class="linenr">28: </span>&gt; (call js-obj-proto 'owns? 'prototype)
+<span class="linenr">29: </span>#f
+<span class="linenr">30: </span>
+<span class="linenr">31: </span>&gt; (define a (js-obj '(x 3)))
+<span class="linenr">32: </span>
+<span class="linenr">33: </span>&gt; (a 'x)
+<span class="linenr">34: </span>3
+<span class="linenr">35: </span>&gt; (call a 'owns? 'prototype)
+<span class="linenr">36: </span>#f
+<span class="linenr">37: </span>&gt; (call a 'owns? 'x)
+<span class="linenr">38: </span>#t
+<span class="linenr">39: </span>&gt; (call a 'owns? 'y)
+<span class="linenr">40: </span>#f
+<span class="linenr">41: </span>&gt; (a 'y)
+<span class="linenr">42: </span>error-obj: no field y
+<span class="linenr">43: </span>
+<span class="linenr">44: </span>&gt; (define Point 
+<span class="linenr">45: </span>    (js-fn (lambda (this y)
+<span class="linenr">46: </span>             (this 'y y))))
+<span class="linenr">47: </span>
+<span class="linenr">48: </span>&gt; (js-fn? Point)
+<span class="linenr">49: </span>#t
+<span class="linenr">50: </span>&gt; (eq? (Point 'constructor) *js-fn*)
+<span class="linenr">51: </span>#t
+<span class="linenr">52: </span>&gt;  (eq? (: Point 'constructor 'prototype) js-fn-proto)
+<span class="linenr">53: </span>#t
+<span class="linenr">54: </span>&gt; (define p (js-new Point 5))
+<span class="linenr">55: </span>
+<span class="linenr">56: </span>&gt;  (eq? (p 'constructor) Point)
+<span class="linenr">57: </span>#t
+<span class="linenr">58: </span>&gt; (call p 'owns? 'y) 
+<span class="linenr">59: </span>#t
+<span class="linenr">60: </span>&gt; (p 'y)
+<span class="linenr">61: </span>5
+<span class="linenr">62: </span>
+<span class="linenr">63: </span>&gt; ;; set a field in Point's prototype.
+<span class="linenr">64: </span>  ;;   It should be inherited by p
+<span class="linenr">65: </span>
+<span class="linenr">66: </span>((Point 'prototype) 'z 2)
+<span class="linenr">67: </span>
+<span class="linenr">68: </span>&gt; (p 'z) 
+<span class="linenr">69: </span>2
+<span class="linenr">70: </span>
+<span class="linenr">71: </span>&gt; ;; set a field in js-obj-proto.
+<span class="linenr">72: </span>  ;; All other objects should inherit this.
+<span class="linenr">73: </span> (js-obj-proto 'w 10)
+<span class="linenr">74: </span>
+<span class="linenr">75: </span>&gt;  (*js-fn* 'w)
+<span class="linenr">76: </span>10
+<span class="linenr">77: </span>&gt; (*js-obj* 'w)
+<span class="linenr">78: </span>10
+<span class="linenr">79: </span>&gt;  (Point 'w)
+<span class="linenr">80: </span>10
+<span class="linenr">81: </span>&gt;   (p 'w)
+<span class="linenr">82: </span>10
+<span class="linenr">83: </span>&gt;  (a 'w)
+<span class="linenr">84: </span>10
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6f6de2a" class="outline-2">
+<h2 id="org6f6de2a"><span class="section-number-2">8.</span> Sources</h2>
+<div class="outline-text-2" id="text-8">
+<dl class="org-dl">
+<dt><a href="./js.rkt">./js.rkt</a></dt><dd>An embedding of Javascript objects in Scheme.
+Javascript objects are implemented using the 
+<code>basic-make-obj</code> mechanism.</dd>
+</dl>
+</div>
+</div>
+
+
+
+<div id="outline-container-org42e7035" class="outline-2">
+<h2 id="org42e7035"><span class="section-number-2">9.</span> Conclusion</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+We have embedded the object mechanism of Javascript in Scheme.  The
+embedding is strikingly simple.  Both Scheme objects and Javascript
+objects spring from the same basic object construction mechanism
+<code>basic-make-obj</code>.
+</p>
+
+<p>
+The implementation of Javascript in Scheme gives us a chance to
+understand, model and experiment with how Javascript's objects,
+functions and their construction works.  It gives us a opportunity to
+explore alternatives to some design decisions in Javascript.  Some of
+these are worth reporting to the official Javascript designers.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

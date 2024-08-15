@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PoPL Lecture Notes Topics</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../themes/readtheorg/style/js/readtheorg.js"></script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">PoPL Lecture Notes Topics</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org1033408">1. Abstract Reductions</a></li>
+<li><a href="#org1f30f50">2. Addition Language</a></li>
+<li><a href="#org118987e">3. Currying</a></li>
+<li><a href="#org37cb9bb">4. Dynamic Binding</a></li>
+<li><a href="#orge9c0c4c">5. Functional Programming</a></li>
+<li><a href="#orgd576e03">6. Higher Order Functions</a></li>
+<li><a href="#orgb7906c8">7. IF/+ Language</a></li>
+<li><a href="#org862a12a">8. Imperative Form</a></li>
+<li><a href="#org7eeada9">9. Inductive Datatypes</a></li>
+<li><a href="#org3b53ed3">10. Lambda Calculus 1</a></li>
+<li><a href="#orgdfc1a34">11. Lambda Calculus 2</a></li>
+<li><a href="#orgc47ba62">12. Mapcode</a></li>
+<li><a href="#org9560103">13. Objects</a></li>
+<li><a href="#org766a7f0">14. Par-Lang</a></li>
+<li><a href="#org1a6c2aa">15. Racket Intro</a></li>
+<li><a href="#org66cd643">16. Streams</a></li>
+<li><a href="#orgffea2d0">17. Structural Dynamics (Notes by Prof. K Viswanath)</a></li>
+<li><a href="#org2e621c1">18. Abstract Syntax Trees and (Un)parsing</a></li>
+<li><a href="#org6789da2">19. Types</a></li>
+<li><a href="#orgc41e5ec">20. Y Combinator</a></li>
+<li><a href="#orgd370647">21. Operational Semantics</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org1033408" class="outline-2">
+<h2 id="org1033408"><span class="section-number-2">1.</span> <a href="./abstract-reductions/index.html">Abstract Reductions</a></h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Abstract Reductions based on Baader and Nipkow's book.
+</p>
+</div>
+</div>
+<div id="outline-container-org1f30f50" class="outline-2">
+<h2 id="org1f30f50"><span class="section-number-2">2.</span> <a href="./addition-lang/index.html">Addition Language</a></h2>
+</div>
+<div id="outline-container-org118987e" class="outline-2">
+<h2 id="org118987e"><span class="section-number-2">3.</span> <a href="./curry/index.html">Currying</a></h2>
+<div class="outline-text-2" id="text-3">
+<p>
+A fundamental notion related to higher order functional
+programming.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org37cb9bb" class="outline-2">
+<h2 id="org37cb9bb"><span class="section-number-2">4.</span> <a href="./dynamic-binding/index.html">Dynamic Binding</a></h2>
+</div>
+<div id="outline-container-orge9c0c4c" class="outline-2">
+<h2 id="orge9c0c4c"><span class="section-number-2">5.</span> <a href="./fp/index.html">Functional Programming</a></h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Introduces Linear Reduction and Higher  order reduction. 
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgd576e03" class="outline-2">
+<h2 id="orgd576e03"><span class="section-number-2">6.</span> <a href="./fp/hof.html">Higher Order Functions</a></h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Introduces higher order functions <code>compose</code>, iteration and derivative.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb7906c8" class="outline-2">
+<h2 id="orgb7906c8"><span class="section-number-2">7.</span> <a href="./if+div-lang/index.html">IF/+ Language</a></h2>
+</div>
+<div id="outline-container-org862a12a" class="outline-2">
+<h2 id="org862a12a"><span class="section-number-2">8.</span> <a href="./imperative-form/index.html">Imperative Form</a></h2>
+</div>
+<div id="outline-container-org7eeada9" class="outline-2">
+<h2 id="org7eeada9"><span class="section-number-2">9.</span> <a href="./inductive-datatypes/index.html">Inductive Datatypes</a></h2>
+</div>
+<div id="outline-container-org3b53ed3" class="outline-2">
+<h2 id="org3b53ed3"><span class="section-number-2">10.</span> <a href="./lambda-calculus-1/index.html">Lambda Calculus 1</a></h2>
+</div>
+<div id="outline-container-orgdfc1a34" class="outline-2">
+<h2 id="orgdfc1a34"><span class="section-number-2">11.</span> <a href="./lambda-calculus-2/index.html">Lambda Calculus 2</a></h2>
+</div>
+<div id="outline-container-orgc47ba62" class="outline-2">
+<h2 id="orgc47ba62"><span class="section-number-2">12.</span> <a href="./mapcode/index.html">Mapcode</a></h2>
+</div>
+<div id="outline-container-org9560103" class="outline-2">
+<h2 id="org9560103"><span class="section-number-2">13.</span> <a href="./objects/index.html">Objects</a></h2>
+</div>
+<div id="outline-container-org766a7f0" class="outline-2">
+<h2 id="org766a7f0"><span class="section-number-2">14.</span> <a href="./par-lang/index.html">Par-Lang</a></h2>
+</div>
+<div id="outline-container-org1a6c2aa" class="outline-2">
+<h2 id="org1a6c2aa"><span class="section-number-2">15.</span> <a href="./racket-intro/index.html">Racket Intro</a></h2>
+</div>
+<div id="outline-container-org66cd643" class="outline-2">
+<h2 id="org66cd643"><span class="section-number-2">16.</span> <a href="./streams/index.html">Streams</a></h2>
+</div>
+<div id="outline-container-orgffea2d0" class="outline-2">
+<h2 id="orgffea2d0"><span class="section-number-2">17.</span> <a href="./structural-dynamics/StructuralDynamicsNotes-3-Version1.pdf">Structural Dynamics</a> (Notes by Prof. K Viswanath)</h2>
+</div>
+<div id="outline-container-org2e621c1" class="outline-2">
+<h2 id="org2e621c1"><span class="section-number-2">18.</span> <a href="./syntax/index.html">Abstract Syntax Trees and (Un)parsing</a></h2>
+</div>
+<div id="outline-container-org6789da2" class="outline-2">
+<h2 id="org6789da2"><span class="section-number-2">19.</span> <a href="./types/index.html">Types</a></h2>
+</div>
+<div id="outline-container-orgc41e5ec" class="outline-2">
+<h2 id="orgc41e5ec"><span class="section-number-2">20.</span> <a href="./y-combinator/index.html">Y Combinator</a></h2>
+</div>
+
+
+<div id="outline-container-orgd370647" class="outline-2">
+<h2 id="orgd370647"><span class="section-number-2">21.</span> Operational Semantics</h2>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

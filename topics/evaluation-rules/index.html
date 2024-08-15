@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Evaluation via rules of inference</title>
+<meta name="author" content="noteness" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Evaluation via rules of inference</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org03862b8">1. Introduction</a></li>
+<li><a href="#org77f52ed">2. Domains</a>
+<ul>
+<li><a href="#org053101c">2.1. Abstract Syntax</a></li>
+<li><a href="#org21a57fb">2.2. Values</a></li>
+<li><a href="#orgc4df1dd">2.3. Environments</a></li>
+<li><a href="#orga25d573">2.4. Evaluation functions</a></li>
+<li><a href="#orgf043d51">2.5. Environment functions</a></li>
+</ul>
+</li>
+<li><a href="#org4f2235e">3. Rules of Evaluation</a>
+<ul>
+<li><a href="#orgd7cfd50">3.1. Notational Convention</a></li>
+<li><a href="#orgffbc48e">3.2. Numbers</a></li>
+<li><a href="#org7a902ad">3.3. Booleans</a></li>
+<li><a href="#orgbc38ea0">3.4. Identifiers</a></li>
+<li><a href="#orged83fe4">3.5. If</a></li>
+<li><a href="#org32ce60c">3.6. Prim App</a></li>
+<li><a href="#org99554cc">3.7. Let</a></li>
+<li><a href="#org8955151">3.8. Functions</a></li>
+<li><a href="#orgd86b8fc">3.9. App</a></li>
+<li><a href="#orga8bfaa6">3.10. Apply-proc</a>
+<ul>
+<li><a href="#org0b52c57">3.10.1. Clo</a></li>
+<li><a href="#org4265042">3.10.2. Prim</a></li>
+</ul>
+</li>
+<li><a href="#org1139fb0">3.11. Environment</a></li>
+</ul>
+</li>
+<li><a href="#orgfeaba21">4. Examples of proofs</a>
+<ul>
+<li><a href="#org26e188d">4.1. Simple constants</a></li>
+<li><a href="#org5a7fd4a">4.2. Variable references</a></li>
+<li><a href="#orgd672d28">4.3. If</a></li>
+<li><a href="#org9438588">4.4. Let</a></li>
+</ul>
+</li>
+<li><a href="#orga4692fd">5. Examples of reductions</a>
+<ul>
+<li><a href="#orga9cfcd7">5.1. Constants</a></li>
+<li><a href="#org6229bea">5.2. Identifiers</a></li>
+<li><a href="#orge17b824">5.3. If</a></li>
+<li><a href="#org0a8dd59">5.4. Let</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org03862b8" class="outline-2">
+<h2 id="org03862b8"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The purpose of this lesson is to understand the execution of a program
+by tracing the evaluation of the program.  The inspiration for this
+exercise is approach to understanding evaluation of expression in
+terms of the <i>specification</i> of the evaluation process before
+committing into its implementation.  Chapters 3 and 4 of EoPL use this
+idea of specifications before introducing the implementation of
+interpreters.a
+</p>
+
+<pre class="example" id="org274138d">
+(value-of &lt;exp&gt; &lt;env&gt;) = &lt;val&gt;
+</pre>
+
+<p>
+Tracing the evaluation then corresponds to building a proof of why a
+certain evaluation (if it does) returns a certain value.  In the
+interim, the tracing lets us visit all the salient points during the
+execution of the program.
+</p>
+
+<p>
+In the rest of this chapter, we trace the evaluation of a few example
+programs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org77f52ed" class="outline-2">
+<h2 id="org77f52ed"><span class="section-number-2">2.</span> Domains</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org053101c" class="outline-3">
+<h3 id="org053101c"><span class="section-number-3">2.1.</span> Abstract Syntax</h3>
+<div class="outline-text-3" id="text-2-1">
+<pre class="example" id="org3c6f171">
+ast? ::= (num (n number?)) 
+         (bool (b boolean?)) 
+         (id-ref (id id?)) 
+         (ifte (test ast?) (then ast?) (else ast?))
+         (lambda ((id id?) ...) (body ast?))
+         (assume ([(id id?) (b ast?)] ...) (body ast?))
+         (app (rator ast?) (rand ast?) ...)
+op?   ::= + | - | * | /
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org21a57fb" class="outline-3">
+<h3 id="org21a57fb"><span class="section-number-3">2.2.</span> Values</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+The domain of expressible values is 
+</p>
+<pre class="example" id="orgf37959d">
+
+denotable? ::= value?
+expressible? ::= value?
+
+value? ::= number? | boolean? | closure? | prim?
+closure? ::= (closure ((x id?) ...) (a ast?) (e env?))
+prim?    ::= (prim (op op?))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgc4df1dd" class="outline-3">
+<h3 id="orgc4df1dd"><span class="section-number-3">2.3.</span> Environments</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Environment are finite maps from  identifiers to denotables.
+</p>
+
+<pre class="example" id="org7874814">
+env? ::= ([(id id?) (d denotable?)] ...)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orga25d573" class="outline-3">
+<h3 id="orga25d573"><span class="section-number-3">2.4.</span> Evaluation functions</h3>
+<div class="outline-text-3" id="text-2-4">
+<pre class="example" id="org4227b87">
+value-of: ast? env? -&gt; expressible?
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgf043d51" class="outline-3">
+<h3 id="orgf043d51"><span class="section-number-3">2.5.</span> Environment functions</h3>
+<div class="outline-text-3" id="text-2-5">
+<pre class="example" id="org7bd4ee5">
+lookup: env? id? -&gt; denotable?
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4f2235e" class="outline-2">
+<h2 id="org4f2235e"><span class="section-number-2">3.</span> Rules of Evaluation</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The specification of evaluation is communicated via <i>rules of
+inference</i>.  Each rule of inference is a (schema) containing two
+parts: the first a collection of zero or more antecedent judgements,
+and the second a judgement called the consequent.  The two are
+written separated by a horizontal line. 
+</p>
+</div>
+
+<div id="outline-container-orgd7cfd50" class="outline-3">
+<h3 id="orgd7cfd50"><span class="section-number-3">3.1.</span> Notational Convention</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+To reduce clutter in the rules, we will use the following convention
+for meta-variables, and their primed and subscripted variants ranging
+over their domains:
+</p>
+
+<pre class="example" id="org5c820ed">
+n: number? 
+b: boolean?
+u,v: expressible?
+d: denotable?
+a: ast?
+e: env?
+p: op?
+x: id?
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgffbc48e" class="outline-3">
+<h3 id="orgffbc48e"><span class="section-number-3">3.2.</span> Numbers</h3>
+<div class="outline-text-3" id="text-3-2">
+<pre class="example" id="org5435f25">
+
+------------------------ NUM
+  (value-of n e) = n
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org7a902ad" class="outline-3">
+<h3 id="org7a902ad"><span class="section-number-3">3.3.</span> Booleans</h3>
+<div class="outline-text-3" id="text-3-3">
+<pre class="example" id="orgbdeba25">
+------------------------ BOOL
+ (value-of b e) = b
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-orgbc38ea0" class="outline-3">
+<h3 id="orgbc38ea0"><span class="section-number-3">3.4.</span> Identifiers</h3>
+<div class="outline-text-3" id="text-3-4">
+<pre class="example" id="org465ae4d">
+(lookup e x) = v
+---------------------------------------- ID-REF
+(value-of (id-ref x) e) = v
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orged83fe4" class="outline-3">
+<h3 id="orged83fe4"><span class="section-number-3">3.5.</span> If</h3>
+<div class="outline-text-3" id="text-3-5">
+<pre class="example" id="org6055cc7">
+(value-of a_1 e) = b
+---------------------------------------- IFTE
+(value-of (ifte a_1 a_2 a_3) e) = 
+(value-of (if b a_1 a_2) e)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org32ce60c" class="outline-3">
+<h3 id="org32ce60c"><span class="section-number-3">3.6.</span> Prim App</h3>
+<div class="outline-text-3" id="text-3-6">
+<pre class="example" id="org1ae9e1b">
+(value-of a e) = u ...
+(p u ...) = v
+---------------------------------------- APP
+(value-of (prim-app p a ...) e)= v
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org99554cc" class="outline-3">
+<h3 id="org99554cc"><span class="section-number-3">3.7.</span> Let</h3>
+<div class="outline-text-3" id="text-3-7">
+<pre class="example" id="org3dd168b">
+(value-of a e) = u ...
+e' = (extended-env e (x ...) (u ...))
+(value-of a' e') = v
+--------------------------------------------------- LET
+(value-of (let ([x a] ...) a') e) = v
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org8955151" class="outline-3">
+<h3 id="org8955151"><span class="section-number-3">3.8.</span> Functions</h3>
+<div class="outline-text-3" id="text-3-8">
+<pre class="example" id="org3211225">
+-------------------------------------------------------- FUN
+(value-of (lambda (x ...) a) e) = (closure (x ...) a e)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgd86b8fc" class="outline-3">
+<h3 id="orgd86b8fc"><span class="section-number-3">3.9.</span> App</h3>
+<div class="outline-text-3" id="text-3-9">
+<pre class="example" id="org7686a52">
+(value-of a e) = u
+(value-of a_1 e) = u_1 ...
+(apply-proc u u_1 ...) = v
+------------------------------------------------  APP
+(value-of (app a a_1  ...) e) = v
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orga8bfaa6" class="outline-3">
+<h3 id="orga8bfaa6"><span class="section-number-3">3.10.</span> Apply-proc</h3>
+<div class="outline-text-3" id="text-3-10">
+</div>
+<div id="outline-container-org0b52c57" class="outline-4">
+<h4 id="org0b52c57"><span class="section-number-4">3.10.1.</span> Clo</h4>
+<div class="outline-text-4" id="text-3-10-1">
+<pre class="example" id="org4c1fec2">
+c = (closure (x ...) a' e)
+e' = (extend-env (x ...)  (a ...) e)
+(value-of a' e') = v
+---------------------------------------------- APP-CLO
+(apply-proc c a ...) = v
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org4265042" class="outline-4">
+<h4 id="org4265042"><span class="section-number-4">3.10.2.</span> Prim</h4>
+<div class="outline-text-4" id="text-3-10-2">
+<pre class="example" id="org1758987">
+p = (prim op)
+(op u ...) = v
+---------------------------------------------- APP-PRIM
+(apply-proc p u ...) = v
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1139fb0" class="outline-3">
+<h3 id="org1139fb0"><span class="section-number-3">3.11.</span> Environment</h3>
+<div class="outline-text-3" id="text-3-11">
+<pre class="example" id="org6f9cb04">
+e = { ... x:v, ...}
+--------------------   LOOKUP
+(lookup e x) = v
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfeaba21" class="outline-2">
+<h2 id="orgfeaba21"><span class="section-number-2">4.</span> Examples of proofs</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The next set of examples illustrate how the above rules may be used
+to construct a <i>proof</i> that the evaluation of an ast in an
+environment returns a value.  
+</p>
+
+
+<p>
+We assume an environment <code>e</code>:
+</p>
+
+<pre class="example" id="org9486cc3">
+0.  e = {x: 3, +: (prim +), -: (prim -)}     ASSUMPTION about e
+</pre>
+</div>
+
+<div id="outline-container-org26e188d" class="outline-3">
+<h3 id="org26e188d"><span class="section-number-3">4.1.</span> Simple constants</h3>
+<div class="outline-text-3" id="text-4-1">
+<pre class="example" id="orgb427979">
+1.  (value-of (num 5) e) = 5            using NUM
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org5a7fd4a" class="outline-3">
+<h3 id="org5a7fd4a"><span class="section-number-3">4.2.</span> Variable references</h3>
+<div class="outline-text-3" id="text-4-2">
+<pre class="example" id="orga3b85ad">
+1. (lookup e 'x) = 3                   from 0 using LOOKUP
+2. (value-of (id-ref 'x) e) = 3        from 1, using ID-REF
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-orgd672d28" class="outline-3">
+<h3 id="orgd672d28"><span class="section-number-3">4.3.</span> If</h3>
+<div class="outline-text-3" id="text-4-3">
+<pre class="example" id="org0f826a3">
+1. (lookup e 'x) = 3                              from 0 using LOOKUP
+2. (value-of (id-ref 'x) e) = 3                   from 1, using ID-REF
+3. (value-of (bool #t) e) = #t                    using BOOL
+4. (value-of (if #t (id-ref 'x) (num 7)) e) = 3   from 2, 3 using property of if
+5. (value-of 
+     (ifte (bool #t) 
+           (id-ref 'x) 
+           (num 7))
+     e)
+   = 3                                 from 3,2 using IFTE
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-org9438588" class="outline-3">
+<h3 id="org9438588"><span class="section-number-3">4.4.</span> Let</h3>
+<div class="outline-text-3" id="text-4-4">
+<pre class="example" id="orgaec0bb9">
+ 1.  (value-of (num 2) e) = 2                     from NUM
+ 2.  (lookup e 'x) = 3                            from 0 using LOOKUP
+ 3.  (value-of (id-ref 'x) e) = 3                 from 2, using ID-REF
+ 4.     e' = (extended-env e '(x y) '(2 3))          ASSUMPTION
+ 5.     (lookup e' '*) = (prim *)                    from 4, using LOOKUP
+ 6.     (lookup e 'x)  = 2                           from 4, using LOOKUP
+ 7.     (lookup e 'y)  = 3                           from 4, using LOOKUP 
+ 8.     (value-of (id-ref '*) e') = (prim *)         from 5, using ID-REF
+ 9.     (value-of (id-ref 'x) e') = 2                from 6, using ID-REF  
+10.     (value-of (id-ref 'y) e') = 3                from 7, using ID-REF
+11.     (* 2 3) = 6                                  property of PRIM *
+12.     (apply-proc (prim *) 2 3) = 6                from 9, 10, 11 using PRIM-APP                    
+13.     (value-of (app (id-ref '*)                   from 8, 9, 10, 12,
+                       (list (id-ref 'x)                   using APP
+                             (id-ref 'y)))
+                  e') = 6
+14.  (value-of                                    from 1, 3, 4, 13, using LET
+        (assume (list 
+                  (bind 'x (num 2)) 
+                  (bind 'y (id-ref 'x)))
+           (app (id-ref '*)
+                (list 
+                  (id-ref 'x)
+                  (id-ref 'y))))
+    e) = 6                              
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga4692fd" class="outline-2">
+<h2 id="orga4692fd"><span class="section-number-2">5.</span> Examples of reductions</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+There is another way of using these rules &#x2014; in a top down, rather
+than bottom up fashion &#x2014; as reductions, to derive the value of an
+expression.  Consider again the environment e given by
+</p>
+<pre class="example" id="orgc36ed05">
+e = {x: 3, +: (op +), -: (op -)}
+</pre>
+</div>
+<div id="outline-container-orga9cfcd7" class="outline-3">
+<h3 id="orga9cfcd7"><span class="section-number-3">5.1.</span> Constants</h3>
+<div class="outline-text-3" id="text-5-1">
+<pre class="example" id="org1032745">
+(eval-ast (num 5) e) =&gt;  NUM
+5  
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org6229bea" class="outline-3">
+<h3 id="org6229bea"><span class="section-number-3">5.2.</span> Identifiers</h3>
+<div class="outline-text-3" id="text-5-2">
+<pre class="example" id="org969d686">
+(eval-ast (id-ref 'x) e) =&gt; ID-REF
+(lookup e 'x)            =&gt; LOOKUP
+3
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orge17b824" class="outline-3">
+<h3 id="orge17b824"><span class="section-number-3">5.3.</span> If</h3>
+<div class="outline-text-3" id="text-5-3">
+<pre class="example" id="orgda5c01c">
+(value-of (ifte (bool #t) (id-ref 'x)  (num 3)) e)    =&gt; IF-RULE
+
+(if (eval-ast (bool #t) e)
+    (eval-ast (id-ref 'x) e)
+    (eval-ast (num 3)  e))                           =&gt;  IFTE
+
+(if #t
+   (eval-ast (id-ref 'x) e)
+   (eval-ast (num 3)  e))                            =&gt; IF-SIMPLIFICATION
+
+(eval-ast (id-ref 'x) e)                             =&gt; ID-REF
+
+(lookup e 'x)                                        =&gt; LOOKUP
+
+3
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0a8dd59" class="outline-3">
+<h3 id="org0a8dd59"><span class="section-number-3">5.4.</span> Let</h3>
+<div class="outline-text-3" id="text-5-4">
+<p>
+Note that the reduction mentions the redex and the rule being
+applied. 
+</p>
+<pre class="example" id="org5c25cd5">
+(eval-ast (assume (list (bind 'x (num 2)) (bind 'y (id-ref 'x)))
+             (app (id-ref '*) (id-ref 'x) (id-ref 'y))) e)
+
+=&gt; (assume ...) using LET
+
+(let ([u (eval-ast (num 2) e)])
+  (let ([v (eval-ast (id-ref 'x) e)]]
+    (let ([e1 (extended-env e '(x y) (list u v))])
+      (eval-ast (app (id-ref '*) (id-ref 'x) (id-ref 'y)) e1))))
+          
+
+=&gt; (eval-ast (num 2) e) using NUM and
+   (eval-ast (id-ref 'x) e) using ID-REF  
+
+(let ([u 2])
+  (let ([v (lookup e 'x)])
+    (let ([e1  (extended-env e '(x y) (list u v))])
+      (eval-ast (app (id-ref '*) (id-ref 'x) (id-ref 'y)) e1))))
+
+=&gt; (lookup e 'x), using LOOKUP
+
+(let ([u 2])
+  (let ([v 3])
+    (let ([e1  (extended-env e '(x y) (list u v))])
+      (eval-ast (app (id-ref '*) (id-ref 'x) (id-ref 'y)) e1))))
+
+=&gt; (list u v),  using SUBSTITUTION
+
+(let ([u 2])
+  (let ([v 3])
+    (let ([e1  (extended-env e '(x y) (list 2 3))])
+      (eval-ast (app (id-ref '*) (id-ref 'x) (id-ref 'y)) e1))))
+
+=&gt; (eval-ast (app ...) e1),  using APPLY
+
+(let ([u 2])
+  (let ([v 7])
+    (let ([e1 (extended-env e '(x y) (list 2 3))])
+      (apply-proc (eval-ast (id-ref '*) e1)
+                  (list (eval-ast (id-ref 'x) e1)
+                        (eval-ast (id-ref 'y) e1))))))
+=&gt;  (eval-ast (id-ref '*)), using ID-REF 
+    (eval-ast (id-ref 'x)), using ID-REF 
+    (eval-ast (id-ref 'y)), using ID-REF 
+
+(let ([u 2])
+  (let ([v 7])
+    (let ([e1 (extended-env e '(x y) (list 2 3))])
+      (apply-proc (lookup e1 '*)
+                  (list (lookup e1 'x)
+                        (lookup e1 'y))))))
+
+=&gt; (lookup e1 '*) using LOOKUP
+   (lookup e1 'x) using LOOKUP
+   (lookup e1 'y) using LOOKUP
+
+(let ([u 2])
+  (let ([v 7])
+    (let ([e1 (extended-env e '(x y) (list 2 3))])
+      (apply-proc (prim *)
+                  (list 2 3)))))
+
+=&gt; (apply-proc ...) using APPLY-PROC
+
+(let ([u 2])
+  (let ([v 7])
+    (let ([e1 (extended-env e '(x y) (list 2 3))])
+      (apply * (list 2 3)))))
+
+=&gt; (apply * (list 2 3)), using APPLY-PRIM
+
+(let ([u 2])
+  (let ([v 7])
+    (let ([e1 (extended-env e '(x y) (list 2 3))])
+      6)))
+
+
+=&gt; 6
+
+
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: noteness</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

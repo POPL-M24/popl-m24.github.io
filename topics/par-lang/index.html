@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2024-08-15 Thu 16:56 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>POPL Lecture notes:  PARLANG &#x2013; a parallel interlude</title>
+<meta name="author" content="Venkatesh Choppella" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<script src="../../themes/math/style/js/math.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/math/style/css/math.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/readtheorg.css"/>
+<link rel="stylesheet" type="text/css" href="../../themes/readtheorg/style/css/extra.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="../../themes/readtheorg/style/js/readtheorg.js"></script>
+<div style="display: none"> \(
+% Latex Preamble definitions here (mostly usepackage)
+\usepackage%
+%[dvipsnames]
+{xcolor}
+% make sure this is before the loading font packages
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage
+%[dvipsnames]
+{graphicx}
+\usepackage{float}
+%\usepackage[numbers]{natbib}
+\usepackage[document]{ragged2e}
+%
+% enumitem doesn't seem to work with beamer
+%\usepackage[inline]{enumitem}
+\usepackage{wrapfig}
+\usepackage{stackrel}
+% extensible arrows
+\usepackage{extpfeil}
+% \usepackage{trfrac}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric}
+\usepackage{turnstile}
+\usepackage{comment}
+%https://tex.stackexchange.com/questions/21334/is-there-a-package-that-has-the-clockwise-gapped-circle-arrow-in-it
+% \usepackage{mathbx}
+\usepackage{datetime}
+\usepackage{datetime2}
+
+%% Also See
+%% http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% for general tips
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{amsfonts} %% - also included by amssymb
+\usepackage{mathpazo} %% - because the OP uses mathpazo, optional
+%\usepackage{tufte-latex}
+\usepackage{comment}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{hyperref}
+%\usepackage{cleveref}
+\)</div>
+<div style="display: none"> \(
+%% Your math definitions here
+% \newcommand{\alphaequiv}{{\underset{\raise 0.7em\alpha}{=}}}
+\newcommand{\yields}{\Rightarrow}
+\newcommand{\derives}{\overset{*}{\yields}}
+\newcommand{\alphaequiv}{=_{\alpha}}
+\newcommand{\tto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\transitsto}[2]{{\overset{#1}{\underset{#2}{\longrightarrow}}}}
+\newcommand{\xtransitsto}[2]{{\underset{#2}{\xrightarrow{#1}}}}
+\newcommand{\xtransitsfrom}[2]{{\underset{#2}{\xleftarrow{#1}}}}
+\newcommand{\xto}[2]{{\xtransitsto{#1}{#2}}}
+\newcommand{\xfrom}[2]{{\xtransitsfrom{#1}{#2}}}
+\newcommand{\xreaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+\newcommand{\reaches}[2]{{\underset{#2}{\xtwoheadrightarrow{#1}}}}
+%\newcommand{\reaches}[2]{{\overset{#1}{\underset{#2}{\twoheadrightarrow}}}}
+%\newcommand{\goesto}[2]{\transitsto{#1}{#2}}
+%\newcommand{\betareducesto}{{\underset{\beta}{\rightarrow}}}
+\newcommand{\betareducesto}{\rightarrow_{\beta}}
+%\newcommand{\etareducesto}{{\underset{\eta}{\rightarrow}}}
+\newcommand{\etareducesto}{\rightarrow_{\eta}}
+%\newcommand{\betaetareducesto}{{\underset{\beta\ \eta}{\rightarrow}}}
+\newcommand{\betaetareducesto}{\rightarrow_{\beta\eta}}
+\newcommand{\preducesto}{\rhd}
+\newcommand{\psimplifiesto}{\stackrel{\scriptstyle{*}}{\rhd}}
+\newcommand{\lreducesto}{\rightsquigarrow}
+\newcommand{\lsimplifiesto}{\stackrel{\scriptstyle{*}}{\lreducesto}}
+\newcommand{\rewritesto}{\hookrightarrow}
+\newcommand{\goesto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\xgoesto}[1]{\xrightarrow{#1}}
+\newcommand{\reducesto}{\stackrel{}{\rightarrow}}
+\newcommand{\simplifiesto}{\stackrel{\scriptstyle{*}}{\rightarrow}}
+\newcommand{\connected}[1]{\stackrel{#1}{\leftrightarrow}}
+\newcommand{\joins}{\downarrow}
+\newcommand{\evaluatesto}{\Longrightarrow}
+%\newcommand{\lit}[1]{\hbox{\sf{#1}}}
+\newcommand{\lit}[1]{{\sf{#1}}}
+\newcommand{\true}{\lit{true}}
+\newcommand{\false}{\lit{false}}
+\def\Z{\mbox{${\mathbb Z}$}}
+\def\N{\mbox{${\mathbb N}$}}
+\def\P{\mbox{${\mathbb P}$}}
+\def\R{\mbox{${\mathbb R}$}}
+\def\T{\mbox{${\mathbb T}$}}
+\newcommand{\Rp}{{\mathbb{R}}^+}
+\def\Bool{\mbox{${\mathbb B}$}}
+\def\Q{\mbox{${\mathbb Q}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sO{\mbox{${\cal O}$}}
+\def\sT{\mbox{${\cal T}$}}
+\def\sU{\mbox{${\cal U}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\osum{${{\bigcirc}}\!\!\!\!{\rm s}~$}
+\def\pf{\noindent {\bf Proof}~~}
+\def\exec{\mathit{exec}}
+\def\Act{\mathit{A\!ct}}
+\def\Traces{\mathit{Traces}}
+\def\Spec{\mathit{Spec}}
+\def\uns{\mathit{unless}}
+\def\ens{\mathit{ensures}}
+\def\lto{\mathit{leads\!\!-\!\!to}}
+\def\a{\alpha}
+\def\b{\beta}
+\def\c{\gamma}
+\def\d{\delta}
+\def\sP{\mbox{${\cal P}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sA{\mbox{${\cal A}$}}
+\def\sB{\mbox{${\cal B}$}}
+\def\sC{\mbox{${\cal C}$}}
+\def\sI{\mbox{${\cal I}$}}
+\def\sS{\mbox{${\cal S}$}}
+\def\sD{\mbox{${\cal D}$}}
+\def\sF{\mbox{${\cal F}$}}
+\def\sG{\mbox{${\cal G}$}}
+\def\sR{\mbox{${\cal R}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\ta{\mbox{$\widetilde{a}$}}
+\def\tb{\mbox{$\widetilde{b}$}}
+\def\tc{\mbox{$\widetilde{c}$}}
+\def\tx{\mbox{$\widetilde{x}$}}
+\def\ty{\mbox{$\widetilde{y}$}}
+\def\tz{\mbox{$\widetilde{z}$}}
+\def\tI{\mbox{$\widetilde{I}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\sL{\mbox{${\cal L}$}}
+\def\sM{\mbox{${\cal M}$}}
+\def\sN{\mbox{${\cal N}$}}
+\def\th{\mbox{$\widetilde{h}$}}
+\def\tg{\mbox{$\widetilde{g}$}}
+\def\tP{\mbox{$\widetilde{P}$}}
+\def\norm{\mbox{$\parallel$}}
+\def\to{\rightarrow}
+\def\ov{\overline}
+\def\gets{\leftarrow}
+\def\too{\longrightarrow}
+\def\To{\Rightarrow}
+%\def\points{\mapsto}
+%\def\yields{\mapsto^{*}}
+\def\un{\underline}
+\def\vep{$\varepsilon$}
+\def\ep{$\epsilon$}
+\def\tri{$\bigtriangleup$}
+\def\Fi{$F^{\infty}$}
+\def\Di{\Delta^{\infty}}
+\def\ebox\Box
+\def\emp{\emptyset}
+\def\leadsto{\rightharpoondown^{*}}
+
+\newcommand{\benum}{\begin{enumerate}}
+\newcommand{\eenum}{\end{enumerate}}
+\newcommand{\bdes}{\begin{description}}
+\newcommand{\edes}{\end{description}}
+\newcommand{\bt}{\begin{theorem}}
+\newcommand{\et}{\end{theorem}}
+\newcommand{\bl}{\begin{lemma}}
+\newcommand{\el}{\end{lemma}}
+% \newcommand{\bp}{\begin{prop}}
+% \newcommand{\ep}{\end{prop}}
+\newcommand{\bd}{\begin{defn}}
+\newcommand{\ed}{\end{defn}}
+\newcommand{\brem}{\begin{remark}}
+\newcommand{\erem}{\end{remark}}
+\newcommand{\bxr}{\begin{exercise}}
+\newcommand{\exr}{\end{exercise}}
+\newcommand{\bxm}{\begin{example}}
+\newcommand{\exm}{\end{example}}
+\newcommand{\beqa}{\begin{eqnarray*}}
+\newcommand{\eeqa}{\end{eqnarray*}}
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+\newcommand{\bcent}{\begin{center}}
+\newcommand{\ecent}{\end{center}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\bcor}{\begin{corollary}}
+\newcommand{\ecor}{\end{corollary}}
+\newcommand{\bds}{\begin{defns}}
+\newcommand{\eds}{\end{defns}}
+\newcommand{\brems}{\begin{remarks}}
+\newcommand{\erems}{\end{remarks}}
+\newcommand{\bxrs}{\begin{exercises}}
+\newcommand{\exrs}{\end{exercises}}
+\newcommand{\bxms}{\begin{examples}}
+\newcommand{\exms}{\end{examples}}
+\newcommand{\bfig}{\begin{figure}}
+\newcommand{\efig}{\end{figure}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\pair}[1]{\langle #1\rangle}
+\newcommand{\tuple}[1]{\langle #1\rangle}
+\newcommand{\size}[1]{| #1 |}
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersection}{\cap}
+\newcommand{\Intersection}{\bigcap}
+\newcommand{\B}{\textbf{B}}
+%\newcommand{\be}[2]{\begin{equation} \label{#1} \tag{#2} \end{equation}}
+\newcommand{\abs}[1]{{\lvert}#1{\rvert}}
+\newcommand{\id}[1]{\mathit{#1}}
+\newcommand{\pfun}{\rightharpoonup}
+%\newcommand{\ra}[1]{\kern-1.5ex\xrightarrow{\ \ #1\ \ }\phantom{}\kern-1.5ex}
+%\newcommand{\ras}[1]{\kern-1.5ex\xrightarrow{\ \ \smash{#1}\ \ }\phantom{}\kern-1.5ex}
+\newcommand{\da}[1]{\bigg\downarrow\raise.5ex\rlap{\scriptstyle#1}}
+\newcommand{\ua}[1]{\bigg\uparrow\raise.5ex\rlap{\scriptstyle#1}}
+% \newcommand{\lift}[1]{#1_{\bot}}
+\newcommand{\signal}[1]{\tilde{#1}}
+\newcommand{\ida}{\stackrel{{\sf def}}{=}}
+\newcommand{\eqn}{\doteq}
+\newcommand{\deduce}[1]{\sststile{#1}{}}
+
+%% These don't sit very well with MathJax
+%% so we don't plan to use theorem like environments
+%% in org documents.
+%% instead we plan to use headings with
+%%  1. property drawers with a CLASS property identifying
+%%  the environment
+%%  2. A tag with the same name as the CLASS property
+%%  In LaTeX export, these turn into (sub)sections.
+
+
+%% See http://u.cs.biu.ac.il/~tsaban/Pdf/LaTeXCommonErrs.pdf
+%% \newtheorem{prop}[thm]{Proposition}
+%% \theoremstyle{plain}%default
+%% \newtheorem{theorem}{Theorem}[section]
+%% \newtheorem{lemma}{Lemma}[section]
+%% \newtheorem{corollary}{Corollary}[section]
+%% \newtheorem{definition}{Definition}[section]
+%% \newtheorem{remark}{Remark}[section]
+%% \newtheorem{example}{Example}[section]
+%% \newtheorem{exercise}{Exercise}[section]
+
+
+
+\newcommand{\less}[1]{#1_{<}}
+\newcommand{\pfn}{\rightharpoonup}
+\newcommand{\ffn}{\stackrel{{\sf fin}}{\rightharpoonup}}
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+
+% Caution: Not supported by MathJax!
+% ----------------------------------
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+
+
+% \usepackage{amsfonts} %% <- also included by amssymb
+% \DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\usepackage{mathpazo} %% <- because the OP uses mathpazo, optional
+
+
+
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\rel}{\twoheadrightarrow}
+\newcommand{\map}{\rightarrow}
+
+%\newcommand{\fixed}{\boldsymbol{\circlearrowleft}}
+\newcommand{\terminal}{\not\xto{}{}}
+\newcommand{\fixed}{\bm\circlearrowleft}
+
+\newcommand{\imp}{\rightarrow}
+\newcommand{\dimp}{\leftrightarrow}  % double implication
+\newcommand{\lequiv}{\Longleftrightarrow} % logical equivalence
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\veebar}
+\)</div>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="../index.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">POPL Lecture notes:  PARLANG &#x2013; a parallel interlude</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org33942d3">1. Introduction</a></li>
+<li><a href="#org92dcc47">2. Abstract Syntax</a></li>
+<li><a href="#org0e1112c">3. Stores</a></li>
+<li><a href="#orgb353f94">4. PARLANG abstract machine configurations</a></li>
+<li><a href="#org1f3b3a0">5. Rewrite Rules</a></li>
+<li><a href="#orgb61c743">6. Reduction</a></li>
+<li><a href="#orga5fb340">7. Lexicographic ordering</a></li>
+<li><a href="#org168da51">8. Normal forms, termination and non-confluence</a>
+<ul>
+<li><a href="#org1cb0980">8.1. Lemma (Termination):  The PARLANG reduction system \(\goesto{}\) is terminating.</a>
+<ul>
+<li><a href="#orgae34a81">8.1.1. Proof</a></li>
+</ul>
+</li>
+<li><a href="#org712ab69">8.2. Exercise (non-confluence)</a></li>
+<li><a href="#orgcbda29e">8.3. Derived reduction relation \(\xto{}{S}\)</a>
+<ul>
+<li><a href="#org1e4d656">8.3.1. Rewrite rules</a></li>
+<li><a href="#orgd614e27">8.3.2. Reduction rules</a></li>
+</ul>
+</li>
+<li><a href="#orga731c8b">8.4. Lemma (Progress):  Either \(s=\textbf{done}\) or \(s\xto{}{S}\)</a>
+<ul>
+<li><a href="#org90a0b2e">8.4.1. Proof</a></li>
+</ul>
+</li>
+<li><a href="#org2f247ae">8.5. Corollary (Unique Normal Form):   Every statement \(s\) simplifies under \(\xto{}{S}\) to \(\textbf{done}\) and to no other statement.</a>
+<ul>
+<li><a href="#orga79c6e8">8.5.1. Proof</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgc521fef">9. References and online resources</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2b8e79a" class="outline-2">
+<h2 id="org2b8e79a">Changelog</h2>
+<div class="outline-text-2" id="text-org2b8e79a">
+<pre class="example">
+UNNUMBERED: notoc
+</pre>
+
+<dl class="org-dl">
+<dt><span class="timestamp-wrapper"><span class="timestamp">[2022-10-06 Thu]</span></span></dt><dd>Added definition of lexicographic
+order.  Added proofs of termination and unique normal form
+for statements.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org33942d3" class="outline-2">
+<h2 id="org33942d3"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The purpose of this short excursion is to investigate the
+behaviour of PARLANG, small parallel language, while we warm
+up for studying the confluence property for &lambda;
+calculus.  The language is a small, but with sufficiently
+interesting behaviour that allows us to conclude that it is
+a language that does not exhibit confluence.  Recall that
+confluence is a property that says that if an expression
+simplifies to two expressions, then those two expressions
+further simplify to some common third expression.  In
+PARLANG, a program's execution may result in multiple,
+possible answers.  Answers depend on which of the permitted
+orders of execution are taken by the system.
+</p>
+
+<p>
+In languages like PARLANG, non-confluence is a feature of
+the semantics.  It is used to model phenomena like race
+conditions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org92dcc47" class="outline-2">
+<h2 id="org92dcc47"><span class="section-number-2">2.</span> Abstract Syntax</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The language consists of statements, variables and numbers:
+</p>
+\begin{align*}
+s ::= &                                        &  \scriptstyle{STMT}     &    \qquad \mbox{Statement}\\
+      &   \textbf{done}                           &  \scriptstyle{DONE}     &    \qquad \mbox{Done}\\
+      &   x:=n                                 &  \scriptstyle{SET}     &    \qquad \mbox{Assignment}\\
+      &   s; s                                 &  \scriptstyle{SEQ}     &    \qquad \mbox{Sequential}\\
+      &   s | s                                &  \scriptstyle{PAR}      &    \qquad \mbox{Parallel}\\ \\ 
+x ::= &                                        &  \scriptstyle{IDENT}   &    \qquad  \mbox{Identifiers}\\ \\
+n ::= &                                        &  \scriptstyle{NUM}     &     \qquad  \mbox{Numbers}\\ \\
+\end{align*}
+
+<p>
+The language is small; there is no lexical scoping, <code>if</code>,
+functions, or primitive operations on numbers.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0e1112c" class="outline-2">
+<h2 id="org0e1112c"><span class="section-number-2">3.</span> Stores</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Stores map identifiers to values.  
+</p>
+\begin{align*}
+G : \id{IDENT} \rightarrow \id{NUM}  & \qquad \qquad \scriptstyle{STORE}\\
+\end{align*}
+</div>
+</div>
+
+
+<div id="outline-container-orgb353f94" class="outline-2">
+<h2 id="orgb353f94"><span class="section-number-2">4.</span> PARLANG abstract machine configurations</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+In the abstract PARLANG machine, a program is `executed' in
+the context of a store.  A store is a map from identifiers
+to values.  
+</p>
+
+<p>
+A configuration is a pair \(G,s\) where \(G\) is a store and \(s\)
+is a statement.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1f3b3a0" class="outline-2">
+<h2 id="org1f3b3a0"><span class="section-number-2">5.</span> Rewrite Rules</h2>
+<div class="outline-text-2" id="text-5">
+\begin{align*}
+{G,x:=n \rewritesto \set{x:n}G, \textbf{done}}\qquad \scriptstyle{ASSGN}\\ \\
+{G,(\textbf{done}; s)\rewritesto G,s}\qquad \scriptstyle{SEQ-DONE}\\ \\
+{G,(s_1\ |\ s_2)\rewritesto G,(s_1;s_2)}\qquad \scriptstyle{PAR-1}\\ \\
+{G,(s_1\ |\ s_2)\rewritesto G,(s_2;s_1)}\qquad \scriptstyle{PAR-2}
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-orgb61c743" class="outline-2">
+<h2 id="orgb61c743"><span class="section-number-2">6.</span> Reduction</h2>
+<div class="outline-text-2" id="text-6">
+\begin{align*}
+\frac{G,s \rewritesto G',s'}{G,s\reducesto G',s'}\qquad \scriptstyle{REWRITE}\\ \\
+\frac{G,s_1\reducesto G', s_1'}{G,(s_1; s_2)\reducesto G', (s_1'; s_2)}\qquad \scriptstyle{SEQ-COMP}\\ \\
+\end{align*}
+</div>
+</div>
+
+
+<div id="outline-container-orga5fb340" class="outline-2">
+<h2 id="orga5fb340"><span class="section-number-2">7.</span> Lexicographic ordering</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Let \((A, <)\) be a (strict) partial order.  A relation \((A^*,
+\sqsubset)\) is a (strict) lexicographic order over \((A,<)\)
+defined as \(a\sqsubset b\) iff
+</p>
+
+<ol class="org-ol">
+<li>\(a\) is a proper prefix of \(b\), OR</li>
+
+<li>there exists elements \(x,y\in A\) and strings \(p,q,r\in A^*\)
+such that 
+<ul class="org-ul">
+<li>\(a=pxq\)</li>
+<li>\(b=pyr\)</li>
+<li>\(x < y\)</li>
+</ul></li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-org168da51" class="outline-2">
+<h2 id="org168da51"><span class="section-number-2">8.</span> Normal forms, termination and non-confluence</h2>
+<div class="outline-text-2" id="text-8">
+</div>
+<div id="outline-container-org1cb0980" class="outline-3">
+<h3 id="org1cb0980"><span class="section-number-3">8.1.</span> Lemma (Termination):  The PARLANG reduction system \(\goesto{}\) is terminating.</h3>
+<div class="outline-text-3" id="text-8-1">
+</div>
+<div id="outline-container-orgae34a81" class="outline-4">
+<h4 id="orgae34a81"><span class="section-number-4">8.1.1.</span> Proof</h4>
+<div class="outline-text-4" id="text-8-1-1">
+<p>
+For a statement \(s\), define the following:
+</p>
+<ul class="org-ul">
+<li>1. \(\id{parsym}(s)\): the number of `|' symbols in \(s\).</li>
+<li>2. \(\id{seqsym}(s)\): the number of `;' symbols in \(s\).</li>
+<li>3. \(\id{setsym}(s)\): the number of `:=' symbols in \(s\).</li>
+<li>4. \(\id{donesym}(s)\): the number of \textbf{done} symbols in \(s\).</li>
+</ul>
+
+<p>
+For any \(s\in \id{Stmt}\), let \(|s|: \N^4\) be defined as
+</p>
+
+<p>
+\[|s| = \pair{\id{parsym}(s), \id{seqsym}(s), \id{setsym}, \id{donesym}(s)}\]
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul class="org-ul">
+<li>1. \(|(x:=5 | \textbf{done})| = [1, 0, 1, 0]\)</li>
+<li>2. \(|(\textbf{done} ; \textbf{done})| = [0, 0, 0, 2]\)</li>
+<li>3. \(|((x:=4; \textbf{done}) | (x:=3 | y:=2))| = [1, 1, 3, 1]\)</li>
+</ul>
+
+
+<p>
+Now, let \((\N^4, \sqsubset)\) be the subset of the lexicographic
+ordering over the total ordering \((\N, <)\).  Clearly, \((\N^4,
+\sqsubset)\) is a strict well-ordering (a strict total order with
+every subset having a least element) and hence well-founded.
+</p>
+
+<p>
+To show that \(\goesto{}\) terminates, we show  the following:
+</p>
+
+<p>
+\[ \text{if}\ (G,s) \goesto{} (G', s'), \text{then}\ |s'| \sqsubset |s| \]
+</p>
+
+<p>
+In each case, we verify that a reduction reduces the size of the
+statement.  
+</p>
+
+<p>
+Case <i>REWRITE</i>:   Then \((G,s)\rewritesto{} (G',s')\) for some stores
+\(G,G'\). 
+</p>
+
+<ul class="org-ul">
+<li>1. case <i>ASSGN</i>: \(s=\ (x:=n)\):   Then \(s' = \textbf{done}\).
+and \([0,0,0,1] = |s'| \sqsubset  |s| = [0,0,1,0]\).</li>
+
+<li>2. case <i>SEQ-DONE</i>: \(s=\textbf{done}; s'\).  If \(s=[i,j,k,l]\)
+where \(l>0\) and \(j>0\), then \(|s'|=(i, j-1, k, l-1)\).
+Clearly, \(|s'| \sqsubset |s|\).</li>
+
+<li>3. cases <i>PAR-1</i> and <i>PAR-2</i>:  Exercise.</li>
+</ul>
+
+<p>
+Case <i>SEQ-COMP</i>: Left as an exercise.
+</p>
+
+<p>
+QED.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org712ab69" class="outline-3">
+<h3 id="org712ab69"><span class="section-number-3">8.2.</span> Exercise (non-confluence)</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+Show that \(\set{x:1} (x:=3\ | \ x:=4)\) simplifies to any of
+the following: \(\set{x:3}, \textbf{done}\) or \(\set{x:4},
+\textbf{done}\).
+</p>
+</div>
+</div>
+<div id="outline-container-orgcbda29e" class="outline-3">
+<h3 id="orgcbda29e"><span class="section-number-3">8.3.</span> Derived reduction relation \(\xto{}{S}\)</h3>
+<div class="outline-text-3" id="text-8-3">
+</div>
+<div id="outline-container-org1e4d656" class="outline-4">
+<h4 id="org1e4d656"><span class="section-number-4">8.3.1.</span> Rewrite rules</h4>
+<div class="outline-text-4" id="text-8-3-1">
+\begin{align*}
+{x:=n \rewritesto \textbf{done}}\qquad \scriptstyle{ASSGN'}\\ \\
+{\textbf{done}; s\rewritesto s}\qquad \scriptstyle{SEQ-DONE'}\\ \\
+{s_1\ |\ s_2\rewritesto s_1;s_2}\qquad \scriptstyle{PAR-1'}\\ \\
+{s_1\ |\ s_2\rewritesto s_2;s_1}\qquad \scriptstyle{PAR-2'}
+\end{align*}
+</div>
+</div>
+
+<div id="outline-container-orgd614e27" class="outline-4">
+<h4 id="orgd614e27"><span class="section-number-4">8.3.2.</span> Reduction rules</h4>
+<div class="outline-text-4" id="text-8-3-2">
+\begin{align*}
+\frac{s \rewritesto s'}{s\xto{}{S} s'}\qquad \scriptstyle{REWRITE'}\\ \\
+\frac{s_1\xto{}{S} s_1'}{s_1; s_2\xto{}{S} s_1'; s_2}\qquad \scriptstyle{SEQ-COMP'}\\ \\
+\end{align*}
+
+
+<p>
+\(\xto{}{S}\) is terminating since \(\goesto{}\) is.
+</p>
+
+<p>
+Note that \(\textbf{done}\) is a normal form.  We prove that for
+any statement \(s\), either \(s = \textbf{done}\), or \(s\xto{}{S}s'\)
+for some \(s'\).  Since the reduction relation is terminating, it
+follows that every statement \(s\) simplifies to the normal form
+\(\textbf{done}\).
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga731c8b" class="outline-3">
+<h3 id="orga731c8b"><span class="section-number-3">8.4.</span> Lemma (Progress):  Either \(s=\textbf{done}\) or \(s\xto{}{S}\)</h3>
+<div class="outline-text-3" id="text-8-4">
+</div>
+<div id="outline-container-org90a0b2e" class="outline-4">
+<h4 id="org90a0b2e"><span class="section-number-4">8.4.1.</span> Proof</h4>
+<div class="outline-text-4" id="text-8-4-1">
+<p>
+The proof is by induction on the structure of \(s\):
+</p>
+
+<ul class="org-ul">
+<li>1. \(\textbf{done}\), so the proposition is trivially true</li>
+</ul>
+
+
+<ul class="org-ul">
+<li>2. \(s=(x:=n)\):  Then we have 
+
+<ul class="org-ul">
+<li>2.1: \(s\rewritesto{} \textbf{done}\)   (using \(\id{ASSIGN'}\))</li>
+
+<li>2.2: \(s\xto{}{S} \textbf{done}\)  (from 2.1 using \(\id{REWRITE'}\))</li>
+</ul></li>
+</ul>
+
+
+<ul class="org-ul">
+<li>3. \(s=(s_1|s_2)\): Then we have the deduction
+
+<ul class="org-ul">
+<li>3.1: \(s \rewritesto{} (s_1;s_2)\)  (using \(\id{PAR-1'}\))</li>
+
+<li>3.2: \(s\xto{}{S} (s_1;s_2)\) (from 3.1 using \(\id{REWRITE'}\))</li>
+</ul></li>
+</ul>
+
+
+<ul class="org-ul">
+<li>4. \(s=(s_1;s_2)\):   We apply the  induction hypothesis on
+\(s_1\).  This yields two cases:
+
+<ul class="org-ul">
+<li>a.  \(s_1=\textbf{done}\):  Then we have the deduction
+<ul class="org-ul">
+<li>4.a.1: \(s\rewritesto{} s_2\)  (using \(\id{DONE'}\))</li>
+<li>4.a.2: \(s\xto{}{S}s_2\) (from 4.a.1 using \(\id{REWRITE'}\))</li>
+</ul></li>
+
+<li>b. \(s_1\xto{}{S}\): Then, we have the deduction
+<ul class="org-ul">
+<li>4.b.1: \(s_1\xto{}{S}s'_1\)  for some \(s'_1\)</li>
+<li>4.b.2: \(s_1;s_2\xto{}{S}(s'_1;s_2)\)  (from
+4.b.1 using \(\id{SEQ-COMP'}\))</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<p>
+QED.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org2f247ae" class="outline-3">
+<h3 id="org2f247ae"><span class="section-number-3">8.5.</span> Corollary (Unique Normal Form):   Every statement \(s\) simplifies under \(\xto{}{S}\) to \(\textbf{done}\) and to no other statement.</h3>
+<div class="outline-text-3" id="text-8-5">
+</div>
+<div id="outline-container-orga79c6e8" class="outline-4">
+<h4 id="orga79c6e8"><span class="section-number-4">8.5.1.</span> Proof</h4>
+<div class="outline-text-4" id="text-8-5-1">
+<p>
+This is a direct consequence of the Progress Lemma and the
+termination of \(\xto{}{S}\).
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc521fef" class="outline-2">
+<h2 id="orgc521fef"><span class="section-number-2">9.</span> References and online resources</h2>
+<div class="outline-text-2" id="text-9">
+<dl class="org-dl">
+<dt><a href="https://pdfs.semanticscholar.org/presentation/5e3a/6c2ea6b5181c1b7de82c2c8a1421e3026451.pdf">Spacek and Eremondi course slides on Pi calculus</a></dt><dd>The &pi;
+calculus, used to model concurrency and communication
+is another example of a language that is not
+confluent.</dd>
+</dl>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Venkatesh Choppella</p>
+<p class="date">Created: 2024-08-15 Thu 16:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
